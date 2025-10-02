@@ -21,8 +21,8 @@ from pydantic import Field, StrictBool, StrictInt, StrictStr
 from typing import Any, Dict, List, Optional
 from typing_extensions import Annotated
 from chatter_sdk.models.body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post import BodyExecuteCustomWorkflowApiV1WorkflowsDefinitionsCustomExecutePost
+from chatter_sdk.models.chat_request import ChatRequest
 from chatter_sdk.models.chat_response import ChatResponse
-from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest
 from chatter_sdk.models.detailed_workflow_execution_response import DetailedWorkflowExecutionResponse
 from chatter_sdk.models.node_type_response import NodeTypeResponse
 from chatter_sdk.models.request import Request
@@ -2055,7 +2055,7 @@ class WorkflowsApi:
     @validate_call
     async def execute_chat_workflow_api_v1_workflows_execute_chat_post(
         self,
-        chat_workflow_request: ChatWorkflowRequest,
+        chat_request: ChatRequest,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2073,8 +2073,8 @@ class WorkflowsApi:
 
         Execute chat using dynamically built workflow. ## Dynamic Workflow Configuration  This endpoint supports dynamic workflow configuration through capability flags:  ### Basic Chat Simple conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"enable_retrieval\": false,     \"enable_tools\": false } ```  ### Retrieval-Augmented Generation Document search and retrieval capabilities. ```json {     \"message\": \"What are the latest sales figures?\",     \"enable_retrieval\": true,     \"enable_tools\": false } ```  ### Tool-Enhanced Workflow Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"enable_retrieval\": false,     \"enable_tools\": true } ```  ### Full-Featured Workflow Combination of retrieval and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"enable_retrieval\": true,     \"enable_tools\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"enable_retrieval\": false,     \"enable_tools\": false,     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
 
-        :param chat_workflow_request: (required)
-        :type chat_workflow_request: ChatWorkflowRequest
+        :param chat_request: (required)
+        :type chat_request: ChatRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2098,7 +2098,7 @@ class WorkflowsApi:
         """ # noqa: E501
 
         _param = self._execute_chat_workflow_api_v1_workflows_execute_chat_post_serialize(
-            chat_workflow_request=chat_workflow_request,
+            chat_request=chat_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2123,7 +2123,7 @@ class WorkflowsApi:
     @validate_call
     async def execute_chat_workflow_api_v1_workflows_execute_chat_post_with_http_info(
         self,
-        chat_workflow_request: ChatWorkflowRequest,
+        chat_request: ChatRequest,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2141,8 +2141,8 @@ class WorkflowsApi:
 
         Execute chat using dynamically built workflow. ## Dynamic Workflow Configuration  This endpoint supports dynamic workflow configuration through capability flags:  ### Basic Chat Simple conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"enable_retrieval\": false,     \"enable_tools\": false } ```  ### Retrieval-Augmented Generation Document search and retrieval capabilities. ```json {     \"message\": \"What are the latest sales figures?\",     \"enable_retrieval\": true,     \"enable_tools\": false } ```  ### Tool-Enhanced Workflow Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"enable_retrieval\": false,     \"enable_tools\": true } ```  ### Full-Featured Workflow Combination of retrieval and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"enable_retrieval\": true,     \"enable_tools\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"enable_retrieval\": false,     \"enable_tools\": false,     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
 
-        :param chat_workflow_request: (required)
-        :type chat_workflow_request: ChatWorkflowRequest
+        :param chat_request: (required)
+        :type chat_request: ChatRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2166,7 +2166,7 @@ class WorkflowsApi:
         """ # noqa: E501
 
         _param = self._execute_chat_workflow_api_v1_workflows_execute_chat_post_serialize(
-            chat_workflow_request=chat_workflow_request,
+            chat_request=chat_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2191,7 +2191,7 @@ class WorkflowsApi:
     @validate_call
     async def execute_chat_workflow_api_v1_workflows_execute_chat_post_without_preload_content(
         self,
-        chat_workflow_request: ChatWorkflowRequest,
+        chat_request: ChatRequest,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2209,8 +2209,8 @@ class WorkflowsApi:
 
         Execute chat using dynamically built workflow. ## Dynamic Workflow Configuration  This endpoint supports dynamic workflow configuration through capability flags:  ### Basic Chat Simple conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"enable_retrieval\": false,     \"enable_tools\": false } ```  ### Retrieval-Augmented Generation Document search and retrieval capabilities. ```json {     \"message\": \"What are the latest sales figures?\",     \"enable_retrieval\": true,     \"enable_tools\": false } ```  ### Tool-Enhanced Workflow Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"enable_retrieval\": false,     \"enable_tools\": true } ```  ### Full-Featured Workflow Combination of retrieval and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"enable_retrieval\": true,     \"enable_tools\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"enable_retrieval\": false,     \"enable_tools\": false,     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
 
-        :param chat_workflow_request: (required)
-        :type chat_workflow_request: ChatWorkflowRequest
+        :param chat_request: (required)
+        :type chat_request: ChatRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2234,7 +2234,7 @@ class WorkflowsApi:
         """ # noqa: E501
 
         _param = self._execute_chat_workflow_api_v1_workflows_execute_chat_post_serialize(
-            chat_workflow_request=chat_workflow_request,
+            chat_request=chat_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2254,7 +2254,7 @@ class WorkflowsApi:
 
     def _execute_chat_workflow_api_v1_workflows_execute_chat_post_serialize(
         self,
-        chat_workflow_request,
+        chat_request,
         _request_auth,
         _content_type,
         _headers,
@@ -2280,8 +2280,8 @@ class WorkflowsApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if chat_workflow_request is not None:
-            _body_params = chat_workflow_request
+        if chat_request is not None:
+            _body_params = chat_request
 
 
         # set the HTTP header `Accept`
@@ -2332,7 +2332,7 @@ class WorkflowsApi:
     @validate_call
     async def execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post(
         self,
-        chat_workflow_request: ChatWorkflowRequest,
+        chat_request: ChatRequest,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2350,8 +2350,8 @@ class WorkflowsApi:
 
         Execute chat using dynamically built workflow with streaming. ## Dynamic Workflow Configuration  This endpoint supports dynamic workflow configuration through capability flags:  ### Basic Chat Simple conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"enable_retrieval\": false,     \"enable_tools\": false } ```  ### Retrieval-Augmented Generation Document search and retrieval capabilities. ```json {     \"message\": \"What are the latest sales figures?\",     \"enable_retrieval\": true,     \"enable_tools\": false } ```  ### Tool-Enhanced Workflow Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"enable_retrieval\": false,     \"enable_tools\": true } ```  ### Full-Featured Workflow Combination of retrieval and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"enable_retrieval\": true,     \"enable_tools\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"enable_retrieval\": false,     \"enable_tools\": false,     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
 
-        :param chat_workflow_request: (required)
-        :type chat_workflow_request: ChatWorkflowRequest
+        :param chat_request: (required)
+        :type chat_request: ChatRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2375,7 +2375,7 @@ class WorkflowsApi:
         """ # noqa: E501
 
         _param = self._execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post_serialize(
-            chat_workflow_request=chat_workflow_request,
+            chat_request=chat_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2400,7 +2400,7 @@ class WorkflowsApi:
     @validate_call
     async def execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post_with_http_info(
         self,
-        chat_workflow_request: ChatWorkflowRequest,
+        chat_request: ChatRequest,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2418,8 +2418,8 @@ class WorkflowsApi:
 
         Execute chat using dynamically built workflow with streaming. ## Dynamic Workflow Configuration  This endpoint supports dynamic workflow configuration through capability flags:  ### Basic Chat Simple conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"enable_retrieval\": false,     \"enable_tools\": false } ```  ### Retrieval-Augmented Generation Document search and retrieval capabilities. ```json {     \"message\": \"What are the latest sales figures?\",     \"enable_retrieval\": true,     \"enable_tools\": false } ```  ### Tool-Enhanced Workflow Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"enable_retrieval\": false,     \"enable_tools\": true } ```  ### Full-Featured Workflow Combination of retrieval and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"enable_retrieval\": true,     \"enable_tools\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"enable_retrieval\": false,     \"enable_tools\": false,     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
 
-        :param chat_workflow_request: (required)
-        :type chat_workflow_request: ChatWorkflowRequest
+        :param chat_request: (required)
+        :type chat_request: ChatRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2443,7 +2443,7 @@ class WorkflowsApi:
         """ # noqa: E501
 
         _param = self._execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post_serialize(
-            chat_workflow_request=chat_workflow_request,
+            chat_request=chat_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2468,7 +2468,7 @@ class WorkflowsApi:
     @validate_call
     async def execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post_without_preload_content(
         self,
-        chat_workflow_request: ChatWorkflowRequest,
+        chat_request: ChatRequest,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2486,8 +2486,8 @@ class WorkflowsApi:
 
         Execute chat using dynamically built workflow with streaming. ## Dynamic Workflow Configuration  This endpoint supports dynamic workflow configuration through capability flags:  ### Basic Chat Simple conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"enable_retrieval\": false,     \"enable_tools\": false } ```  ### Retrieval-Augmented Generation Document search and retrieval capabilities. ```json {     \"message\": \"What are the latest sales figures?\",     \"enable_retrieval\": true,     \"enable_tools\": false } ```  ### Tool-Enhanced Workflow Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"enable_retrieval\": false,     \"enable_tools\": true } ```  ### Full-Featured Workflow Combination of retrieval and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"enable_retrieval\": true,     \"enable_tools\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"enable_retrieval\": false,     \"enable_tools\": false,     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
 
-        :param chat_workflow_request: (required)
-        :type chat_workflow_request: ChatWorkflowRequest
+        :param chat_request: (required)
+        :type chat_request: ChatRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2511,7 +2511,7 @@ class WorkflowsApi:
         """ # noqa: E501
 
         _param = self._execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post_serialize(
-            chat_workflow_request=chat_workflow_request,
+            chat_request=chat_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2531,7 +2531,7 @@ class WorkflowsApi:
 
     def _execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post_serialize(
         self,
-        chat_workflow_request,
+        chat_request,
         _request_auth,
         _content_type,
         _headers,
@@ -2557,8 +2557,8 @@ class WorkflowsApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if chat_workflow_request is not None:
-            _body_params = chat_workflow_request
+        if chat_request is not None:
+            _body_params = chat_request
 
 
         # set the HTTP header `Accept`

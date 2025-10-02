@@ -1914,80 +1914,26 @@ components:
       - hourly_performance_data
       title: ChartReadyAnalytics
       type: object
-    ChatResponse:
-      description: Schema for chat response.
-      properties:
-        conversation:
-          $ref: '#/components/schemas/ConversationResponse'
-          description: Updated conversation
-        conversation_id:
-          description: Conversation ID
-          title: Conversation Id
-          type: string
-        message:
-          $ref: '#/components/schemas/MessageResponse'
-          description: Assistant response message
-      required:
-      - conversation_id
-      - message
-      - conversation
-      title: ChatResponse
-      type: object
-    ChatWorkflowConfig:
-      description: Configuration for building chat workflows dynamically.
-      properties:
-        enable_memory:
-          default: true
-          description: Enable conversation memory
-          title: Enable Memory
-          type: boolean
-        enable_retrieval:
-          default: false
-          description: Enable document retrieval
-          title: Enable Retrieval
-          type: boolean
-        enable_tools:
-          default: false
-          description: Enable function calling
-          title: Enable Tools
-          type: boolean
-        enable_web_search:
-          default: false
-          description: Enable web search
-          title: Enable Web Search
-          type: boolean
-        llm_config:
-          anyOf:
-          - $ref: '#/components/schemas/ModelConfig'
-          - type: 'null'
-          description: Model configuration
-        retrieval_config:
-          anyOf:
-          - $ref: '#/components/schemas/RetrievalConfig'
-          - type: 'null'
-          description: Retrieval configuration
-        tool_config:
-          anyOf:
-          - $ref: '#/components/schemas/ToolConfig'
-          - type: 'null'
-          description: Tool configuration
-      title: ChatWorkflowConfig
-      type: object
-    ChatWorkflowRequest:
-      description: Request for executing chat via workflow system.
+    ChatRequest:
+      description: 'Schema for chat request.
+
+
+        This unified schema supports both simple chat and workflow execution,
+
+        eliminating the need for separate ChatWorkflowRequest type.'
       properties:
         context_limit:
           anyOf:
           - minimum: 1.0
             type: integer
           - type: 'null'
-          description: Context limit
+          description: Context limit override
           title: Context Limit
         conversation_id:
           anyOf:
           - type: string
           - type: 'null'
-          description: Conversation ID
+          description: Conversation ID for continuing chat
           title: Conversation Id
         document_ids:
           anyOf:
@@ -1995,7 +1941,7 @@ components:
               type: string
             type: array
           - type: 'null'
-          description: Document IDs
+          description: Document IDs to include in context
           title: Document Ids
         enable_memory:
           default: true
@@ -2028,36 +1974,41 @@ components:
             minimum: 1.0
             type: integer
           - type: 'null'
-          description: Max tokens
+          description: Max tokens override
           title: Max Tokens
         message:
           description: User message
-          minLength: 1
           title: Message
           type: string
         model:
           anyOf:
           - type: string
           - type: 'null'
-          description: LLM model
+          description: Override LLM model for this request
           title: Model
         profile_id:
           anyOf:
           - type: string
           - type: 'null'
-          description: Profile ID
+          description: Profile ID to use
           title: Profile Id
+        prompt_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Prompt template ID to use for this request
+          title: Prompt Id
         provider:
           anyOf:
           - type: string
           - type: 'null'
-          description: LLM provider
+          description: Override LLM provider for this request
           title: Provider
         system_prompt_override:
           anyOf:
           - type: string
           - type: 'null'
-          description: System prompt override
+          description: Override system prompt for this request
           title: System Prompt Override
         temperature:
           anyOf:
@@ -2065,13 +2016,15 @@ components:
             minimum: 0.0
             type: number
           - type: 'null'
-          description: Temperature
+          description: Temperature override
           title: Temperature
         workflow_config:
           anyOf:
-          - $ref: '#/components/schemas/ChatWorkflowConfig'
+          - additionalProperties: true
+            type: object
           - type: 'null'
-          description: Dynamic workflow config
+          description: Dynamic workflow configuration
+          title: Workflow Config
         workflow_definition_id:
           anyOf:
           - type: string
@@ -2082,11 +2035,30 @@ components:
           anyOf:
           - type: string
           - type: 'null'
-          description: Template name
+          description: Workflow template name
           title: Workflow Template Name
       required:
       - message
-      title: ChatWorkflowRequest
+      title: ChatRequest
+      type: object
+    ChatResponse:
+      description: Schema for chat response.
+      properties:
+        conversation:
+          $ref: '#/components/schemas/ConversationResponse'
+          description: Updated conversation
+        conversation_id:
+          description: Conversation ID
+          title: Conversation Id
+          type: string
+        message:
+          $ref: '#/components/schemas/MessageResponse'
+          description: Assistant response message
+      required:
+      - conversation_id
+      - message
+      - conversation
+      title: ChatResponse
       type: object
     CleanupResponse:
       description: Schema for cleanup operation response.
@@ -4697,58 +4669,6 @@ components:
       - data_points_last_hour
       - storage_size_mb
       title: MetricsSummaryResponse
-      type: object
-    ModelConfig:
-      description: Model configuration for chat workflows.
-      properties:
-        frequency_penalty:
-          default: 0.0
-          description: Frequency penalty
-          maximum: 2.0
-          minimum: -2.0
-          title: Frequency Penalty
-          type: number
-        max_tokens:
-          default: 1000
-          description: Max tokens
-          maximum: 8192.0
-          minimum: 1.0
-          title: Max Tokens
-          type: integer
-        model:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Model name
-          title: Model
-        presence_penalty:
-          default: 0.0
-          description: Presence penalty
-          maximum: 2.0
-          minimum: -2.0
-          title: Presence Penalty
-          type: number
-        provider:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: LLM provider
-          title: Provider
-        temperature:
-          default: 0.7
-          description: Temperature
-          maximum: 2.0
-          minimum: 0.0
-          title: Temperature
-          type: number
-        top_p:
-          default: 1.0
-          description: Top-p sampling
-          maximum: 1.0
-          minimum: 0.0
-          title: Top P
-          type: number
-      title: ModelConfig
       type: object
     ModelDefCreate:
       description: Schema for creating a model definition.
@@ -7729,51 +7649,6 @@ components:
       - started_at
       title: RestoreResponse
       type: object
-    RetrievalConfig:
-      description: Retrieval configuration for RAG workflows.
-      properties:
-        collections:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          description: Document collections
-          title: Collections
-        document_ids:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          description: Specific document IDs
-          title: Document Ids
-        enabled:
-          default: true
-          description: Enable retrieval
-          title: Enabled
-          type: boolean
-        max_documents:
-          default: 5
-          description: Max documents to retrieve
-          maximum: 20.0
-          minimum: 1.0
-          title: Max Documents
-          type: integer
-        rerank:
-          default: false
-          description: Enable reranking
-          title: Rerank
-          type: boolean
-        similarity_threshold:
-          default: 0.7
-          description: Similarity threshold
-          maximum: 1.0
-          minimum: 0.0
-          title: Similarity Threshold
-          type: number
-      title: RetrievalConfig
-      type: object
     RoleToolAccessCreate:
       description: Schema for creating role-based tool access.
       properties:
@@ -8588,43 +8463,6 @@ components:
       - allowed
       - access_level
       title: ToolAccessResult
-      type: object
-    ToolConfig:
-      description: Tool configuration for function calling workflows.
-      properties:
-        allowed_tools:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          description: Allowed tool names
-          title: Allowed Tools
-        enabled:
-          default: true
-          description: Enable tools
-          title: Enabled
-          type: boolean
-        max_tool_calls:
-          default: 5
-          description: Max tool calls
-          maximum: 20.0
-          minimum: 1.0
-          title: Max Tool Calls
-          type: integer
-        parallel_tool_calls:
-          default: false
-          description: Enable parallel tool calls
-          title: Parallel Tool Calls
-          type: boolean
-        tool_timeout_ms:
-          default: 30000
-          description: Tool timeout in ms
-          maximum: 300000.0
-          minimum: 1000.0
-          title: Tool Timeout Ms
-          type: integer
-      title: ToolConfig
       type: object
     ToolOperationResponse:
       description: Schema for tool operation response.
@@ -20384,7 +20222,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ChatWorkflowRequest'
+              $ref: '#/components/schemas/ChatRequest'
         required: true
       responses:
         '200':
@@ -20450,7 +20288,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ChatWorkflowRequest'
+              $ref: '#/components/schemas/ChatRequest'
         required: true
       responses:
         '200':

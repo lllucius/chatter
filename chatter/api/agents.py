@@ -312,7 +312,7 @@ async def list_agents(
         for agent in agents:
             try:
                 agent_responses.append(
-                    AgentResponse.model_validate(agent.model_dump())
+                    AgentResponse.model_validate(agent)
                 )
             except Exception as e:
                 logger.warning(
@@ -987,9 +987,7 @@ async def bulk_create_agents(
                 agent = await agent_manager.get_agent(agent_id)
                 if agent:
                     created_agents.append(
-                        AgentResponse.model_validate(
-                            agent.profile.model_dump()
-                        )
+                        AgentResponse.model_validate(agent.profile)
                     )
 
             except Exception as e:

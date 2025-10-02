@@ -177,7 +177,7 @@ class WorkflowExecutionService:
     async def execute_chat_workflow(
         self,
         user_id: str,
-        request: Any,
+        request: ChatRequest,
     ) -> tuple[Conversation, Message]:
         """Execute chat workflow - API wrapper method."""
         # Get or create conversation
@@ -185,13 +185,10 @@ class WorkflowExecutionService:
             user_id, request
         )
 
-        # Convert request to ChatRequest
-        chat_request = self._convert_to_chat_request(request)
-
-        # Execute the actual workflow
+        # Execute the actual workflow directly with ChatRequest
         message, result = await self._execute_chat_workflow_internal(
             conversation=conversation,
-            chat_request=chat_request,
+            chat_request=request,
             user_id=user_id,
         )
 
@@ -387,9 +384,12 @@ class WorkflowExecutionService:
                     from chatter.core.tool_registry import ToolRegistry
 
                     tool_registry = ToolRegistry()
+                    # Note: user_permissions parameter is for future permission-based tool filtering
+                    # Currently all tools are available. Future enhancement: integrate with
+                    # WorkflowSecurityManager to filter tools based on user permissions.
                     tools = tool_registry.get_tools_for_workspace(
                         workspace_id=user_id,
-                        user_permissions=[],  # TODO: Add user permission system
+                        user_permissions=[],
                     )
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for universal template execution"
@@ -407,10 +407,12 @@ class WorkflowExecutionService:
                     )
 
                     retriever = await get_vector_store_retriever(
-                        user_id=user_id
+                        user_id=user_id,
+                        document_ids=chat_request.document_ids,
                     )
                     logger.info(
-                        "Loaded retriever from vector store for universal template"
+                        "Loaded retriever from vector store for universal template",
+                        document_ids=chat_request.document_ids,
                     )
                 except Exception as e:
                     logger.warning(
@@ -758,9 +760,12 @@ class WorkflowExecutionService:
                     from chatter.core.tool_registry import ToolRegistry
 
                     tool_registry = ToolRegistry()
+                    # Note: user_permissions parameter is for future permission-based tool filtering
+                    # Currently all tools are available. Future enhancement: integrate with
+                    # WorkflowSecurityManager to filter tools based on user permissions.
                     tools = tool_registry.get_tools_for_workspace(
                         workspace_id=user_id,
-                        user_permissions=[],  # TODO: Add user permission system
+                        user_permissions=[],
                     )
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for workflow execution"
@@ -778,9 +783,13 @@ class WorkflowExecutionService:
                     )
 
                     retriever = await get_vector_store_retriever(
-                        user_id=user_id
+                        user_id=user_id,
+                        document_ids=chat_request.document_ids,
                     )
-                    logger.info("Loaded retriever from vector store")
+                    logger.info(
+                        "Loaded retriever from vector store",
+                        document_ids=chat_request.document_ids,
+                    )
                 except Exception as e:
                     logger.warning(
                         f"Could not load retriever from vector store: {e}"
@@ -1156,9 +1165,12 @@ class WorkflowExecutionService:
                     from chatter.core.tool_registry import ToolRegistry
 
                     tool_registry = ToolRegistry()
+                    # Note: user_permissions parameter is for future permission-based tool filtering
+                    # Currently all tools are available. Future enhancement: integrate with
+                    # WorkflowSecurityManager to filter tools based on user permissions.
                     tools = tool_registry.get_tools_for_workspace(
                         workspace_id=user_id,
-                        user_permissions=[],  # TODO: Add user permission system
+                        user_permissions=[],
                     )
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for universal template streaming"
@@ -1176,10 +1188,12 @@ class WorkflowExecutionService:
                     )
 
                     retriever = await get_vector_store_retriever(
-                        user_id=user_id
+                        user_id=user_id,
+                        document_ids=chat_request.document_ids,
                     )
                     logger.info(
-                        "Loaded retriever from vector store for universal template streaming"
+                        "Loaded retriever from vector store for universal template streaming",
+                        document_ids=chat_request.document_ids,
                     )
                 except Exception as e:
                     logger.warning(
@@ -1530,6 +1544,51 @@ class WorkflowExecutionService:
                 max_tokens=chat_request.max_tokens,
             )
 
+            # Get tools and retriever if needed
+            tools = None
+            retriever = None
+
+            if chat_request.enable_tools:
+                try:
+                    from chatter.core.tool_registry import ToolRegistry
+
+                    tool_registry = ToolRegistry()
+                    # Note: user_permissions parameter is for future permission-based tool filtering
+                    # Currently all tools are available. Future enhancement: integrate with
+                    # WorkflowSecurityManager to filter tools based on user permissions.
+                    tools = tool_registry.get_tools_for_workspace(
+                        workspace_id=user_id,
+                        user_permissions=[],
+                    )
+                    logger.info(
+                        f"Loaded {len(tools) if tools else 0} tools for streaming workflow execution"
+                    )
+                except Exception as e:
+                    logger.warning(
+                        f"Could not load tools from tool registry: {e}"
+                    )
+                    tools = []
+
+            if chat_request.enable_retrieval:
+                try:
+                    from chatter.core.vector_store import (
+                        get_vector_store_retriever,
+                    )
+
+                    retriever = await get_vector_store_retriever(
+                        user_id=user_id,
+                        document_ids=chat_request.document_ids,
+                    )
+                    logger.info(
+                        "Loaded retriever from vector store for streaming",
+                        document_ids=chat_request.document_ids,
+                    )
+                except Exception as e:
+                    logger.warning(
+                        f"Could not load retriever from vector store: {e}"
+                    )
+                    retriever = None
+
             # Create workflow
             workflow = await workflow_manager.create_workflow(
                 llm=llm,
@@ -1538,6 +1597,8 @@ class WorkflowExecutionService:
                 enable_memory=chat_request.enable_memory,
                 enable_streaming=True,
                 system_message=chat_request.system_prompt_override,
+                retriever=retriever,
+                tools=tools,
                 user_id=user_id,
                 conversation_id=conversation.id,
             )
@@ -2340,15 +2401,33 @@ class WorkflowExecutionService:
         return message
 
     async def _get_or_create_conversation(
-        self, user_id: str, request: Any
+        self, user_id: str, request: ChatRequest
     ) -> Conversation:
         """Get existing conversation or create new one."""
         conversation_id = getattr(request, 'conversation_id', None)
 
         if conversation_id:
-            # TODO: Get existing conversation
-            # conversation = await self.conversation_service.get_conversation(conversation_id)
-            pass
+            # Get existing conversation
+            try:
+                from chatter.services.conversation import (
+                    ConversationService,
+                )
+
+                conversation_service = ConversationService(self.session)
+                conversation = await conversation_service.get_conversation(
+                    conversation_id=conversation_id,
+                    user_id=user_id,
+                    include_messages=False,
+                )
+                logger.debug(
+                    f"Retrieved existing conversation {conversation_id}"
+                )
+                return conversation
+            except Exception as e:
+                logger.warning(
+                    f"Failed to retrieve conversation {conversation_id}: {e}. Creating new conversation."
+                )
+                # Fall through to create new conversation
 
         # Create new conversation with all required fields
         now = datetime.now(UTC)
@@ -2385,28 +2464,7 @@ class WorkflowExecutionService:
 
         return conversation
 
-    def _convert_to_chat_request(self, request: Any) -> ChatRequest:
-        """Convert workflow request to ChatRequest for compatibility."""
-        return ChatRequest(
-            message=request.message,
-            conversation_id=getattr(request, 'conversation_id', None),
-            provider=getattr(
-                request, 'provider', None
-            ),  # Let system choose default
-            model=getattr(
-                request, 'model', None
-            ),  # Let system choose default
-            temperature=getattr(request, 'temperature', None),
-            max_tokens=getattr(request, 'max_tokens', None),
-            system_prompt_override=getattr(
-                request, 'system_prompt_override', None
-            ),
-            enable_retrieval=getattr(
-                request, 'enable_retrieval', False
-            ),
-            enable_tools=getattr(request, 'enable_tools', False),
-            enable_memory=getattr(request, 'enable_memory', True),
-        )
+
 
 
 # Factory function for dependency injection

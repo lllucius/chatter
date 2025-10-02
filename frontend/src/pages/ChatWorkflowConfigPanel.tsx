@@ -555,37 +555,43 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
       >
         <DialogTitle>Select Documents</DialogTitle>
         <DialogContent>
-          <List sx={{ pt: 1 }}>
-            {documents.map((doc) => (
-              <ListItem key={doc.id} disablePadding>
-                <ListItemButton
-                  onClick={() => {
-                    if (selectedDocuments.includes(doc.id)) {
-                      setSelectedDocuments(
-                        selectedDocuments.filter((id) => id !== doc.id)
-                      );
-                    } else {
-                      setSelectedDocuments([...selectedDocuments, doc.id]);
-                    }
-                  }}
-                  dense
-                >
-                  <Checkbox
-                    edge="start"
-                    checked={selectedDocuments.includes(doc.id)}
-                    tabIndex={-1}
-                    disableRipple
-                  />
-                  <ListItemText
-                    primary={doc.title || doc.filename}
-                    secondary={doc.document_type}
-                    primaryTypographyProps={{ variant: 'body2' }}
-                    secondaryTypographyProps={{ variant: 'caption' }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
+          {documents.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+              No documents available. Please upload documents first.
+            </Typography>
+          ) : (
+            <List sx={{ pt: 1 }}>
+              {documents.map((doc) => (
+                <ListItem key={doc.id} disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      if (selectedDocuments.includes(doc.id)) {
+                        setSelectedDocuments(
+                          selectedDocuments.filter((id) => id !== doc.id)
+                        );
+                      } else {
+                        setSelectedDocuments([...selectedDocuments, doc.id]);
+                      }
+                    }}
+                    dense
+                  >
+                    <Checkbox
+                      edge="start"
+                      checked={selectedDocuments.includes(doc.id)}
+                      tabIndex={-1}
+                      disableRipple
+                    />
+                    <ListItemText
+                      primary={doc.title || doc.filename}
+                      secondary={doc.document_type}
+                      primaryTypographyProps={{ variant: 'body2' }}
+                      secondaryTypographyProps={{ variant: 'caption' }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDocumentDialogOpen(false)}>Close</Button>
@@ -601,41 +607,47 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
       >
         <DialogTitle>Select Tools</DialogTitle>
         <DialogContent>
-          <List sx={{ pt: 1 }}>
-            {availableTools.map((tool) => (
-              <ListItem key={tool.id} disablePadding>
-                <ListItemButton
-                  onClick={() => {
-                    const newSelectedTools = selectedTools.includes(tool.name)
-                      ? selectedTools.filter((name) => name !== tool.name)
-                      : [...selectedTools, tool.name];
-                    setSelectedTools(newSelectedTools);
-                    updateWorkflowConfig({
-                      tool_config: {
-                        ...workflowConfig.tool_config,
-                        enabled: true,
-                        allowed_tools: newSelectedTools,
-                      },
-                    });
-                  }}
-                  dense
-                >
-                  <Checkbox
-                    edge="start"
-                    checked={selectedTools.includes(tool.name)}
-                    tabIndex={-1}
-                    disableRipple
-                  />
-                  <ListItemText
-                    primary={tool.display_name || tool.name}
-                    secondary={tool.description || tool.name}
-                    primaryTypographyProps={{ variant: 'body2' }}
-                    secondaryTypographyProps={{ variant: 'caption' }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
+          {availableTools.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+              No tools available. Please configure tool servers first.
+            </Typography>
+          ) : (
+            <List sx={{ pt: 1 }}>
+              {availableTools.map((tool) => (
+                <ListItem key={tool.id} disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      const newSelectedTools = selectedTools.includes(tool.name)
+                        ? selectedTools.filter((name) => name !== tool.name)
+                        : [...selectedTools, tool.name];
+                      setSelectedTools(newSelectedTools);
+                      updateWorkflowConfig({
+                        tool_config: {
+                          ...workflowConfig.tool_config,
+                          enabled: true,
+                          allowed_tools: newSelectedTools,
+                        },
+                      });
+                    }}
+                    dense
+                  >
+                    <Checkbox
+                      edge="start"
+                      checked={selectedTools.includes(tool.name)}
+                      tabIndex={-1}
+                      disableRipple
+                    />
+                    <ListItemText
+                      primary={tool.display_name || tool.name}
+                      secondary={tool.description || tool.name}
+                      primaryTypographyProps={{ variant: 'body2' }}
+                      secondaryTypographyProps={{ variant: 'caption' }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setToolDialogOpen(false)}>Close</Button>

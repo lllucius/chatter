@@ -435,7 +435,11 @@ class WorkflowGraphBuilder:
                 logger.info(
                     f"LLM Node {self.node_id} applying context",
                     has_retrieval_context=bool(retrieval_context),
-                    retrieval_context_length=len(retrieval_context) if retrieval_context else 0,
+                    retrieval_context_length=(
+                        len(retrieval_context)
+                        if retrieval_context
+                        else 0
+                    ),
                 )
                 if retrieval_context:
                     system_content += (
@@ -889,16 +893,22 @@ class WorkflowGraphBuilder:
                 entry = "call_model"
 
         if enable_tools:
+            # Route from call_model based on LLM's decision and safety limit
             definition.add_edge(
-                "call_model", "execute_tools", "has_tool_calls"
+                "call_model",
+                "execute_tools",
+                "has_tool_calls AND tool_calls < "
+                + str(max_tool_calls),
+            )
+            definition.add_edge(
+                "call_model",
+                "finalize_response",
+                "has_tool_calls AND tool_calls >= "
+                + str(max_tool_calls),
             )
             definition.add_edge("call_model", END, "no_tool_calls")
+            # After executing tools, always return to call_model to let LLM decide
             definition.add_edge("execute_tools", "call_model")
-            definition.add_edge(
-                "execute_tools",
-                "finalize_response",
-                "tool_calls >= " + str(max_tool_calls),
-            )
             definition.add_edge("finalize_response", END)
         else:
             definition.add_edge("call_model", END)

@@ -996,7 +996,7 @@ class ToolServerService:
             )
 
             # Add to MCP service
-            success = await self.mcp_service.add_remote_server(
+            success = await self.mcp_service.add_server(
                 remote_server
             )
 

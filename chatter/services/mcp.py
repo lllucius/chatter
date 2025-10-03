@@ -207,7 +207,7 @@ class MCPToolService:
 
         return base_connection
 
-    async def add_remote_server(
+    async def add_server(
         self, server_config: RemoteMCPServer
     ) -> bool:
         """Add a remote MCP server configuration."""

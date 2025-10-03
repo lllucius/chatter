@@ -893,7 +893,12 @@ class WorkflowGraphBuilder:
                 "call_model", "execute_tools", "has_tool_calls"
             )
             definition.add_edge("call_model", END, "no_tool_calls")
-            definition.add_edge("execute_tools", "call_model")
+            # Conditional routing from execute_tools based on tool call count
+            definition.add_edge(
+                "execute_tools",
+                "call_model",
+                "tool_calls < " + str(max_tool_calls),
+            )
             definition.add_edge(
                 "execute_tools",
                 "finalize_response",

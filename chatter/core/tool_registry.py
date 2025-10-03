@@ -113,7 +113,8 @@ class ToolRegistry:
         """Get enabled tools for a workspace, checking database status.
         
         This method checks both the in-memory registry and the database
-        to ensure only enabled tools are returned.
+        to ensure only enabled tools are returned. It also includes MCP tools
+        from enabled MCP servers.
         
         Args:
             workspace_id: Workspace ID
@@ -121,9 +122,9 @@ class ToolRegistry:
             session: Optional database session
             
         Returns:
-            List of enabled tools
+            List of enabled tools (including MCP tools)
         """
-        from chatter.models.toolserver import ServerTool, ToolStatus
+        from chatter.models.toolserver import ServerStatus, ServerTool, ToolServer, ToolStatus
         from sqlalchemy import select
         
         # Get all tools from registry
@@ -149,6 +150,38 @@ class ToolRegistry:
             tool for tool in registry_tools
             if self._get_tool_name(tool) in enabled_tool_names
         ]
+        
+        # Also get MCP tools from enabled MCP servers
+        try:
+            # Get enabled MCP servers
+            servers_result = await session.execute(
+                select(ToolServer).where(
+                    ToolServer.status == ServerStatus.ENABLED
+                )
+            )
+            enabled_servers = servers_result.scalars().all()
+            
+            if enabled_servers:
+                # Import MCP service
+                from chatter.services.mcp import mcp_service
+                
+                # Get tools from each enabled server
+                for server in enabled_servers:
+                    try:
+                        server_tools = await mcp_service.get_tools(
+                            server_names=[server.name]
+                        )
+                        if server_tools:
+                            logger.info(
+                                f"Loaded {len(server_tools)} MCP tools from server '{server.name}'"
+                            )
+                            enabled_tools.extend(server_tools)
+                    except Exception as e:
+                        logger.warning(
+                            f"Failed to get tools from MCP server '{server.name}': {e}"
+                        )
+        except Exception as e:
+            logger.warning(f"Failed to load MCP tools: {e}")
         
         return enabled_tools
     

@@ -183,7 +183,7 @@ class RetrievalNode(WorkflowNode):
             f"RetrievalNode {self.node_id} executing",
             has_retriever=self.retriever is not None,
         )
-        
+
         if not self.retriever:
             logger.warning(
                 f"RetrievalNode {self.node_id} has no retriever, returning empty context"
@@ -313,23 +313,45 @@ class ConditionalNode(WorkflowNode):
                     search_term.lower() in last_message.content.lower()
                 )
 
-        # Check variable conditions
-        if "variable" in condition and "equals" in condition:
-            parts = condition.split()
-            if len(parts) >= 3:
-                var_name = parts[1]
-                expected_value = parts[3]
-                actual_value = context.get("variables", {}).get(
-                    var_name
-                )
-                return str(actual_value) == expected_value
+        # Handle capability-specific variable conditions BEFORE general tool_calls check
+        if "variable" in condition:
+            # Handle "variable max_tool_calls" pattern with comparison operators
+            if " max_tool_calls" in condition:
+                variables = context.get("variables", {})
+                capabilities = variables.get("capabilities", {})
+                max_calls = capabilities.get("max_tool_calls", 10)
+                tool_count = context.get("tool_call_count", 0)
+                if ">=" in condition:
+                    return tool_count >= max_calls
+                elif ">" in condition:
+                    return tool_count > max_calls
+                elif "<=" in condition:
+                    return tool_count <= max_calls
+                elif "<" in condition:
+                    return tool_count < max_calls
+            # Handle general variable equals conditions
+            elif "equals" in condition:
+                parts = condition.split()
+                if len(parts) >= 3:
+                    var_name = parts[1]
+                    expected_value = parts[3]
+                    actual_value = context.get("variables", {}).get(
+                        var_name
+                    )
+                    return str(actual_value) == expected_value
 
-        # Check tool call count conditions
+        # Check tool call count conditions (with literal numbers)
         if "tool_calls" in condition:
             tool_count = context.get("tool_call_count", 0)
-            if ">" in condition:
+            if ">=" in condition:
+                threshold = int(condition.split(">=")[1].strip())
+                return tool_count >= threshold
+            elif ">" in condition:
                 threshold = int(condition.split(">")[1].strip())
                 return tool_count > threshold
+            elif "<=" in condition:
+                threshold = int(condition.split("<=")[1].strip())
+                return tool_count <= threshold
             elif "<" in condition:
                 threshold = int(condition.split("<")[1].strip())
                 return tool_count < threshold

@@ -682,32 +682,25 @@ class WorkflowGraphBuilder:
                 )
             return True  # If no messages, assume no tool calls
 
-        # Check tool call count conditions
-        if "tool_calls" in condition:
-            tool_count = state.get("tool_call_count", 0)
-            if ">=" in condition:
-                threshold = int(condition.split(">=")[1].strip())
-                return tool_count >= threshold
-            elif ">" in condition:
-                threshold = int(condition.split(">")[1].strip())
-                return tool_count > threshold
-            elif "<=" in condition:
-                threshold = int(condition.split("<=")[1].strip())
-                return tool_count <= threshold
-            elif "<" in condition:
-                threshold = int(condition.split("<")[1].strip())
-                return tool_count < threshold
-
-        # Check error conditions
-        if "has_errors" in condition:
-            error_state = state.get("error_state", {})
-            return bool(error_state)
-
-        # Handle capability-specific variable conditions BEFORE general variable handler
+        # Handle capability-specific variable conditions BEFORE general tool_calls check
         # These need special handling because capabilities are nested under variables["capabilities"]
         if "variable" in condition:
+            # Handle "variable max_tool_calls" pattern with comparison operators
+            if " max_tool_calls" in condition:
+                variables = state.get("variables", {})
+                capabilities = variables.get("capabilities", {})
+                max_calls = capabilities.get("max_tool_calls", 10)
+                tool_count = state.get("tool_call_count", 0)
+                if ">=" in condition:
+                    return tool_count >= max_calls
+                elif ">" in condition:
+                    return tool_count > max_calls
+                elif "<=" in condition:
+                    return tool_count <= max_calls
+                elif "<" in condition:
+                    return tool_count < max_calls
             # Handle "variable enable_memory equals <value>" pattern
-            if " enable_memory equals " in condition:
+            elif " enable_memory equals " in condition:
                 variables = state.get("variables", {})
                 capabilities = variables.get("capabilities", {})
                 actual_value = str(
@@ -740,19 +733,27 @@ class WorkflowGraphBuilder:
                     " enable_tools equals "
                 )[1].strip()
                 return actual_value == expected_value
-            elif " max_tool_calls" in condition:
-                variables = state.get("variables", {})
-                capabilities = variables.get("capabilities", {})
-                max_calls = capabilities.get("max_tool_calls", 10)
-                tool_count = state.get("tool_call_count", 0)
-                if ">=" in condition:
-                    return tool_count >= max_calls
-                elif ">" in condition:
-                    return tool_count > max_calls
-                elif "<=" in condition:
-                    return tool_count <= max_calls
-                elif "<" in condition:
-                    return tool_count < max_calls
+
+        # Check tool call count conditions (with literal numbers)
+        if "tool_calls" in condition:
+            tool_count = state.get("tool_call_count", 0)
+            if ">=" in condition:
+                threshold = int(condition.split(">=")[1].strip())
+                return tool_count >= threshold
+            elif ">" in condition:
+                threshold = int(condition.split(">")[1].strip())
+                return tool_count > threshold
+            elif "<=" in condition:
+                threshold = int(condition.split("<=")[1].strip())
+                return tool_count <= threshold
+            elif "<" in condition:
+                threshold = int(condition.split("<")[1].strip())
+                return tool_count < threshold
+
+        # Check error conditions
+        if "has_errors" in condition:
+            error_state = state.get("error_state", {})
+            return bool(error_state)
 
         # Check general variable conditions
         # This handles patterns like "variable capabilities enable_memory equals true"

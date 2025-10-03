@@ -111,41 +111,41 @@ class ToolRegistry:
         session=None,
     ) -> list[Any]:
         """Get enabled tools for a workspace, checking database status.
-        
+
         This method checks both the in-memory registry and the database
         to ensure only enabled tools are returned. It also includes MCP tools
         from enabled MCP servers.
-        
+
         Tools that are not in the database are treated as enabled by default.
         Only tools explicitly marked as DISABLED in the database are filtered out.
-        
+
         Args:
             workspace_id: Workspace ID
             user_permissions: User permissions for filtering
             session: Optional database session
-            
+
         Returns:
             List of enabled tools (including MCP tools)
         """
         from chatter.models.toolserver import ServerStatus, ServerTool, ToolServer, ToolStatus
         from sqlalchemy import select
-        
+
         # Get all tools from registry
         registry_tools = self.get_tools_for_workspace(
             workspace_id, user_permissions
         )
-        
+
         if not session:
             # If no session provided, return all registry tools
             # (backward compatible behavior)
             return registry_tools
-        
+
         # Get all tools from database (not just enabled)
         result = await session.execute(
             select(ServerTool)
         )
         all_db_tools = {tool.name: tool for tool in result.scalars().all()}
-        
+
         # Filter out only explicitly disabled tools
         # Tools not in the database are treated as enabled by default
         enabled_tools = [
@@ -155,7 +155,7 @@ class ToolRegistry:
                 or all_db_tools[self._get_tool_name(tool)].status == ToolStatus.ENABLED
             )
         ]
-        
+
         # Also get MCP tools from enabled MCP servers
         try:
             # Get enabled MCP servers
@@ -165,11 +165,11 @@ class ToolRegistry:
                 )
             )
             enabled_servers = servers_result.scalars().all()
-            
+
             if enabled_servers:
                 # Import MCP service and RemoteMCPServer
                 from chatter.services.mcp import mcp_service, RemoteMCPServer, OAuthConfig
-                
+
                 # Get tools from each enabled server
                 for server in enabled_servers:
                     try:
@@ -194,13 +194,13 @@ class ToolRegistry:
                                 timeout=server.timeout,
                                 enabled=True,
                             )
-                            
+
                             # Add server to MCP service
                             logger.info(
                                 f"Adding MCP server '{server.name}' to MCP service"
                             )
                             await mcp_service.add_server(server_config)
-                        
+
                         server_tools = await mcp_service.get_tools(
                             server_names=[server.name]
                         )
@@ -215,9 +215,9 @@ class ToolRegistry:
                         )
         except Exception as e:
             logger.warning(f"Failed to load MCP tools: {e}")
-        
+
         return enabled_tools
-    
+
     def _get_tool_name(self, tool: Any) -> str:
         """Extract tool name from a tool object."""
         return (

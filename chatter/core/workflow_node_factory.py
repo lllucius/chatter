@@ -183,7 +183,7 @@ class RetrievalNode(WorkflowNode):
             f"RetrievalNode {self.node_id} executing",
             has_retriever=self.retriever is not None,
         )
-        
+
         if not self.retriever:
             logger.warning(
                 f"RetrievalNode {self.node_id} has no retriever, returning empty context"

@@ -76,14 +76,14 @@ async def test_builtin_server_initialization():
 @pytest.mark.asyncio
 async def test_get_enabled_tools_for_workspace():
     """Test that get_enabled_tools_for_workspace filters by database status."""
-    from chatter.core.tool_registry import ToolRegistry
+    from chatter.core.tool_registry import ToolMetadata, ToolRegistry
     from chatter.models.toolserver import ServerTool, ToolStatus
-    from sqlalchemy import select
+    from langchain_core.tools import StructuredTool
     
     # Create mock session
     mock_session = AsyncMock()
     
-    # Create mock enabled tools in database
+    # Create mock tools in database - one enabled, one disabled
     mock_calculator_tool = MagicMock(spec=ServerTool)
     mock_calculator_tool.name = "calculator"
     mock_calculator_tool.status = ToolStatus.ENABLED
@@ -92,16 +92,55 @@ async def test_get_enabled_tools_for_workspace():
     mock_get_time_tool.name = "get_time"
     mock_get_time_tool.status = ToolStatus.DISABLED  # This one is disabled
     
-    # Mock the database query
+    # Mock the database query to return ALL tools (not just enabled)
     mock_result = MagicMock()
     mock_result.scalars.return_value.all.return_value = [
         mock_calculator_tool,
-        # get_time is not in the enabled list
+        mock_get_time_tool,  # Include the disabled tool in the query result
     ]
     mock_session.execute.return_value = mock_result
     
-    # Get tool registry
+    # Create a new tool registry and register test tools
     tool_registry = ToolRegistry()
+    
+    # Register calculator tool
+    def calculate(expression: str) -> str:
+        """Calculate a mathematical expression."""
+        return str(eval(expression))
+    
+    calculator_tool = StructuredTool.from_function(
+        func=calculate,
+        name="calculator",
+        description="Perform basic mathematical calculations",
+    )
+    
+    calculator_metadata = ToolMetadata(
+        name="calculator",
+        description="Perform basic mathematical calculations",
+        category="builtin",
+    )
+    
+    tool_registry.register_tool(calculator_tool, calculator_metadata)
+    
+    # Register get_time tool
+    def get_time() -> str:
+        """Get the current time."""
+        import datetime
+        return datetime.datetime.now().isoformat()
+    
+    get_time_tool = StructuredTool.from_function(
+        func=get_time,
+        name="get_time",
+        description="Get the current date and time",
+    )
+    
+    get_time_metadata = ToolMetadata(
+        name="get_time",
+        description="Get the current date and time",
+        category="builtin",
+    )
+    
+    tool_registry.register_tool(get_time_tool, get_time_metadata)
     
     # Get enabled tools
     enabled_tools = await tool_registry.get_enabled_tools_for_workspace(
@@ -119,9 +158,62 @@ async def test_get_enabled_tools_for_workspace():
     # calculator should be included since it's enabled in the database
     assert "calculator" in tool_names
     
-    # get_time should be filtered out since it's not in enabled tools
-    # Note: This depends on whether get_time exists in the registry
-    # If it exists in registry but not in enabled list, it should be filtered
+    # get_time should be filtered out since it's explicitly disabled
+    # If get_time exists in registry but is disabled in database, it should be filtered out
+    assert "get_time" not in tool_names
+
+
+@pytest.mark.asyncio
+async def test_tools_not_in_database_are_enabled_by_default():
+    """Test that tools registered but not in database are treated as enabled."""
+    from chatter.core.tool_registry import ToolMetadata, ToolRegistry
+    from chatter.models.toolserver import ServerTool, ToolStatus
+    from langchain_core.tools import StructuredTool
+    
+    # Create mock session that returns empty database (no tools in DB)
+    mock_session = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.scalars.return_value.all.return_value = []  # No tools in database
+    mock_session.execute.return_value = mock_result
+    
+    # Create a new tool registry and register a test tool
+    tool_registry = ToolRegistry()
+    
+    def test_function(query: str) -> str:
+        """Test function."""
+        return f"Result for {query}"
+    
+    test_tool = StructuredTool.from_function(
+        func=test_function,
+        name="test_tool",
+        description="A test tool",
+    )
+    
+    metadata = ToolMetadata(
+        name="test_tool",
+        description="A test tool",
+        category="test",
+    )
+    
+    tool_registry.register_tool(test_tool, metadata)
+    
+    # Get enabled tools - should include test_tool even though it's not in database
+    enabled_tools = await tool_registry.get_enabled_tools_for_workspace(
+        workspace_id="test-user",
+        user_permissions=[],
+        session=mock_session,
+    )
+    
+    # Extract tool names
+    tool_names = {
+        getattr(tool, 'name', getattr(tool, 'name_', 'unknown'))
+        for tool in enabled_tools
+    }
+    
+    # test_tool should be included since it's not in the database
+    # (tools not in database are treated as enabled by default)
+    assert "test_tool" in tool_names
+
 
 
 def test_builtin_tools_exist():

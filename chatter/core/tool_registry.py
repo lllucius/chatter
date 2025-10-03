@@ -167,12 +167,40 @@ class ToolRegistry:
             enabled_servers = servers_result.scalars().all()
             
             if enabled_servers:
-                # Import MCP service
-                from chatter.services.mcp import mcp_service
+                # Import MCP service and RemoteMCPServer
+                from chatter.services.mcp import mcp_service, RemoteMCPServer, OAuthConfig
                 
                 # Get tools from each enabled server
                 for server in enabled_servers:
                     try:
+                        # Ensure server is added to MCP service before getting tools
+                        if server.name not in mcp_service.connections:
+                            # Create server configuration from database model
+                            server_config = RemoteMCPServer(
+                                name=server.name,
+                                base_url=server.base_url,
+                                transport_type=server.transport_type,
+                                oauth_config=(
+                                    OAuthConfig(
+                                        client_id=server.oauth_client_id,
+                                        client_secret=server.oauth_client_secret,
+                                        token_url=server.oauth_token_url,
+                                        scope=server.oauth_scope,
+                                    )
+                                    if server.oauth_client_id and server.oauth_client_secret and server.oauth_token_url
+                                    else None
+                                ),
+                                headers=server.headers or {},
+                                timeout=server.timeout,
+                                enabled=True,
+                            )
+                            
+                            # Add server to MCP service
+                            logger.info(
+                                f"Adding MCP server '{server.name}' to MCP service"
+                            )
+                            await mcp_service.add_server(server_config)
+                        
                         server_tools = await mcp_service.get_tools(
                             server_names=[server.name]
                         )

@@ -30,6 +30,14 @@ class MockToolServer:
     def __init__(self, name: str, status: str):
         self.name = name
         self.status = status
+        self.base_url = "http://localhost:8080"
+        self.transport_type = "http"
+        self.oauth_client_id = None
+        self.oauth_client_secret = None
+        self.oauth_token_url = None
+        self.oauth_scope = None
+        self.headers = None
+        self.timeout = 30
 
 
 class TestMCPToolLoading:
@@ -82,6 +90,9 @@ class TestMCPToolLoading:
         ]
         
         with patch('chatter.services.mcp.mcp_service') as mock_mcp_service:
+            # Set up connections attribute as empty dict (server not yet added)
+            mock_mcp_service.connections = {}
+            mock_mcp_service.add_server = AsyncMock(return_value=True)
             mock_mcp_service.get_tools = AsyncMock(return_value=mock_mcp_tools)
             
             # Call the method
@@ -90,6 +101,9 @@ class TestMCPToolLoading:
                 user_permissions=[],
                 session=mock_session
             )
+            
+            # Verify add_server was called to add the server
+            mock_mcp_service.add_server.assert_called_once()
             
             # Verify MCP service was called with the enabled server
             mock_mcp_service.get_tools.assert_called_once_with(
@@ -185,3 +199,72 @@ class TestMCPToolLoading:
         # Should return all registry tools
         assert len(tools) == 1
         assert tools[0].name == "tool1"
+
+    @pytest.mark.asyncio
+    async def test_get_enabled_tools_reuses_existing_connections(self):
+        """Test that get_enabled_tools_for_workspace reuses existing MCP connections."""
+        registry = ToolRegistry()
+        
+        # Register a built-in tool
+        builtin_tool = MagicMock()
+        builtin_tool.name = "calculator"
+        registry.register_tool(
+            builtin_tool,
+            ToolMetadata(name="calculator", description="Test calculator", category="builtin")
+        )
+        
+        # Mock database session
+        mock_session = AsyncMock()
+        
+        # Mock ServerTool query result
+        mock_server_tools_result = MagicMock()
+        mock_server_tools_result.scalars.return_value.all.return_value = [
+            MockServerTool("calculator", "enabled")
+        ]
+        
+        # Mock ToolServer query result - one enabled MCP server
+        mock_tool_servers_result = MagicMock()
+        mock_tool_servers_result.scalars.return_value.all.return_value = [
+            MockToolServer("weather_server", "enabled")
+        ]
+        
+        # Set up session.execute to return different results for different queries
+        async def mock_execute(query):
+            query_str = str(query)
+            if "tool_server" in query_str.lower():
+                return mock_tool_servers_result
+            else:
+                return mock_server_tools_result
+        
+        mock_session.execute = AsyncMock(side_effect=mock_execute)
+        
+        # Mock MCP service to return tools
+        mock_mcp_tools = [
+            MockMCPTool("weather"),
+            MockMCPTool("date")
+        ]
+        
+        with patch('chatter.services.mcp.mcp_service') as mock_mcp_service:
+            # Set up connections attribute with existing server
+            mock_mcp_service.connections = {"weather_server": MagicMock()}
+            mock_mcp_service.add_server = AsyncMock(return_value=True)
+            mock_mcp_service.get_tools = AsyncMock(return_value=mock_mcp_tools)
+            
+            # Call the method
+            tools = await registry.get_enabled_tools_for_workspace(
+                workspace_id="test_workspace",
+                user_permissions=[],
+                session=mock_session
+            )
+            
+            # Verify add_server was NOT called since server already exists
+            mock_mcp_service.add_server.assert_not_called()
+            
+            # Verify MCP service was called with the enabled server
+            mock_mcp_service.get_tools.assert_called_once_with(
+                server_names=["weather_server"]
+            )
+            
+            # Verify both builtin and MCP tools are included
+            assert len(tools) == 3, f"Expected 3 tools (1 builtin + 2 MCP), got {len(tools)}"
+

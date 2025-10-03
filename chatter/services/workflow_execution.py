@@ -437,9 +437,8 @@ class WorkflowExecutionService:
 
             if wf_settings['enable_tools']:
                 try:
-                    from chatter.core.tool_registry import ToolRegistry
+                    from chatter.core.tool_registry import tool_registry
 
-                    tool_registry = ToolRegistry()
                     # Note: user_permissions parameter is for future permission-based tool filtering
                     # Currently all tools are available. Future enhancement: integrate with
                     # WorkflowSecurityManager to filter tools based on user permissions.
@@ -835,9 +834,8 @@ class WorkflowExecutionService:
 
             if wf_settings['enable_tools']:
                 try:
-                    from chatter.core.tool_registry import ToolRegistry
+                    from chatter.core.tool_registry import tool_registry
 
-                    tool_registry = ToolRegistry()
                     # Note: user_permissions parameter is for future permission-based tool filtering
                     # Currently all tools are available. Future enhancement: integrate with
                     # WorkflowSecurityManager to filter tools based on user permissions.
@@ -1259,9 +1257,8 @@ class WorkflowExecutionService:
 
             if wf_settings['enable_tools']:
                 try:
-                    from chatter.core.tool_registry import ToolRegistry
+                    from chatter.core.tool_registry import tool_registry
 
-                    tool_registry = ToolRegistry()
                     # Note: user_permissions parameter is for future permission-based tool filtering
                     # Currently all tools are available. Future enhancement: integrate with
                     # WorkflowSecurityManager to filter tools based on user permissions.
@@ -1669,9 +1666,8 @@ class WorkflowExecutionService:
 
             if wf_settings['enable_tools']:
                 try:
-                    from chatter.core.tool_registry import ToolRegistry
+                    from chatter.core.tool_registry import tool_registry
 
-                    tool_registry = ToolRegistry()
                     # Note: user_permissions parameter is for future permission-based tool filtering
                     # Currently all tools are available. Future enhancement: integrate with
                     # WorkflowSecurityManager to filter tools based on user permissions.

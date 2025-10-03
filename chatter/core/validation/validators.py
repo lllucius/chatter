@@ -1086,7 +1086,13 @@ class WorkflowValidator(BaseValidator):
                     )
                 )
 
-            if "target" in edge and edge["target"] not in node_ids:
+            # Target must be in nodes or be the special 'END' constant
+            # 'END' is a reserved terminal node identifier in LangGraph workflows
+            if (
+                "target" in edge
+                and edge["target"] not in node_ids
+                and edge["target"] != "END"
+            ):
                 errors.append(
                     ValidationError(
                         f"Edge {i} target '{edge['target']}' not found in nodes"

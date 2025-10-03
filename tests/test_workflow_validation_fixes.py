@@ -534,6 +534,65 @@ class TestWorkflowValidationFixes:
             len(edge_dict_errors) == 1
         ), f"Should have error about edge being dictionary: {[str(e) for e in result.errors]}"
 
+    def test_end_target_validation(self):
+        """Test that edges with target 'END' are valid without requiring an 'END' node."""
+
+        definition_data = {
+            "name": "test_workflow_with_end",
+            "description": "Test workflow with END target",
+            "nodes": [
+                {
+                    "id": "start",
+                    "type": "start",
+                    "position": {"x": 0, "y": 0},
+                    "data": {"label": "Start"},
+                },
+                {
+                    "id": "call_model",
+                    "type": "llm",
+                    "position": {"x": 200, "y": 0},
+                    "data": {"label": "Call Model"},
+                },
+            ],
+            "edges": [
+                {
+                    "id": "e1",
+                    "source": "start",
+                    "target": "call_model",
+                    "type": "default",
+                },
+                {
+                    "id": "e2",
+                    "source": "call_model",
+                    "target": "END",
+                    "type": "default",
+                },
+            ],
+            "metadata": {},
+        }
+
+        validator = WorkflowValidator()
+        context = ValidationContext()
+
+        result = validator.validate(
+            definition_data, "workflow_definition", context
+        )
+
+        # Should be valid - 'END' is a special reserved target
+        assert (
+            result.is_valid
+        ), f"Validation should pass with END target. Errors: {[str(e) for e in result.errors]}"
+
+        # Should not have errors about END not being found in nodes
+        end_errors = [
+            e
+            for e in result.errors
+            if "END" in str(e) and "not found in nodes" in str(e)
+        ]
+        assert (
+            len(end_errors) == 0
+        ), f"Should not have errors about END not being in nodes: {end_errors}"
+
 
 if __name__ == "__main__":
     # Run tests directly for manual verification
@@ -564,5 +623,11 @@ if __name__ == "__main__":
         print("✓ Edge dictionary validation test passed")
     except Exception as e:
         print(f"❌ Edge dictionary validation test failed: {e}")
+
+    try:
+        test_class.test_end_target_validation()
+        print("✓ END target validation test passed")
+    except Exception as e:
+        print(f"❌ END target validation test failed: {e}")
 
     print("All tests completed!")

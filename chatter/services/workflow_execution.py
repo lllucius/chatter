@@ -1374,6 +1374,8 @@ class WorkflowExecutionService:
                 thread_id=conversation.id,
                 enable_llm_streaming=True,
             ):
+                print("universal ================================================================")
+                print(update)
                 # Handle LangGraph streaming events
                 if isinstance(update, dict):
                     event_name = update.get("event", "")
@@ -1775,6 +1777,8 @@ class WorkflowExecutionService:
                 thread_id=conversation.id,
                 enable_llm_streaming=True,
             ):
+                print("dynamic ================================================================")
+                print(update)
                 # Handle LangGraph streaming events
                 if isinstance(update, dict):
                     event_name = update.get("event", "")

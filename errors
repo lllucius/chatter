@@ -1,45 +1,7 @@
-2025-10-03T04:18:56.330470Z [debug    ] HTTP Request                   [chatter.main] body={"message":"what time is it","conversation_id":"01K6JWZP1QGCAPDBF68FB5T9YN","workflow_config":{"enable_retrieval":false,"enable_tools":true,"enable_memory":false,"llm_config":{"temperature":2,"max_tokens":2048},"tool_config":{"enabled":true,"max_tool_calls":1,"parallel_tool_calls":true,"allowed_tools":["get_time","calculator"]},"retrieval_config":{"enabled":true,"rerank":true}},"profile_id":"01K6B5H7V7W1YMMJK90BRJBMT7","enable_tracing":false,"enable_retrieval":false,"enable_tools":true,"enable_memory":false,"enable_web_search":false} headers={'host': 'localhost:8000', 'connection': 'keep-alive', 'content-length': '539', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs2QjVIN1NYNFoyNjBKQ1JDMDhSWTM5QSIsImp0aSI6IjAxSzZNNFBLU0JYRDNXSDhUVDVOOVJUQURNIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1OTQ2NTEzMSwic2Vzc2lvbl9pZCI6IjAxSzZFSzYxNUpGMFY0Qk5XUVJEWUdTNTZDIiwiZXhwIjoxNzU5NDY2OTMxfQ.jr82CLur-AC_KzlozGdGuX0j2RZuKn8ULSUEJ0jeBFU', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"', 'content-type': 'application/json', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'http://localhost:3000', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:3000/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'cookie': 'refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs2QjVIN1NYNFoyNjBKQ1JDMDhSWTM5QSIsImp0aSI6IjAxSzZNNFBLU0JYRDNXSDhUVDVOOVJUQURNIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NTk0NjUxMzEsInNlc3Npb25faWQiOiIwMUs2RUs2MTVKRjBWNEJOV1FSRFlHUzU2QyIsImV4cCI6MTc2MDA2OTkzMX0.H9ar1tbQPZS4AMiwNI2M6QpAutb_jQPm-aUPQmNxG0Q'} method=POST url=http://localhost:8000/api/v1/workflows/execute/chat/streaming
-2025-10-03T04:18:56.332957Z [debug    ] Reusing existing cache instance [chatter.core.cache_factory] cache_type=general correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.333412Z [debug    ] User found in cache            [chatter.core.auth] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V user_id=01K6B5H7SX4Z260JCRC08RY39A
-2025-10-03T04:18:56.336518Z [debug    ] Reusing existing cache instance [chatter.core.cache_factory] cache_type=general correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.337220Z [debug    ] User cached                    [chatter.core.auth] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V user_id=01K6B5H7SX4Z260JCRC08RY39A
-2025-10-03T04:18:56.349427Z [debug    ] Retrieved existing conversation 01K6JWZP1QGCAPDBF68FB5T9YN [chatter.services.workflow_execution] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.374316Z [info     ] Redis cache connection established [chatter.core.cache] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.375452Z [info     ] Cleared all workflow caches    [chatter.core.workflow_performance] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.375556Z [debug    ] Invalidated workflow caches    [chatter.services.workflow_management] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V workflow_id=01K6M4PR7DWHF4YPR40BTPKTMR
-2025-10-03T04:18:56.375612Z [info     ] Created workflow definition 01K6M4PR7DWHF4YPR40BTPKTMR for user 01K6B5H7SX4Z260JCRC08RY39A [chatter.services.workflow_management] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.375667Z [info     ] Created workflow definition 01K6M4PR7DWHF4YPR40BTPKTMR from template 01K6B5H7VZJA79908N4C6G0P7K [chatter.services.workflow_management] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.383690Z [info     ] Created workflow execution 01K6M4PR7R3QH7VJ7QX5N85XF1 for definition 01K6M4PR7DWHF4YPR40BTPKTMR [chatter.services.workflow_management] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.391640Z [info     ] Updated workflow execution 01K6M4PR7R3QH7VJ7QX5N85XF1 [chatter.services.workflow_management] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.391793Z [debug    ] Lazy loaded service: model_registry [chatter.core.dependencies] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.391886Z [debug    ] Reusing existing cache instance [chatter.core.cache_factory] cache_type=general correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.564438Z [debug    ] Lazy loaded service: builtin_tools [chatter.core.dependencies] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-Registered tool: calculator (category: builtin)
-Registered tool: get_time (category: builtin)
-Registered 2 built-in tools
-2025-10-03T04:18:56.568921Z [info     ] Filtered 2 tools down to 2 allowed tools: ['get_time', 'calculator'] [chatter.services.workflow_execution] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.569001Z [info     ] Loaded 2 tools for universal template streaming [chatter.services.workflow_execution] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.569135Z [info     ] Using memory checkpointer      [chatter.core.langgraph] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.576153Z [info     ] Updated workflow execution 01K6M4PR7R3QH7VJ7QX5N85XF1 [chatter.services.workflow_management] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.576235Z [warning  ] Universal template streaming failed, falling back to dynamic creation: Edge references non-existent target node: END [chatter.services.workflow_execution] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.582554Z [info     ] Cleared all workflow caches    [chatter.core.workflow_performance] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.582645Z [debug    ] Invalidated workflow caches    [chatter.services.workflow_management] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V workflow_id=01K6M4PRE05CSBC22ZDAE2MHAZ
-2025-10-03T04:18:56.582698Z [info     ] Created workflow definition 01K6M4PRE05CSBC22ZDAE2MHAZ for user 01K6B5H7SX4Z260JCRC08RY39A [chatter.services.workflow_management] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.587467Z [info     ] Created workflow execution 01K6M4PRE6RQV017XF52HNSM5E for definition 01K6M4PRE05CSBC22ZDAE2MHAZ [chatter.services.workflow_management] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.593391Z [info     ] Updated workflow execution 01K6M4PRE6RQV017XF52HNSM5E [chatter.services.workflow_management] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.593527Z [debug    ] Reusing existing cache instance [chatter.core.cache_factory] cache_type=general correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.600189Z [info     ] Filtered 2 tools down to 2 allowed tools: ['get_time', 'calculator'] [chatter.services.workflow_execution] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.600274Z [info     ] Loaded 2 tools for streaming workflow execution [chatter.services.workflow_execution] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:18:56.600493Z [info     ] Creating workflow nodes        [chatter.core.workflow_graph_builder] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V has_retriever=False has_tools=True node_count=3
-The garbage collector is trying to clean up non-checked-in connection <AdaptedConnection <asyncpg.connection.Connection object at 0x789e6d3b8140>>, which will be terminated.  Please ensure that SQLAlchemy pooled connections are returned to the pool explicitly, either by calling ``close()`` or by using appropriate context managers to manage their lifecycle.
-/home/yam/.local/lib/python3.12/site-packages/pydantic/_internal/_config.py:94: SAWarning: The garbage collector is trying to clean up non-checked-in connection <AdaptedConnection <asyncpg.connection.Connection object at 0x789e6d3b8140>>, which will be terminated.  Please ensure that SQLAlchemy pooled connections are returned to the pool explicitly, either by calling ``close()`` or by using appropriate context managers to manage their lifecycle.
-  def __init__(self, config: ConfigDict | dict[str, Any] | type[Any] | None, *, check: bool = True):
-2025-10-03T04:18:56.607413Z [debug    ] Created modern workflow        [chatter.core.langgraph] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V edges=5 nodes=3 recursion_limit=40
-2025-10-03T04:18:56.612591Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-4aefd605-d031-4257-97be-f228c523ada7', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': 'what time is it', 'role': 'user'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
+Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-429a1e03-3d90-4a0e-93c9-d7287327e229', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': 'what is the date', 'role': 'user'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'date', 'description': 'Returns the current date/time ', 'parameters': {'properties': {}, 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'weather', 'description': 'A weather tool ', 'parameters': {'properties': {'city': {'type': 'string'}}, 'required': ['city'], 'type': 'object'}}}]}}
 Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
 connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x789e6c860e60>
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716adca0>
 send_request_headers.started request=<Request [b'POST']>
 send_request_headers.complete
 send_request_body.started request=<Request [b'POST']>
@@ -50,16 +12,116 @@ HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
 HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
 request_id: None
 receive_response_body.started request=<Request [b'POST']>
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={}, response_metadata={}, id='run--336a8b8c-c69f-437a-a424-7943db2e441e')}, 'run_id': '336a8b8c-c69f-437a-a424-7943db2e441e', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 5, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'df8e93cd-e7a8-4b0d-a6cc-a39b39d80719']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={'tool_calls': [{'index': 0, 'id': 'ZOvHjZWIbRO0QPJBjhK1WN16rpsWOWWu', 'function': {'arguments': '{', 'name': 'date'}, 'type': 'function'}]}, response_metadata={}, id='run--336a8b8c-c69f-437a-a424-7943db2e441e', tool_calls=[{'name': 'date', 'args': {}, 'id': 'ZOvHjZWIbRO0QPJBjhK1WN16rpsWOWWu', 'type': 'tool_call'}], tool_call_chunks=[{'name': 'date', 'args': '{', 'id': 'ZOvHjZWIbRO0QPJBjhK1WN16rpsWOWWu', 'index': 0, 'type': 'tool_call_chunk'}])}, 'run_id': '336a8b8c-c69f-437a-a424-7943db2e441e', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 5, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'df8e93cd-e7a8-4b0d-a6cc-a39b39d80719']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={'tool_calls': [{'index': 0, 'id': None, 'function': {'arguments': '}', 'name': None}, 'type': None}]}, response_metadata={}, id='run--336a8b8c-c69f-437a-a424-7943db2e441e', invalid_tool_calls=[{'name': None, 'args': '}', 'id': None, 'error': None, 'type': 'invalid_tool_call'}], tool_call_chunks=[{'name': None, 'args': '}', 'id': None, 'index': 0, 'type': 'tool_call_chunk'}])}, 'run_id': '336a8b8c-c69f-437a-a424-7943db2e441e', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 5, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'df8e93cd-e7a8-4b0d-a6cc-a39b39d80719']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={}, response_metadata={'finish_reason': 'tool_calls', 'model_name': 'gpt-4', 'system_fingerprint': 'b5833-a0374a67'}, id='run--336a8b8c-c69f-437a-a424-7943db2e441e', usage_metadata={'input_tokens': 232, 'output_tokens': 12, 'total_tokens': 244, 'input_token_details': {}, 'output_token_details': {}})}, 'run_id': '336a8b8c-c69f-437a-a424-7943db2e441e', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 5, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'df8e93cd-e7a8-4b0d-a6cc-a39b39d80719']}
 receive_response_body.complete
 response_closed.started
 response_closed.complete
 close.started
 close.complete
-2025-10-03T04:18:57.969158Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-ba70a102-28b6-40d7-b8c8-1e39e560c8a7', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-02T23:18:57.967927', 'role': 'tool', 'tool_call_id': '3VZFgZWmXXsxi3eGT6JWurk6lRc1mEu5'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
+Connecting to StreamableHTTP endpoint: http://0.0.0.0:9000/mcp
+Sending client message: root=JSONRPCRequest(method='initialize', params={'protocolVersion': '2025-06-18', 'capabilities': {}, 'clientInfo': {'name': 'mcp', 'version': '0.1.0'}}, jsonrpc='2.0', id=0)
+connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716ae240>
+send_request_headers.started request=<Request [b'POST']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'POST']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'POST']>
+receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:57 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'1b9c9f39d1b3445b89d1c5dc9722246c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
+HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
+Received session ID: 1b9c9f39d1b3445b89d1c5dc9722246c
+receive_response_body.started request=<Request [b'POST']>
+SSE message: root=JSONRPCResponse(jsonrpc='2.0', id=0, result={'protocolVersion': '2025-06-18', 'capabilities': {'experimental': {}, 'prompts': {'listChanged': True}, 'resources': {'subscribe': False, 'listChanged': True}, 'tools': {'listChanged': True}}, 'serverInfo': {'name': 'mcp', 'version': '1.13.0'}})
+Negotiated protocol version: 2025-06-18
+response_closed.started
+response_closed.complete
+Sending client message: root=JSONRPCNotification(method='notifications/initialized', params=None, jsonrpc='2.0')
+connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
+connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
+receive_response_body.failed exception=GeneratorExit()
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716afdd0>
+send_request_headers.started request=<Request [b'POST']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'POST']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'POST']>
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716ae930>
+send_request_headers.started request=<Request [b'GET']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'GET']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'GET']>
+receive_response_headers.complete return_value=(b'HTTP/1.1', 202, b'Accepted', [(b'date', b'Fri, 03 Oct 2025 14:28:57 GMT'), (b'server', b'uvicorn'), (b'content-type', b'application/json'), (b'mcp-session-id', b'1b9c9f39d1b3445b89d1c5dc9722246c'), (b'content-length', b'0')])
+HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 202 Accepted"
+Received 202 Accepted
+response_closed.started
+receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:57 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'1b9c9f39d1b3445b89d1c5dc9722246c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
+HTTP Request: GET http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
+GET SSE connection established
+receive_response_body.started request=<Request [b'GET']>
+response_closed.complete
+Sending client message: root=JSONRPCRequest(method='tools/call', params={'name': 'date', 'arguments': {}}, jsonrpc='2.0', id=1)
+connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716e5610>
+send_request_headers.started request=<Request [b'POST']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'POST']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'POST']>
+receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:57 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'1b9c9f39d1b3445b89d1c5dc9722246c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
+HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
+receive_response_body.started request=<Request [b'POST']>
+SSE message: root=JSONRPCResponse(jsonrpc='2.0', id=1, result={'content': [{'type': 'text', 'text': '2025-10-03 14:28:57'}], 'structuredContent': {'result': '2025-10-03 14:28:57'}, 'isError': False})
+response_closed.started
+response_closed.complete
+Sending client message: root=JSONRPCRequest(method='tools/list', params=None, jsonrpc='2.0', id=2)
+connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
+receive_response_body.failed exception=GeneratorExit()
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716e67e0>
+send_request_headers.started request=<Request [b'POST']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'POST']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'POST']>
+receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:57 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'1b9c9f39d1b3445b89d1c5dc9722246c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
+HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
+receive_response_body.started request=<Request [b'POST']>
+SSE message: root=JSONRPCResponse(jsonrpc='2.0', id=2, result={'tools': [{'name': 'date', 'description': 'Returns the current date/time ', 'inputSchema': {'properties': {}, 'type': 'object'}, 'outputSchema': {'properties': {'result': {'title': 'Result', 'type': 'string'}}, 'required': ['result'], 'title': '_WrappedResult', 'type': 'object', 'x-fastmcp-wrap-result': True}, '_meta': {'_fastmcp': {'tags': []}}}, {'name': 'weather', 'description': 'A weather tool ', 'inputSchema': {'properties': {'city': {'title': 'City', 'type': 'string'}}, 'required': ['city'], 'type': 'object'}, 'outputSchema': {'properties': {'result': {'title': 'Result', 'type': 'string'}}, 'required': ['result'], 'title': '_WrappedResult', 'type': 'object', 'x-fastmcp-wrap-result': True}, '_meta': {'_fastmcp': {'tags': []}}}]})
+response_closed.started
+response_closed.complete
+connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
+receive_response_body.failed exception=GeneratorExit()
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346720eb650>
+send_request_headers.started request=<Request [b'DELETE']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'DELETE']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'DELETE']>
+receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:57 GMT'), (b'server', b'uvicorn'), (b'content-type', b'application/json'), (b'mcp-session-id', b'1b9c9f39d1b3445b89d1c5dc9722246c'), (b'content-length', b'0')])
+HTTP Request: DELETE http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
+receive_response_body.started request=<Request [b'DELETE']>
+receive_response_body.complete
+response_closed.started
+response_closed.complete
+close.started
+receive_response_body.complete
+response_closed.started
+close.complete
+close.started
+response_closed.complete
+close.complete
+2025-10-03T14:28:57.717682Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6N7KM000TKNGHX16RWN260N has_retrieval_context=False retrieval_context_length=0
+Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-19bdd703-9c45-492e-858a-7a8de1c54c63', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-03 14:28:57', 'role': 'tool', 'tool_call_id': 'ZOvHjZWIbRO0QPJBjhK1WN16rpsWOWWu'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'date', 'description': 'Returns the current date/time ', 'parameters': {'properties': {}, 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'weather', 'description': 'A weather tool ', 'parameters': {'properties': {'city': {'type': 'string'}}, 'required': ['city'], 'type': 'object'}}}]}}
 Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
 connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x789e6c861b50>
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716ec6e0>
 send_request_headers.started request=<Request [b'POST']>
 send_request_headers.complete
 send_request_body.started request=<Request [b'POST']>
@@ -70,16 +132,116 @@ HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
 HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
 request_id: None
 receive_response_body.started request=<Request [b'POST']>
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={}, response_metadata={}, id='run--fde2831c-2d0a-4b41-9f99-6855ed33a650')}, 'run_id': 'fde2831c-2d0a-4b41-9f99-6855ed33a650', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 9, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'f975d5f0-d579-4260-82fa-22e35b108e35']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={'tool_calls': [{'index': 0, 'id': 'fMmo1NkNmmA4xGyS2jJHICH6oc29ca5j', 'function': {'arguments': '{', 'name': 'date'}, 'type': 'function'}]}, response_metadata={}, id='run--fde2831c-2d0a-4b41-9f99-6855ed33a650', tool_calls=[{'name': 'date', 'args': {}, 'id': 'fMmo1NkNmmA4xGyS2jJHICH6oc29ca5j', 'type': 'tool_call'}], tool_call_chunks=[{'name': 'date', 'args': '{', 'id': 'fMmo1NkNmmA4xGyS2jJHICH6oc29ca5j', 'index': 0, 'type': 'tool_call_chunk'}])}, 'run_id': 'fde2831c-2d0a-4b41-9f99-6855ed33a650', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 9, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'f975d5f0-d579-4260-82fa-22e35b108e35']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={'tool_calls': [{'index': 0, 'id': None, 'function': {'arguments': '}', 'name': None}, 'type': None}]}, response_metadata={}, id='run--fde2831c-2d0a-4b41-9f99-6855ed33a650', invalid_tool_calls=[{'name': None, 'args': '}', 'id': None, 'error': None, 'type': 'invalid_tool_call'}], tool_call_chunks=[{'name': None, 'args': '}', 'id': None, 'index': 0, 'type': 'tool_call_chunk'}])}, 'run_id': 'fde2831c-2d0a-4b41-9f99-6855ed33a650', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 9, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'f975d5f0-d579-4260-82fa-22e35b108e35']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={}, response_metadata={'finish_reason': 'tool_calls', 'model_name': 'gpt-4', 'system_fingerprint': 'b5833-a0374a67'}, id='run--fde2831c-2d0a-4b41-9f99-6855ed33a650', usage_metadata={'input_tokens': 243, 'output_tokens': 19, 'total_tokens': 262, 'input_token_details': {}, 'output_token_details': {}})}, 'run_id': 'fde2831c-2d0a-4b41-9f99-6855ed33a650', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 9, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'f975d5f0-d579-4260-82fa-22e35b108e35']}
 receive_response_body.complete
 response_closed.started
 response_closed.complete
 close.started
 close.complete
-2025-10-03T04:18:59.608594Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-d49fbf6b-0dd9-49a6-851a-546fb9ba096a', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-02T23:18:59.607137', 'role': 'tool', 'tool_call_id': 'yIgYsMlb875PyFifEl31L2qwNZj3mkjq'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
+Connecting to StreamableHTTP endpoint: http://0.0.0.0:9000/mcp
+Sending client message: root=JSONRPCRequest(method='initialize', params={'protocolVersion': '2025-06-18', 'capabilities': {}, 'clientInfo': {'name': 'mcp', 'version': '0.1.0'}}, jsonrpc='2.0', id=0)
+connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716aeae0>
+send_request_headers.started request=<Request [b'POST']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'POST']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'POST']>
+receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:59 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'24f2485c0b1c4b3697bb1a2f53369c8c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
+HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
+Received session ID: 24f2485c0b1c4b3697bb1a2f53369c8c
+receive_response_body.started request=<Request [b'POST']>
+SSE message: root=JSONRPCResponse(jsonrpc='2.0', id=0, result={'protocolVersion': '2025-06-18', 'capabilities': {'experimental': {}, 'prompts': {'listChanged': True}, 'resources': {'subscribe': False, 'listChanged': True}, 'tools': {'listChanged': True}}, 'serverInfo': {'name': 'mcp', 'version': '1.13.0'}})
+Negotiated protocol version: 2025-06-18
+response_closed.started
+response_closed.complete
+Sending client message: root=JSONRPCNotification(method='notifications/initialized', params=None, jsonrpc='2.0')
+connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
+connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
+receive_response_body.failed exception=GeneratorExit()
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716e63c0>
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716aeea0>
+send_request_headers.started request=<Request [b'POST']>
+send_request_headers.started request=<Request [b'GET']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'POST']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'GET']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'GET']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'POST']>
+receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:59 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'24f2485c0b1c4b3697bb1a2f53369c8c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
+HTTP Request: GET http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
+GET SSE connection established
+receive_response_body.started request=<Request [b'GET']>
+receive_response_headers.complete return_value=(b'HTTP/1.1', 202, b'Accepted', [(b'date', b'Fri, 03 Oct 2025 14:28:59 GMT'), (b'server', b'uvicorn'), (b'content-type', b'application/json'), (b'mcp-session-id', b'24f2485c0b1c4b3697bb1a2f53369c8c'), (b'content-length', b'0')])
+HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 202 Accepted"
+Received 202 Accepted
+response_closed.started
+response_closed.complete
+Sending client message: root=JSONRPCRequest(method='tools/call', params={'name': 'date', 'arguments': {}}, jsonrpc='2.0', id=1)
+connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716e4320>
+send_request_headers.started request=<Request [b'POST']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'POST']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'POST']>
+receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:59 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'24f2485c0b1c4b3697bb1a2f53369c8c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
+HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
+receive_response_body.started request=<Request [b'POST']>
+SSE message: root=JSONRPCResponse(jsonrpc='2.0', id=1, result={'content': [{'type': 'text', 'text': '2025-10-03 14:28:59'}], 'structuredContent': {'result': '2025-10-03 14:28:59'}, 'isError': False})
+response_closed.started
+response_closed.complete
+Sending client message: root=JSONRPCRequest(method='tools/list', params=None, jsonrpc='2.0', id=2)
+connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
+receive_response_body.failed exception=GeneratorExit()
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716edb80>
+send_request_headers.started request=<Request [b'POST']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'POST']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'POST']>
+receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:59 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'24f2485c0b1c4b3697bb1a2f53369c8c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
+HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
+receive_response_body.started request=<Request [b'POST']>
+SSE message: root=JSONRPCResponse(jsonrpc='2.0', id=2, result={'tools': [{'name': 'date', 'description': 'Returns the current date/time ', 'inputSchema': {'properties': {}, 'type': 'object'}, 'outputSchema': {'properties': {'result': {'title': 'Result', 'type': 'string'}}, 'required': ['result'], 'title': '_WrappedResult', 'type': 'object', 'x-fastmcp-wrap-result': True}, '_meta': {'_fastmcp': {'tags': []}}}, {'name': 'weather', 'description': 'A weather tool ', 'inputSchema': {'properties': {'city': {'title': 'City', 'type': 'string'}}, 'required': ['city'], 'type': 'object'}, 'outputSchema': {'properties': {'result': {'title': 'Result', 'type': 'string'}}, 'required': ['result'], 'title': '_WrappedResult', 'type': 'object', 'x-fastmcp-wrap-result': True}, '_meta': {'_fastmcp': {'tags': []}}}]})
+response_closed.started
+response_closed.complete
+connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
+receive_response_body.failed exception=GeneratorExit()
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346720e9160>
+send_request_headers.started request=<Request [b'DELETE']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'DELETE']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'DELETE']>
+receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:59 GMT'), (b'server', b'uvicorn'), (b'content-type', b'application/json'), (b'mcp-session-id', b'24f2485c0b1c4b3697bb1a2f53369c8c'), (b'content-length', b'0')])
+HTTP Request: DELETE http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
+receive_response_body.started request=<Request [b'DELETE']>
+receive_response_body.complete
+response_closed.started
+response_closed.complete
+close.started
+receive_response_body.complete
+response_closed.started
+close.complete
+close.started
+response_closed.complete
+close.complete
+2025-10-03T14:28:59.926998Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6N7KM000TKNGHX16RWN260N has_retrieval_context=False retrieval_context_length=0
+Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-21876321-0236-4c52-befe-c0679520f94a', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-03 14:28:59', 'role': 'tool', 'tool_call_id': 'fMmo1NkNmmA4xGyS2jJHICH6oc29ca5j'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'date', 'description': 'Returns the current date/time ', 'parameters': {'properties': {}, 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'weather', 'description': 'A weather tool ', 'parameters': {'properties': {'city': {'type': 'string'}}, 'required': ['city'], 'type': 'object'}}}]}}
 Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
 connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x789e6c862660>
+connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716efe00>
 send_request_headers.started request=<Request [b'POST']>
 send_request_headers.complete
 send_request_body.started request=<Request [b'POST']>
@@ -90,173 +252,35 @@ HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
 HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
 request_id: None
 receive_response_body.started request=<Request [b'POST']>
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='{"type": "function", "function', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
+2025-10-03T14:29:00.904595Z [debug    ] HTTP Response                  [chatter.main] correlation_id=01K6N7KM000TKNGHX16RWN260N duration=7.017157316207886 duration_ms=7017.157316207886 headers={'cache-control': 'no-cache', 'connection': 'keep-alive', 'content-type': 'text/event-stream; charset=utf-8', 'x-content-type-options': 'nosniff', 'x-frame-options': 'DENY', 'x-xss-protection': '1; mode=block', 'strict-transport-security': 'max-age=31536000; includeSubDomains', 'referrer-policy': 'strict-origin-when-cross-origin', 'x-correlation-id': '01K6N7KM000TKNGHX16RWN260N', 'x-ratelimit-limit': '100', 'x-ratelimit-remaining': '99', 'x-ratelimit-reset': '1759501793', 'x-ratelimit-window': '60'} status_code=200
+2025-10-03T14:29:00.904999Z [debug    ] Recorded request metrics       [chatter.core.monitoring] method=POST path=/api/v1/workflows/execute/chat/streaming response_time_ms=7017.157316207886
+INFO:     127.0.0.1:49748 - "POST /api/v1/workflows/execute/chat/streaming HTTP/1.1" 200 OK
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='":', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content=' "', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='date', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='",', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content=' "', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='parameters', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='":', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content=' {}}', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
+universal ================================================================
+{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={}, response_metadata={'finish_reason': 'stop', 'model_name': 'gpt-4', 'system_fingerprint': 'b5833-a0374a67'}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710', usage_metadata={'input_tokens': 243, 'output_tokens': 19, 'total_tokens': 262, 'input_token_details': {}, 'output_token_details': {}})}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
 receive_response_body.complete
 response_closed.started
 response_closed.complete
 close.started
 close.complete
-2025-10-03T04:19:01.142623Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-1c012e0e-65eb-4f8e-b8bd-ad229aa562b0', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-02T23:19:01.140938', 'role': 'tool', 'tool_call_id': '5kXa0Gb1ampC4Fzdd9zcg7cvyjXSEeFK'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
-connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x789e6c862270>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'text/event-stream'), (b'Server', b'llama.cpp'), (b'Transfer-Encoding', b'chunked'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
-HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
-request_id: None
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-close.complete
-2025-10-03T04:19:02.591287Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-c48706a4-b24f-4a54-bb05-6a24c6ce4652', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-02T23:19:02.589773', 'role': 'tool', 'tool_call_id': 'iIXdlFK4Y2qWzYvrpBx1xYpVfjWwpTKi'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
-connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x789e6c6a04a0>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'text/event-stream'), (b'Server', b'llama.cpp'), (b'Transfer-Encoding', b'chunked'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
-HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
-request_id: None
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-close.complete
-2025-10-03T04:19:04.079110Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-e51c5adb-b4dd-43ed-a77e-8f83cc313fc5', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-02T23:19:04.077040', 'role': 'tool', 'tool_call_id': 'dUI1kORWd49gCdHVhHmQmPTHSiMBMUXl'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
-connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x789e6c862e70>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'text/event-stream'), (b'Server', b'llama.cpp'), (b'Transfer-Encoding', b'chunked'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
-HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
-request_id: None
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-close.complete
-2025-10-03T04:19:05.596891Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-73efc7b8-9787-40d3-b45f-ef4b665f2db7', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-02T23:19:05.595187', 'role': 'tool', 'tool_call_id': '2xYUNVHTkhcV7BB42U9qLfAfRLAXMAj8'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
-connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x789e6c6a1e20>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'text/event-stream'), (b'Server', b'llama.cpp'), (b'Transfer-Encoding', b'chunked'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
-HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
-request_id: None
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-close.complete
-2025-10-03T04:19:07.000368Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-d39e1494-567f-4285-ba27-912d229b18a9', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-02T23:19:06.998686', 'role': 'tool', 'tool_call_id': 'B3P6N84I1NCQ68Tcr03NLubJH8gFreBu'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
-connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x789e6d1da8d0>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'text/event-stream'), (b'Server', b'llama.cpp'), (b'Transfer-Encoding', b'chunked'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
-HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
-request_id: None
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-close.complete
-2025-10-03T04:19:09.864565Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-a11f938d-0aad-45a4-b0f8-6a46dae16f5a', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-02T23:19:09.863059', 'role': 'tool', 'tool_call_id': 'IRpub46uk2BcfP1H5uCKPOcK7FWUSCqj'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
-connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x789e6c6a2b70>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'text/event-stream'), (b'Server', b'llama.cpp'), (b'Transfer-Encoding', b'chunked'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
-HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
-request_id: None
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-close.complete
-2025-10-03T04:19:12.155045Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-54f4e55b-1f44-4e90-8587-495f3e048dcc', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-02T23:19:12.153289', 'role': 'tool', 'tool_call_id': 'aQ6FKh6HbSAMRQdypdWfxk9Cmksv8YoK'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
-connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x789e6c6c4320>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'text/event-stream'), (b'Server', b'llama.cpp'), (b'Transfer-Encoding', b'chunked'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
-HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
-request_id: None
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-close.complete
-2025-10-03T04:19:13.650493Z [info     ] LLM Node finalize_response applying context [chatter.core.workflow_graph_builder] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-50478c03-588e-4285-9a9e-1fc43d305124', 'json_data': {'messages': [{'content': 'Provide a final response based on the tool results.', 'role': 'system'}, {'content': '2025-10-02T23:19:13.649230', 'role': 'tool', 'tool_call_id': 'Ph8iXIOFtjqAUTaN2pwN9b2SUxsHkjnw'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
-connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x789e6c8061b0>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'text/event-stream'), (b'Server', b'llama.cpp'), (b'Transfer-Encoding', b'chunked'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
-HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
-request_id: None
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-close.complete
-2025-10-03T04:19:15.441895Z [debug    ] HTTP Response                  [chatter.main] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V duration=19.11158061027527 duration_ms=19111.58061027527 headers={'cache-control': 'no-cache', 'connection': 'keep-alive', 'content-type': 'text/event-stream; charset=utf-8', 'x-content-type-options': 'nosniff', 'x-frame-options': 'DENY', 'x-xss-protection': '1; mode=block', 'strict-transport-security': 'max-age=31536000; includeSubDomains', 'referrer-policy': 'strict-origin-when-cross-origin', 'x-correlation-id': '01K6M4PR6B1YRKD9RS0HJ3CZ1V', 'x-ratelimit-limit': '100', 'x-ratelimit-remaining': '99', 'x-ratelimit-reset': '1759465196', 'x-ratelimit-window': '60'} status_code=200
-2025-10-03T04:19:15.442139Z [debug    ] Recorded request metrics       [chatter.core.monitoring] method=POST path=/api/v1/workflows/execute/chat/streaming response_time_ms=19111.58061027527
-INFO:     127.0.0.1:55619 - "POST /api/v1/workflows/execute/chat/streaming HTTP/1.1" 200 OK
-2025-10-03T04:19:15.451824Z [info     ] Updated workflow execution 01K6M4PRE6RQV017XF52HNSM5E [chatter.services.workflow_management] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
-2025-10-03T04:19:15.451972Z [info     ] Dynamic workflow streaming execution 01K6M4PRE6RQV017XF52HNSM5E completed successfully [chatter.services.workflow_execution] correlation_id=01K6M4PR6B1YRKD9RS0HJ3CZ1V
+2025-10-03T14:29:02.018808Z [info     ] Updated workflow execution 01K6N7KM16NFY25E5JWYHQQKG2 [chatter.services.workflow_management] correlation_id=01K6N7KM000TKNGHX16RWN260N
+2025-10-03T14:29:02.018947Z [info     ] Universal template streaming execution 01K6N7KM16NFY25E5JWYHQQKG2 completed successfully [chatter.services.workflow_execution] correlation_id=01K6N7KM000TKNGHX16RWN260N

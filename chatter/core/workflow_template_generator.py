@@ -418,7 +418,7 @@ class WorkflowTemplateGenerator:
             {
                 "id": "conditional_tools-end",
                 "source": "conditional_tools",
-                "target": "END",
+                "target": "end",
                 "type": "conditional",
                 "condition": "variable enable_tools equals false OR no_tool_calls",
             },
@@ -446,7 +446,7 @@ class WorkflowTemplateGenerator:
             {
                 "id": "finalize_response-end",
                 "source": "finalize_response",
-                "target": "END",
+                "target": "end",
                 "type": "default",
             },
         ]
@@ -633,7 +633,7 @@ class WorkflowTemplateGenerator:
             {
                 "id": "llm-end",
                 "source": "llm",
-                "target": "END",
+                "target": "end",
                 "type": "default",
                 "data": {},
             }

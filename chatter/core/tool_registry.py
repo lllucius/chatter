@@ -116,6 +116,9 @@ class ToolRegistry:
         to ensure only enabled tools are returned. It also includes MCP tools
         from enabled MCP servers.
         
+        Tools that are not in the database are treated as enabled by default.
+        Only tools explicitly marked as DISABLED in the database are filtered out.
+        
         Args:
             workspace_id: Workspace ID
             user_permissions: User permissions for filtering
@@ -137,18 +140,20 @@ class ToolRegistry:
             # (backward compatible behavior)
             return registry_tools
         
-        # Get enabled tools from database
+        # Get all tools from database (not just enabled)
         result = await session.execute(
-            select(ServerTool).where(
-                ServerTool.status == ToolStatus.ENABLED
-            )
+            select(ServerTool)
         )
-        enabled_tool_names = {tool.name for tool in result.scalars().all()}
+        all_db_tools = {tool.name: tool for tool in result.scalars().all()}
         
-        # Filter registry tools to only include enabled ones
+        # Filter out only explicitly disabled tools
+        # Tools not in the database are treated as enabled by default
         enabled_tools = [
             tool for tool in registry_tools
-            if self._get_tool_name(tool) in enabled_tool_names
+            if (
+                self._get_tool_name(tool) not in all_db_tools
+                or all_db_tools[self._get_tool_name(tool)].status == ToolStatus.ENABLED
+            )
         ]
         
         # Also get MCP tools from enabled MCP servers

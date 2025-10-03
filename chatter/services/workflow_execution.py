@@ -174,6 +174,59 @@ class WorkflowExecutionService:
         self.memory_manager = EnhancedMemoryManager()
         self.tool_executor = EnhancedToolExecutor()
 
+    def _extract_workflow_config_settings(
+        self, chat_request: ChatRequest
+    ) -> dict[str, Any]:
+        """Extract and merge workflow configuration settings from ChatRequest.
+        
+        This method extracts settings from workflow_config if present and merges them
+        with top-level request settings. The workflow_config settings take precedence.
+        
+        Args:
+            chat_request: The chat request containing potential workflow_config
+            
+        Returns:
+            Dictionary with extracted settings including:
+            - enable_tools: Whether tools are enabled
+            - allowed_tools: List of allowed tool names (if specified)
+            - enable_retrieval: Whether retrieval is enabled
+            - enable_memory: Whether memory is enabled
+            - tool_config: Full tool configuration if present
+        """
+        settings = {
+            'enable_tools': chat_request.enable_tools,
+            'enable_retrieval': chat_request.enable_retrieval,
+            'enable_memory': chat_request.enable_memory,
+            'allowed_tools': None,
+            'tool_config': None,
+        }
+        
+        # Extract from workflow_config if present
+        if chat_request.workflow_config:
+            wf_config = chat_request.workflow_config
+            
+            # Extract tool configuration
+            if 'tool_config' in wf_config:
+                tool_config = wf_config['tool_config']
+                settings['tool_config'] = tool_config
+                
+                # tool_config.enabled takes precedence over top-level enable_tools
+                if 'enabled' in tool_config:
+                    settings['enable_tools'] = tool_config['enabled']
+                
+                # Extract allowed_tools list
+                if 'allowed_tools' in tool_config:
+                    settings['allowed_tools'] = tool_config['allowed_tools']
+            
+            # Extract other configuration settings
+            if 'enable_retrieval' in wf_config:
+                settings['enable_retrieval'] = wf_config['enable_retrieval']
+            
+            if 'enable_memory' in wf_config:
+                settings['enable_memory'] = wf_config['enable_memory']
+        
+        return settings
+
     async def execute_chat_workflow(
         self,
         user_id: str,
@@ -378,8 +431,11 @@ class WorkflowExecutionService:
             # Get tools and retriever if needed
             tools = None
             retriever = None
+            
+            # Extract workflow configuration settings
+            wf_settings = self._extract_workflow_config_settings(chat_request)
 
-            if chat_request.enable_tools:
+            if wf_settings['enable_tools']:
                 try:
                     from chatter.core.tool_registry import ToolRegistry
 
@@ -392,6 +448,20 @@ class WorkflowExecutionService:
                         user_permissions=[],
                         session=self.session,
                     )
+                    
+                    # Filter tools by allowed_tools if specified
+                    if wf_settings['allowed_tools']:
+                        allowed_tools_set = set(wf_settings['allowed_tools'])
+                        filtered_tools = [
+                            tool for tool in tools
+                            if tool_registry._get_tool_name(tool) in allowed_tools_set
+                        ]
+                        logger.info(
+                            f"Filtered {len(tools)} tools down to {len(filtered_tools)} "
+                            f"allowed tools: {wf_settings['allowed_tools']}"
+                        )
+                        tools = filtered_tools
+                    
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for universal template execution"
                     )
@@ -759,8 +829,11 @@ class WorkflowExecutionService:
             # Get tools and retriever if needed
             tools = None
             retriever = None
+            
+            # Extract workflow configuration settings
+            wf_settings = self._extract_workflow_config_settings(chat_request)
 
-            if chat_request.enable_tools:
+            if wf_settings['enable_tools']:
                 try:
                     from chatter.core.tool_registry import ToolRegistry
 
@@ -773,6 +846,20 @@ class WorkflowExecutionService:
                         user_permissions=[],
                         session=self.session,
                     )
+                    
+                    # Filter tools by allowed_tools if specified
+                    if wf_settings['allowed_tools']:
+                        allowed_tools_set = set(wf_settings['allowed_tools'])
+                        filtered_tools = [
+                            tool for tool in tools
+                            if tool_registry._get_tool_name(tool) in allowed_tools_set
+                        ]
+                        logger.info(
+                            f"Filtered {len(tools)} tools down to {len(filtered_tools)} "
+                            f"allowed tools: {wf_settings['allowed_tools']}"
+                        )
+                        tools = filtered_tools
+                    
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for workflow execution"
                     )
@@ -1166,8 +1253,11 @@ class WorkflowExecutionService:
             # Get tools and retriever if needed
             tools = None
             retriever = None
+            
+            # Extract workflow configuration settings
+            wf_settings = self._extract_workflow_config_settings(chat_request)
 
-            if chat_request.enable_tools:
+            if wf_settings['enable_tools']:
                 try:
                     from chatter.core.tool_registry import ToolRegistry
 
@@ -1180,6 +1270,20 @@ class WorkflowExecutionService:
                         user_permissions=[],
                         session=self.session,
                     )
+                    
+                    # Filter tools by allowed_tools if specified
+                    if wf_settings['allowed_tools']:
+                        allowed_tools_set = set(wf_settings['allowed_tools'])
+                        filtered_tools = [
+                            tool for tool in tools
+                            if tool_registry._get_tool_name(tool) in allowed_tools_set
+                        ]
+                        logger.info(
+                            f"Filtered {len(tools)} tools down to {len(filtered_tools)} "
+                            f"allowed tools: {wf_settings['allowed_tools']}"
+                        )
+                        tools = filtered_tools
+                    
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for universal template streaming"
                     )
@@ -1559,8 +1663,11 @@ class WorkflowExecutionService:
             # Get tools and retriever if needed
             tools = None
             retriever = None
+            
+            # Extract workflow configuration settings
+            wf_settings = self._extract_workflow_config_settings(chat_request)
 
-            if chat_request.enable_tools:
+            if wf_settings['enable_tools']:
                 try:
                     from chatter.core.tool_registry import ToolRegistry
 
@@ -1573,6 +1680,20 @@ class WorkflowExecutionService:
                         user_permissions=[],
                         session=self.session,
                     )
+                    
+                    # Filter tools by allowed_tools if specified
+                    if wf_settings['allowed_tools']:
+                        allowed_tools_set = set(wf_settings['allowed_tools'])
+                        filtered_tools = [
+                            tool for tool in tools
+                            if tool_registry._get_tool_name(tool) in allowed_tools_set
+                        ]
+                        logger.info(
+                            f"Filtered {len(tools)} tools down to {len(filtered_tools)} "
+                            f"allowed tools: {wf_settings['allowed_tools']}"
+                        )
+                        tools = filtered_tools
+                    
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for streaming workflow execution"
                     )

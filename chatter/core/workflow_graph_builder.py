@@ -435,7 +435,11 @@ class WorkflowGraphBuilder:
                 logger.info(
                     f"LLM Node {self.node_id} applying context",
                     has_retrieval_context=bool(retrieval_context),
-                    retrieval_context_length=len(retrieval_context) if retrieval_context else 0,
+                    retrieval_context_length=(
+                        len(retrieval_context)
+                        if retrieval_context
+                        else 0
+                    ),
                 )
                 if retrieval_context:
                     system_content += (

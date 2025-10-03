@@ -1411,24 +1411,40 @@ class WorkflowExecutionService:
                         data = update.get("data", {})
                         chunk = data.get("chunk", {})
 
-                        # Get content from the chunk
-                        if hasattr(chunk, "content"):
-                            content = chunk.content
+                        # Check if this chunk contains tool calls - if so, skip streaming content
+                        # Tool calls will be handled by the workflow and we only want to stream
+                        # the final response after tools execute
+                        has_tool_calls = False
+                        if hasattr(chunk, "tool_calls") and chunk.tool_calls:
+                            has_tool_calls = True
+                        elif hasattr(chunk, "tool_call_chunks") and chunk.tool_call_chunks:
+                            has_tool_calls = True
+                        elif hasattr(chunk, "invalid_tool_calls") and chunk.invalid_tool_calls:
+                            has_tool_calls = True
                         elif isinstance(chunk, dict):
-                            content = chunk.get("content", "")
-                        else:
-                            content = str(chunk) if chunk else ""
+                            if chunk.get("tool_calls") or chunk.get("tool_call_chunks") or chunk.get("invalid_tool_calls"):
+                                has_tool_calls = True
 
-                        if content:
-                            content_buffer += content
-                            yield StreamingChatChunk(
-                                type="token",
-                                content=content,
-                                metadata={
-                                    "universal_template": True,
-                                    "event": event_name,
-                                },
-                            )
+                        # Only stream content if there are no tool calls
+                        if not has_tool_calls:
+                            # Get content from the chunk
+                            if hasattr(chunk, "content"):
+                                content = chunk.content
+                            elif isinstance(chunk, dict):
+                                content = chunk.get("content", "")
+                            else:
+                                content = str(chunk) if chunk else ""
+
+                            if content:
+                                content_buffer += content
+                                yield StreamingChatChunk(
+                                    type="token",
+                                    content=content,
+                                    metadata={
+                                        "universal_template": True,
+                                        "event": event_name,
+                                    },
+                                )
 
                     # Handle chat model end event
                     elif event_name == "on_chat_model_end":

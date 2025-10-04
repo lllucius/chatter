@@ -899,3 +899,248 @@ class WorkflowManagementService:
                 template, input_params
             )
         )
+
+    async def export_workflow_template(
+        self, template_id: str, owner_id: str
+    ) -> dict[str, Any] | None:
+        """Export a workflow template to JSON format.
+
+        Args:
+            template_id: Template ID to export
+            owner_id: Owner user ID
+
+        Returns:
+            Template data as dictionary, or None if not found
+        """
+        try:
+            template = await self.get_workflow_template(
+                template_id=template_id, owner_id=owner_id
+            )
+
+            if not template:
+                return None
+
+            # Export template with all metadata
+            export_data = {
+                "name": template.name,
+                "description": template.description,
+                "category": template.category.value,
+                "default_params": template.default_params,
+                "required_tools": template.required_tools,
+                "required_retrievers": template.required_retrievers,
+                "tags": template.tags,
+                "is_public": template.is_public,
+                "version": template.version,
+                "metadata": {
+                    "config_hash": template.config_hash,
+                    "estimated_complexity": template.estimated_complexity,
+                    "export_version": "1.0",
+                },
+            }
+
+            logger.info(
+                f"Exported workflow template {template_id}",
+                template_name=template.name,
+            )
+
+            return export_data
+
+        except Exception as e:
+            logger.error(
+                f"Failed to export workflow template {template_id}: {e}"
+            )
+            raise
+
+    async def import_workflow_template(
+        self,
+        template_data: dict[str, Any],
+        owner_id: str,
+        override_name: str | None = None,
+        merge_with_existing: bool = False,
+    ) -> WorkflowTemplate:
+        """Import a workflow template from JSON format.
+
+        Args:
+            template_data: Template data to import
+            owner_id: Owner user ID
+            override_name: Optional name override
+            merge_with_existing: Whether to merge with existing template
+
+        Returns:
+            Imported workflow template
+        """
+        try:
+            # Validate required fields
+            required_fields = ["name", "description", "category"]
+            missing_fields = [
+                field
+                for field in required_fields
+                if field not in template_data
+            ]
+            if missing_fields:
+                raise ValueError(
+                    f"Missing required fields: {', '.join(missing_fields)}"
+                )
+
+            # Use override name if provided
+            name = override_name or template_data["name"]
+
+            # Check if template with same name exists
+            if merge_with_existing:
+                stmt = select(WorkflowTemplate).where(
+                    and_(
+                        WorkflowTemplate.owner_id == owner_id,
+                        WorkflowTemplate.name == name,
+                    )
+                )
+                result = await self.session.execute(stmt)
+                existing_template = result.scalar_one_or_none()
+
+                if existing_template:
+                    # Update existing template
+                    existing_template.description = template_data[
+                        "description"
+                    ]
+                    existing_template.category = TemplateCategory(
+                        template_data["category"]
+                    )
+                    existing_template.default_params = template_data.get(
+                        "default_params", {}
+                    )
+                    existing_template.required_tools = template_data.get(
+                        "required_tools"
+                    )
+                    existing_template.required_retrievers = (
+                        template_data.get("required_retrievers")
+                    )
+                    existing_template.tags = template_data.get("tags")
+                    existing_template.is_public = template_data.get(
+                        "is_public", False
+                    )
+                    existing_template.version += 1
+
+                    await self.session.commit()
+                    await self.session.refresh(existing_template)
+
+                    logger.info(
+                        f"Updated existing workflow template {existing_template.id}",
+                        template_name=name,
+                    )
+
+                    return existing_template
+
+            # Create new template
+            template = WorkflowTemplate(
+                owner_id=owner_id,
+                name=name,
+                description=template_data["description"],
+                category=TemplateCategory(template_data["category"]),
+                default_params=template_data.get("default_params", {}),
+                required_tools=template_data.get("required_tools"),
+                required_retrievers=template_data.get("required_retrievers"),
+                tags=template_data.get("tags"),
+                is_public=template_data.get("is_public", False),
+                version=1,
+            )
+
+            self.session.add(template)
+            await self.session.commit()
+            await self.session.refresh(template)
+
+            logger.info(
+                f"Imported new workflow template {template.id}",
+                template_name=name,
+            )
+
+            return template
+
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Failed to import workflow template: {e}")
+            raise
+
+    async def validate_workflow_template(
+        self, template_data: dict[str, Any], owner_id: str
+    ) -> dict[str, Any]:
+        """Validate a workflow template.
+
+        Args:
+            template_data: Template data to validate
+            owner_id: Owner user ID
+
+        Returns:
+            Validation result dictionary
+        """
+        errors: list[str] = []
+        warnings: list[str] = []
+        template_info: dict[str, Any] = {}
+
+        try:
+            # Validate required fields
+            required_fields = ["name", "description", "category"]
+            for field in required_fields:
+                if field not in template_data:
+                    errors.append(f"Missing required field: {field}")
+                elif not template_data[field]:
+                    errors.append(f"Empty required field: {field}")
+
+            # Validate category
+            if "category" in template_data:
+                try:
+                    TemplateCategory(template_data["category"])
+                except ValueError:
+                    errors.append(
+                        f"Invalid category: {template_data['category']}"
+                    )
+
+            # Validate default_params if present
+            if "default_params" in template_data:
+                if not isinstance(template_data["default_params"], dict):
+                    errors.append(
+                        "default_params must be a dictionary"
+                    )
+
+            # Extract template info
+            if "name" in template_data:
+                template_info["name"] = template_data["name"]
+            if "description" in template_data:
+                template_info["description"] = template_data[
+                    "description"
+                ]
+            if "category" in template_data:
+                template_info["category"] = template_data["category"]
+            if "tags" in template_data:
+                template_info["tags"] = template_data["tags"]
+
+            # Check for duplicate name
+            if "name" in template_data:
+                stmt = select(WorkflowTemplate).where(
+                    and_(
+                        WorkflowTemplate.owner_id == owner_id,
+                        WorkflowTemplate.name == template_data["name"],
+                    )
+                )
+                result = await self.session.execute(stmt)
+                existing = result.scalar_one_or_none()
+                if existing:
+                    warnings.append(
+                        f"Template with name '{template_data['name']}' already exists"
+                    )
+
+            is_valid = len(errors) == 0
+
+            return {
+                "is_valid": is_valid,
+                "errors": errors,
+                "warnings": warnings,
+                "template_info": template_info if is_valid else None,
+            }
+
+        except Exception as e:
+            logger.error(f"Error during template validation: {e}")
+            return {
+                "is_valid": False,
+                "errors": [f"Validation error: {str(e)}"],
+                "warnings": warnings,
+                "template_info": None,
+            }

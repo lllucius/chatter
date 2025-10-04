@@ -27,9 +27,14 @@ from chatter.schemas.workflows import (
     WorkflowExecutionRequest,
     WorkflowExecutionResponse,
     WorkflowTemplateCreate,
+    WorkflowTemplateExecutionRequest,
+    WorkflowTemplateExportResponse,
+    WorkflowTemplateImportRequest,
     WorkflowTemplateResponse,
     WorkflowTemplatesResponse,
     WorkflowTemplateUpdate,
+    WorkflowTemplateValidationRequest,
+    WorkflowTemplateValidationResponse,
     WorkflowValidationResponse,
 )
 from chatter.services.simplified_workflow_analytics import (
@@ -399,6 +404,180 @@ async def delete_workflow_template(
         logger.error(f"Failed to delete workflow template: {e}")
         raise InternalServerProblem(
             detail=f"Failed to delete workflow template: {str(e)}"
+        ) from e
+
+
+@router.get(
+    "/templates/{template_id}/export",
+    response_model=WorkflowTemplateExportResponse,
+)
+async def export_workflow_template(
+    template_id: str,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+) -> WorkflowTemplateExportResponse:
+    """Export a workflow template."""
+    try:
+        template_data = await workflow_service.export_workflow_template(
+            template_id=template_id,
+            owner_id=current_user.id,
+        )
+        
+        if not template_data:
+            raise NotFoundProblem(detail="Workflow template not found")
+
+        from datetime import UTC, datetime
+        
+        return WorkflowTemplateExportResponse(
+            template=template_data,
+            export_format="json",
+            exported_at=datetime.now(UTC),
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to export workflow template: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to export workflow template: {str(e)}"
+        ) from e
+
+
+@router.post(
+    "/templates/import", response_model=WorkflowTemplateResponse
+)
+async def import_workflow_template(
+    import_request: WorkflowTemplateImportRequest,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+) -> WorkflowTemplateResponse:
+    """Import a workflow template."""
+    try:
+        template = await workflow_service.import_workflow_template(
+            template_data=import_request.template,
+            owner_id=current_user.id,
+            override_name=import_request.override_name,
+            merge_with_existing=import_request.merge_with_existing,
+        )
+        
+        return WorkflowTemplateResponse.model_validate(
+            template.to_dict()
+        )
+    except Exception as e:
+        logger.error(f"Failed to import workflow template: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to import workflow template: {str(e)}"
+        ) from e
+
+
+@router.get(
+    "/templates/{template_id}/load",
+    response_model=WorkflowTemplateResponse,
+)
+async def load_workflow_template(
+    template_id: str,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+) -> WorkflowTemplateResponse:
+    """Load a workflow template with full details."""
+    try:
+        template = await workflow_service.get_workflow_template(
+            template_id=template_id,
+            owner_id=current_user.id,
+        )
+        
+        if not template:
+            raise NotFoundProblem(detail="Workflow template not found")
+
+        return WorkflowTemplateResponse.model_validate(
+            template.to_dict()
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to load workflow template: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to load workflow template: {str(e)}"
+        ) from e
+
+
+@router.post(
+    "/templates/validate",
+    response_model=WorkflowTemplateValidationResponse,
+)
+async def validate_workflow_template(
+    validation_request: WorkflowTemplateValidationRequest,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+) -> WorkflowTemplateValidationResponse:
+    """Validate a workflow template."""
+    try:
+        validation_result = (
+            await workflow_service.validate_workflow_template(
+                template_data=validation_request.template,
+                owner_id=current_user.id,
+            )
+        )
+        
+        return WorkflowTemplateValidationResponse(**validation_result)
+    except Exception as e:
+        logger.error(f"Failed to validate workflow template: {e}")
+        return WorkflowTemplateValidationResponse(
+            is_valid=False,
+            errors=[f"Validation error: {str(e)}"],
+            warnings=[],
+            template_info=None,
+        )
+
+
+@router.post(
+    "/templates/{template_id}/execute",
+    response_model=WorkflowExecutionResponse,
+)
+async def execute_workflow_template(
+    template_id: str,
+    execution_request: WorkflowTemplateExecutionRequest,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+    execution_service: WorkflowExecutionService = Depends(
+        get_workflow_execution_service
+    ),
+) -> WorkflowExecutionResponse:
+    """Execute a workflow template directly."""
+    try:
+        # Create a temporary workflow definition from the template
+        definition = await workflow_service.create_workflow_definition_from_template(
+            template_id=template_id,
+            owner_id=current_user.id,
+            name_suffix="",
+            user_input=execution_request.input_data,
+            is_temporary=True,
+        )
+        
+        # Execute the workflow definition
+        result = await execution_service.execute_workflow_definition(
+            definition=definition,
+            input_data=execution_request.input_data,
+            user_id=current_user.id,
+            debug_mode=execution_request.debug_mode,
+        )
+        
+        return WorkflowExecutionResponse(**result)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to execute workflow template: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to execute workflow template: {str(e)}"
         ) from e
 
 

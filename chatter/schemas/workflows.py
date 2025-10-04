@@ -398,6 +398,69 @@ class WorkflowTemplatesResponse(BaseModel):
     )
 
 
+class WorkflowTemplateExportResponse(BaseModel):
+    """Schema for template export response."""
+
+    template: dict[str, Any] = Field(
+        ..., description="Complete template data including metadata"
+    )
+    export_format: str = Field(
+        default="json", description="Export format version"
+    )
+    exported_at: datetime = Field(
+        ..., description="Export timestamp"
+    )
+
+
+class WorkflowTemplateImportRequest(BaseModel):
+    """Schema for template import request."""
+
+    template: dict[str, Any] = Field(
+        ..., description="Template data to import"
+    )
+    override_name: str | None = Field(
+        None, description="Optional name override for imported template"
+    )
+    merge_with_existing: bool = Field(
+        default=False,
+        description="Whether to merge with existing template if found",
+    )
+
+
+class WorkflowTemplateValidationRequest(BaseModel):
+    """Schema for template validation request."""
+
+    template: dict[str, Any] = Field(
+        ..., description="Template data to validate"
+    )
+
+
+class WorkflowTemplateValidationResponse(BaseModel):
+    """Schema for template validation response."""
+
+    is_valid: bool = Field(..., description="Whether template is valid")
+    errors: list[str] = Field(
+        default_factory=list, description="Validation errors"
+    )
+    warnings: list[str] = Field(
+        default_factory=list, description="Validation warnings"
+    )
+    template_info: dict[str, Any] | None = Field(
+        None, description="Extracted template information"
+    )
+
+
+class WorkflowTemplateExecutionRequest(BaseModel):
+    """Schema for template execution request."""
+
+    input_data: dict[str, Any] | None = Field(
+        default_factory=dict, description="Input data for execution"
+    )
+    debug_mode: bool = Field(
+        default=False, description="Enable debug mode"
+    )
+
+
 # Analytics schemas
 class ComplexityMetrics(BaseModel):
     """Schema for workflow complexity metrics."""

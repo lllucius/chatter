@@ -1,7 +1,7 @@
 /**
  * Generated API client for Workflows
  */
-import { Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, ChatRequest, ChatResponse, DetailedWorkflowExecutionResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
+import { Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, ChatRequest, ChatResponse, DetailedWorkflowExecutionResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateExecutionRequest, WorkflowTemplateExportResponse, WorkflowTemplateImportRequest, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplateValidationRequest, WorkflowTemplateValidationResponse, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class WorkflowsApi extends BaseAPI {
@@ -158,6 +158,82 @@ export class WorkflowsApi extends BaseAPI {
 
     const response = await this.request(requestContext);
     return response.json() as Promise<WorkflowDeleteResponse>;
+  }
+  /**Export Workflow Template
+   * Export a workflow template.
+   */
+  public async exportWorkflowTemplateApiV1WorkflowsTemplatesTemplateIdExport(templateId: string): Promise<WorkflowTemplateExportResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/templates/${templateId}/export`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<WorkflowTemplateExportResponse>;
+  }
+  /**Import Workflow Template
+   * Import a workflow template.
+   */
+  public async importWorkflowTemplateApiV1WorkflowsTemplatesImport(data: WorkflowTemplateImportRequest): Promise<WorkflowTemplateResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/templates/import`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<WorkflowTemplateResponse>;
+  }
+  /**Load Workflow Template
+   * Load a workflow template with full details.
+   */
+  public async loadWorkflowTemplateApiV1WorkflowsTemplatesTemplateIdLoad(templateId: string): Promise<WorkflowTemplateResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/templates/${templateId}/load`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<WorkflowTemplateResponse>;
+  }
+  /**Validate Workflow Template
+   * Validate a workflow template.
+   */
+  public async validateWorkflowTemplateApiV1WorkflowsTemplatesValidate(data: WorkflowTemplateValidationRequest): Promise<WorkflowTemplateValidationResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/templates/validate`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<WorkflowTemplateValidationResponse>;
+  }
+  /**Execute Workflow Template
+   * Execute a workflow template directly.
+   */
+  public async executeWorkflowTemplateApiV1WorkflowsTemplatesTemplateIdExecute(templateId: string, data: WorkflowTemplateExecutionRequest): Promise<WorkflowExecutionResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/templates/${templateId}/execute`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<WorkflowExecutionResponse>;
   }
   /**Get Workflow Analytics
    * Get analytics for a specific workflow definition.

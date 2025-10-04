@@ -7,8 +7,16 @@ import {
   Typography,
   Box,
   Button,
+  TextField,
 } from '../utils/mui';
-import { AddIcon, RefreshIcon, PlayArrowIcon, EditIcon } from '../utils/icons';
+import {
+  AddIcon,
+  RefreshIcon,
+  PlayArrowIcon,
+  EditIcon,
+  DownloadIcon,
+  UploadIcon,
+} from '../utils/icons';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, {
@@ -35,9 +43,100 @@ const WorkflowTemplatesPage: React.FC = () => {
     useState<WorkflowTemplateResponse | null>(null);
   const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
   const [executionInput, setExecutionInput] = useState('');
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importData, setImportData] = useState('');
+  const [importName, setImportName] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Use the workflow data hook
   const { executeTemplate } = useWorkflowData();
+
+  // Handle template export
+  const handleExportTemplate = async (template: WorkflowTemplateResponse) => {
+    try {
+      const sdk = await getSDK();
+      const response =
+        await sdk.workflows.exportWorkflowTemplateApiV1WorkflowsTemplatesTemplateIdExport(
+          template.id
+        );
+
+      // Download as JSON file
+      const blob = new Blob([JSON.stringify(response.template, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${template.name.replace(/\s+/g, '_')}_template.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toastService.success('Template exported successfully');
+    } catch (error) {
+      handleError(error, {
+        source: 'WorkflowTemplatesPage.handleExportTemplate',
+        operation: 'export template',
+      });
+    }
+  };
+
+  // Handle import from file
+  const handleImportFromFile = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      setImportData(text);
+      setImportDialogOpen(true);
+
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      handleError(error, {
+        source: 'WorkflowTemplatesPage.handleFileChange',
+        operation: 'read import file',
+      });
+    }
+  };
+
+  const handleImportTemplate = async () => {
+    try {
+      let templateData;
+      try {
+        templateData = JSON.parse(importData);
+      } catch {
+        toastService.error('Invalid JSON format');
+        return;
+      }
+
+      const sdk = await getSDK();
+      await sdk.workflows.importWorkflowTemplateApiV1WorkflowsTemplatesImport({
+        template: templateData,
+        override_name: importName || undefined,
+        merge_with_existing: false,
+      });
+
+      toastService.success('Template imported successfully');
+      setImportDialogOpen(false);
+      setImportData('');
+      setImportName('');
+      crudTableRef.current?.handleRefresh();
+    } catch (error) {
+      handleError(error, {
+        source: 'WorkflowTemplatesPage.handleImportTemplate',
+        operation: 'import template',
+      });
+    }
+  };
 
   // Handle template execution
   const handleExecuteTemplate = (template: WorkflowTemplateResponse) => {
@@ -135,6 +234,11 @@ const WorkflowTemplatesPage: React.FC = () => {
         label: 'Edit',
         onClick: handleEditTemplate,
       },
+      {
+        icon: <DownloadIcon />,
+        label: 'Export',
+        onClick: handleExportTemplate,
+      },
     ],
     enableCreate: true,
     enableEdit: true,
@@ -188,6 +292,13 @@ const WorkflowTemplatesPage: React.FC = () => {
         Refresh
       </Button>
       <Button
+        variant="outlined"
+        startIcon={<UploadIcon />}
+        onClick={handleImportFromFile}
+      >
+        Import
+      </Button>
+      <Button
         variant="contained"
         startIcon={<AddIcon />}
         onClick={() => {
@@ -201,6 +312,13 @@ const WorkflowTemplatesPage: React.FC = () => {
       >
         Create Template
       </Button>
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        accept=".json"
+        onChange={handleFileChange}
+      />
     </>
   );
 
@@ -253,6 +371,54 @@ const WorkflowTemplatesPage: React.FC = () => {
           <Button onClick={() => setExecuteDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleExecuteWorkflow} variant="contained">
             Execute
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Import Template Dialog */}
+      <Dialog
+        open={importDialogOpen}
+        onClose={() => setImportDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Import Workflow Template</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Override Name (optional)"
+            value={importName}
+            onChange={(e) => setImportName(e.target.value)}
+            sx={{ mb: 2, mt: 1 }}
+            helperText="Leave empty to use the template's original name"
+          />
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            Template Data (JSON):
+          </Typography>
+          <Box
+            component="textarea"
+            sx={{
+              width: '100%',
+              minHeight: '300px',
+              border: 1,
+              borderColor: 'divider',
+              borderRadius: 1,
+              p: 1,
+              fontFamily: 'monospace',
+              fontSize: '0.875rem',
+              resize: 'vertical',
+            }}
+            value={importData}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setImportData(e.target.value)
+            }
+            placeholder="Paste template JSON data here..."
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setImportDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleImportTemplate} variant="contained">
+            Import
           </Button>
         </DialogActions>
       </Dialog>

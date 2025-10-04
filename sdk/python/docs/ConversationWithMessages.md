@@ -32,7 +32,7 @@ Name | Type | Description | Notes
 **created_at** | **datetime** | Creation timestamp | 
 **updated_at** | **datetime** | Last update timestamp | 
 **last_message_at** | **datetime** |  | [optional] 
-**messages** | [**List[MessageResponse]**](MessageResponse.md) | Conversation messages | [optional] 
+**messages** | [**List[MessageResponse]**](MessageResponse.md) | Conversation messages | 
 
 ## Example
 

@@ -1,10 +1,11 @@
 /**
- * Chatter API
- * Advanced AI Chatbot Backend API Platform
+ * Generated from OpenAPI schema: WorkflowTemplateExportResponse
  */
-
 export interface WorkflowTemplateExportResponse {
-  template: Record<string, any>;
+  /** Complete template data including metadata */
+  template: Record<string, unknown>;
+  /** Export format version */
   export_format?: string;
+  /** Export timestamp */
   exported_at: string;
 }

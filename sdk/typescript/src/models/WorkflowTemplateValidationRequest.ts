@@ -1,8 +1,7 @@
 /**
- * Chatter API
- * Advanced AI Chatbot Backend API Platform
+ * Generated from OpenAPI schema: WorkflowTemplateValidationRequest
  */
-
 export interface WorkflowTemplateValidationRequest {
-  template: Record<string, any>;
+  /** Template data to validate */
+  template: Record<string, unknown>;
 }

@@ -104,6 +104,20 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_execute_workflow_template_api_v1_workflows_templates_template_id_execute_post(self) -> None:
+        """Test case for execute_workflow_template_api_v1_workflows_templates_template_id_execute_post
+
+        Execute Workflow Template
+        """
+        pass
+
+    async def test_export_workflow_template_api_v1_workflows_templates_template_id_export_get(self) -> None:
+        """Test case for export_workflow_template_api_v1_workflows_templates_template_id_export_get
+
+        Export Workflow Template
+        """
+        pass
+
     async def test_get_modern_supported_node_types_api_v1_workflows_node_types_modern_get(self) -> None:
         """Test case for get_modern_supported_node_types_api_v1_workflows_node_types_modern_get
 
@@ -153,6 +167,13 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_import_workflow_template_api_v1_workflows_templates_import_post(self) -> None:
+        """Test case for import_workflow_template_api_v1_workflows_templates_import_post
+
+        Import Workflow Template
+        """
+        pass
+
     async def test_list_all_workflow_executions_api_v1_workflows_executions_get(self) -> None:
         """Test case for list_all_workflow_executions_api_v1_workflows_executions_get
 
@@ -181,6 +202,13 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_load_workflow_template_api_v1_workflows_templates_template_id_load_get(self) -> None:
+        """Test case for load_workflow_template_api_v1_workflows_templates_template_id_load_get
+
+        Load Workflow Template
+        """
+        pass
+
     async def test_update_workflow_definition_api_v1_workflows_definitions_workflow_id_put(self) -> None:
         """Test case for update_workflow_definition_api_v1_workflows_definitions_workflow_id_put
 
@@ -199,6 +227,13 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """Test case for validate_workflow_definition_api_v1_workflows_definitions_validate_post
 
         Validate Workflow Definition
+        """
+        pass
+
+    async def test_validate_workflow_template_api_v1_workflows_templates_validate_post(self) -> None:
+        """Test case for validate_workflow_template_api_v1_workflows_templates_validate_post
+
+        Validate Workflow Template
         """
         pass
 

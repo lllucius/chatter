@@ -2704,6 +2704,7 @@ components:
       - retrieval_score_threshold
       - created_at
       - updated_at
+      - messages
       title: ConversationWithMessages
       type: object
     CorrelationTraceResponse:
@@ -10425,6 +10426,69 @@ components:
       - description
       title: WorkflowTemplateCreate
       type: object
+    WorkflowTemplateExecutionRequest:
+      description: Schema for template execution request.
+      properties:
+        debug_mode:
+          default: false
+          description: Enable debug mode
+          title: Debug Mode
+          type: boolean
+        input_data:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          description: Input data for execution
+          title: Input Data
+      title: WorkflowTemplateExecutionRequest
+      type: object
+    WorkflowTemplateExportResponse:
+      description: Schema for template export response.
+      properties:
+        export_format:
+          default: json
+          description: Export format version
+          title: Export Format
+          type: string
+        exported_at:
+          description: Export timestamp
+          format: date-time
+          title: Exported At
+          type: string
+        template:
+          additionalProperties: true
+          description: Complete template data including metadata
+          title: Template
+          type: object
+      required:
+      - template
+      - exported_at
+      title: WorkflowTemplateExportResponse
+      type: object
+    WorkflowTemplateImportRequest:
+      description: Schema for template import request.
+      properties:
+        merge_with_existing:
+          default: false
+          description: Whether to merge with existing template if found
+          title: Merge With Existing
+          type: boolean
+        override_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional name override for imported template
+          title: Override Name
+        template:
+          additionalProperties: true
+          description: Template data to import
+          title: Template
+          type: object
+      required:
+      - template
+      title: WorkflowTemplateImportRequest
+      type: object
     WorkflowTemplateResponse:
       description: Schema for workflow template response.
       properties:
@@ -10609,6 +10673,48 @@ components:
           description: Template tags
           title: Tags
       title: WorkflowTemplateUpdate
+      type: object
+    WorkflowTemplateValidationRequest:
+      description: Schema for template validation request.
+      properties:
+        template:
+          additionalProperties: true
+          description: Template data to validate
+          title: Template
+          type: object
+      required:
+      - template
+      title: WorkflowTemplateValidationRequest
+      type: object
+    WorkflowTemplateValidationResponse:
+      description: Schema for template validation response.
+      properties:
+        errors:
+          description: Validation errors
+          items:
+            type: string
+          title: Errors
+          type: array
+        is_valid:
+          description: Whether template is valid
+          title: Is Valid
+          type: boolean
+        template_info:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          description: Extracted template information
+          title: Template Info
+        warnings:
+          description: Validation warnings
+          items:
+            type: string
+          title: Warnings
+          type: array
+      required:
+      - is_valid
+      title: WorkflowTemplateValidationResponse
       type: object
     WorkflowTemplatesResponse:
       description: Schema for workflow templates list response.
@@ -20552,6 +20658,86 @@ paths:
       summary: Create Workflow Template
       tags:
       - Workflows
+  /api/v1/workflows/templates/import:
+    post:
+      description: Import a workflow template.
+      operationId: import_workflow_template_api_v1_workflows_templates_import_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowTemplateImportRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowTemplateResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Import Workflow Template
+      tags:
+      - Workflows
+  /api/v1/workflows/templates/validate:
+    post:
+      description: Validate a workflow template.
+      operationId: validate_workflow_template_api_v1_workflows_templates_validate_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowTemplateValidationRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowTemplateValidationResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Validate Workflow Template
+      tags:
+      - Workflows
   /api/v1/workflows/templates/{template_id}:
     delete:
       description: Delete a workflow template.
@@ -20637,6 +20823,135 @@ paths:
       security:
       - CustomHTTPBearer: []
       summary: Update Workflow Template
+      tags:
+      - Workflows
+  /api/v1/workflows/templates/{template_id}/execute:
+    post:
+      description: Execute a workflow template directly.
+      operationId: execute_workflow_template_api_v1_workflows_templates__template_id__execute_post
+      parameters:
+      - in: path
+        name: template_id
+        required: true
+        schema:
+          title: Template Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowTemplateExecutionRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowExecutionResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Execute Workflow Template
+      tags:
+      - Workflows
+  /api/v1/workflows/templates/{template_id}/export:
+    get:
+      description: Export a workflow template.
+      operationId: export_workflow_template_api_v1_workflows_templates__template_id__export_get
+      parameters:
+      - in: path
+        name: template_id
+        required: true
+        schema:
+          title: Template Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowTemplateExportResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Export Workflow Template
+      tags:
+      - Workflows
+  /api/v1/workflows/templates/{template_id}/load:
+    get:
+      description: Load a workflow template with full details.
+      operationId: load_workflow_template_api_v1_workflows_templates__template_id__load_get
+      parameters:
+      - in: path
+        name: template_id
+        required: true
+        schema:
+          title: Template Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowTemplateResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Load Workflow Template
       tags:
       - Workflows
   /api/v1/workflows/tools/configure:

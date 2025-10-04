@@ -15,6 +15,8 @@ Method | HTTP request | Description
 [**execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post**](WorkflowsApi.md#execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post) | **POST** /api/v1/workflows/execute/chat/streaming | Execute Chat Workflow Streaming
 [**execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post**](WorkflowsApi.md#execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post) | **POST** /api/v1/workflows/definitions/custom/execute | Execute Custom Workflow
 [**execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post**](WorkflowsApi.md#execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post) | **POST** /api/v1/workflows/definitions/{workflow_id}/execute | Execute Workflow
+[**execute_workflow_template_api_v1_workflows_templates_template_id_execute_post**](WorkflowsApi.md#execute_workflow_template_api_v1_workflows_templates_template_id_execute_post) | **POST** /api/v1/workflows/templates/{template_id}/execute | Execute Workflow Template
+[**export_workflow_template_api_v1_workflows_templates_template_id_export_get**](WorkflowsApi.md#export_workflow_template_api_v1_workflows_templates_template_id_export_get) | **GET** /api/v1/workflows/templates/{template_id}/export | Export Workflow Template
 [**get_modern_supported_node_types_api_v1_workflows_node_types_modern_get**](WorkflowsApi.md#get_modern_supported_node_types_api_v1_workflows_node_types_modern_get) | **GET** /api/v1/workflows/node-types/modern | Get Modern Supported Node Types
 [**get_supported_node_types_api_v1_workflows_node_types_get**](WorkflowsApi.md#get_supported_node_types_api_v1_workflows_node_types_get) | **GET** /api/v1/workflows/node-types | Get Supported Node Types
 [**get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get**](WorkflowsApi.md#get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/analytics | Get Workflow Analytics
@@ -22,13 +24,16 @@ Method | HTTP request | Description
 [**get_workflow_definition_api_v1_workflows_definitions_workflow_id_get**](WorkflowsApi.md#get_workflow_definition_api_v1_workflows_definitions_workflow_id_get) | **GET** /api/v1/workflows/definitions/{workflow_id} | Get Workflow Definition
 [**get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get**](WorkflowsApi.md#get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions/{execution_id} | Get Workflow Execution Details
 [**get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get**](WorkflowsApi.md#get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions/{execution_id}/logs | Get Workflow Execution Logs
+[**import_workflow_template_api_v1_workflows_templates_import_post**](WorkflowsApi.md#import_workflow_template_api_v1_workflows_templates_import_post) | **POST** /api/v1/workflows/templates/import | Import Workflow Template
 [**list_all_workflow_executions_api_v1_workflows_executions_get**](WorkflowsApi.md#list_all_workflow_executions_api_v1_workflows_executions_get) | **GET** /api/v1/workflows/executions | List All Workflow Executions
 [**list_workflow_definitions_api_v1_workflows_definitions_get**](WorkflowsApi.md#list_workflow_definitions_api_v1_workflows_definitions_get) | **GET** /api/v1/workflows/definitions | List Workflow Definitions
 [**list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get**](WorkflowsApi.md#list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions | List Workflow Executions
 [**list_workflow_templates_api_v1_workflows_templates_get**](WorkflowsApi.md#list_workflow_templates_api_v1_workflows_templates_get) | **GET** /api/v1/workflows/templates | List Workflow Templates
+[**load_workflow_template_api_v1_workflows_templates_template_id_load_get**](WorkflowsApi.md#load_workflow_template_api_v1_workflows_templates_template_id_load_get) | **GET** /api/v1/workflows/templates/{template_id}/load | Load Workflow Template
 [**update_workflow_definition_api_v1_workflows_definitions_workflow_id_put**](WorkflowsApi.md#update_workflow_definition_api_v1_workflows_definitions_workflow_id_put) | **PUT** /api/v1/workflows/definitions/{workflow_id} | Update Workflow Definition
 [**update_workflow_template_api_v1_workflows_templates_template_id_put**](WorkflowsApi.md#update_workflow_template_api_v1_workflows_templates_template_id_put) | **PUT** /api/v1/workflows/templates/{template_id} | Update Workflow Template
 [**validate_workflow_definition_api_v1_workflows_definitions_validate_post**](WorkflowsApi.md#validate_workflow_definition_api_v1_workflows_definitions_validate_post) | **POST** /api/v1/workflows/definitions/validate | Validate Workflow Definition
+[**validate_workflow_template_api_v1_workflows_templates_validate_post**](WorkflowsApi.md#validate_workflow_template_api_v1_workflows_templates_validate_post) | **POST** /api/v1/workflows/templates/validate | Validate Workflow Template
 
 
 # **configure_memory_settings_api_v1_workflows_memory_configure_post**
@@ -1089,6 +1094,167 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **execute_workflow_template_api_v1_workflows_templates_template_id_execute_post**
+> WorkflowExecutionResponse execute_workflow_template_api_v1_workflows_templates_template_id_execute_post(template_id, workflow_template_execution_request)
+
+Execute Workflow Template
+
+Execute a workflow template directly.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.workflow_execution_response import WorkflowExecutionResponse
+from chatter_sdk.models.workflow_template_execution_request import WorkflowTemplateExecutionRequest
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.WorkflowsApi(api_client)
+    template_id = 'template_id_example' # str | 
+    workflow_template_execution_request = chatter_sdk.WorkflowTemplateExecutionRequest() # WorkflowTemplateExecutionRequest | 
+
+    try:
+        # Execute Workflow Template
+        api_response = await api_instance.execute_workflow_template_api_v1_workflows_templates_template_id_execute_post(template_id, workflow_template_execution_request)
+        print("The response of WorkflowsApi->execute_workflow_template_api_v1_workflows_templates_template_id_execute_post:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling WorkflowsApi->execute_workflow_template_api_v1_workflows_templates_template_id_execute_post: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **template_id** | **str**|  | 
+ **workflow_template_execution_request** | [**WorkflowTemplateExecutionRequest**](WorkflowTemplateExecutionRequest.md)|  | 
+
+### Return type
+
+[**WorkflowExecutionResponse**](WorkflowExecutionResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **export_workflow_template_api_v1_workflows_templates_template_id_export_get**
+> WorkflowTemplateExportResponse export_workflow_template_api_v1_workflows_templates_template_id_export_get(template_id)
+
+Export Workflow Template
+
+Export a workflow template.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.workflow_template_export_response import WorkflowTemplateExportResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.WorkflowsApi(api_client)
+    template_id = 'template_id_example' # str | 
+
+    try:
+        # Export Workflow Template
+        api_response = await api_instance.export_workflow_template_api_v1_workflows_templates_template_id_export_get(template_id)
+        print("The response of WorkflowsApi->export_workflow_template_api_v1_workflows_templates_template_id_export_get:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling WorkflowsApi->export_workflow_template_api_v1_workflows_templates_template_id_export_get: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **template_id** | **str**|  | 
+
+### Return type
+
+[**WorkflowTemplateExportResponse**](WorkflowTemplateExportResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **get_modern_supported_node_types_api_v1_workflows_node_types_modern_get**
 > Dict[str, object] get_modern_supported_node_types_api_v1_workflows_node_types_modern_get()
 
@@ -1645,6 +1811,86 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **import_workflow_template_api_v1_workflows_templates_import_post**
+> WorkflowTemplateResponse import_workflow_template_api_v1_workflows_templates_import_post(workflow_template_import_request)
+
+Import Workflow Template
+
+Import a workflow template.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.workflow_template_import_request import WorkflowTemplateImportRequest
+from chatter_sdk.models.workflow_template_response import WorkflowTemplateResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.WorkflowsApi(api_client)
+    workflow_template_import_request = chatter_sdk.WorkflowTemplateImportRequest() # WorkflowTemplateImportRequest | 
+
+    try:
+        # Import Workflow Template
+        api_response = await api_instance.import_workflow_template_api_v1_workflows_templates_import_post(workflow_template_import_request)
+        print("The response of WorkflowsApi->import_workflow_template_api_v1_workflows_templates_import_post:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling WorkflowsApi->import_workflow_template_api_v1_workflows_templates_import_post: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workflow_template_import_request** | [**WorkflowTemplateImportRequest**](WorkflowTemplateImportRequest.md)|  | 
+
+### Return type
+
+[**WorkflowTemplateResponse**](WorkflowTemplateResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **list_all_workflow_executions_api_v1_workflows_executions_get**
 > Dict[str, object] list_all_workflow_executions_api_v1_workflows_executions_get(page=page, page_size=page_size)
 
@@ -1952,6 +2198,85 @@ This endpoint does not need any parameter.
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **load_workflow_template_api_v1_workflows_templates_template_id_load_get**
+> WorkflowTemplateResponse load_workflow_template_api_v1_workflows_templates_template_id_load_get(template_id)
+
+Load Workflow Template
+
+Load a workflow template with full details.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.workflow_template_response import WorkflowTemplateResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.WorkflowsApi(api_client)
+    template_id = 'template_id_example' # str | 
+
+    try:
+        # Load Workflow Template
+        api_response = await api_instance.load_workflow_template_api_v1_workflows_templates_template_id_load_get(template_id)
+        print("The response of WorkflowsApi->load_workflow_template_api_v1_workflows_templates_template_id_load_get:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling WorkflowsApi->load_workflow_template_api_v1_workflows_templates_template_id_load_get: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **template_id** | **str**|  | 
+
+### Return type
+
+[**WorkflowTemplateResponse**](WorkflowTemplateResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **update_workflow_definition_api_v1_workflows_definitions_workflow_id_put**
 > WorkflowDefinitionResponse update_workflow_definition_api_v1_workflows_definitions_workflow_id_put(workflow_id, workflow_definition_update)
 
@@ -2177,6 +2502,86 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**WorkflowValidationResponse**](WorkflowValidationResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **validate_workflow_template_api_v1_workflows_templates_validate_post**
+> WorkflowTemplateValidationResponse validate_workflow_template_api_v1_workflows_templates_validate_post(workflow_template_validation_request)
+
+Validate Workflow Template
+
+Validate a workflow template.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.workflow_template_validation_request import WorkflowTemplateValidationRequest
+from chatter_sdk.models.workflow_template_validation_response import WorkflowTemplateValidationResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.WorkflowsApi(api_client)
+    workflow_template_validation_request = chatter_sdk.WorkflowTemplateValidationRequest() # WorkflowTemplateValidationRequest | 
+
+    try:
+        # Validate Workflow Template
+        api_response = await api_instance.validate_workflow_template_api_v1_workflows_templates_validate_post(workflow_template_validation_request)
+        print("The response of WorkflowsApi->validate_workflow_template_api_v1_workflows_templates_validate_post:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling WorkflowsApi->validate_workflow_template_api_v1_workflows_templates_validate_post: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workflow_template_validation_request** | [**WorkflowTemplateValidationRequest**](WorkflowTemplateValidationRequest.md)|  | 
+
+### Return type
+
+[**WorkflowTemplateValidationResponse**](WorkflowTemplateValidationResponse.md)
 
 ### Authorization
 

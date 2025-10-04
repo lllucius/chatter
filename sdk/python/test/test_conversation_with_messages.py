@@ -100,6 +100,25 @@ class TestConversationWithMessages(unittest.TestCase):
                 retrieval_score_threshold = 1.337,
                 created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                messages = [
+                    chatter_sdk.models.message_response.MessageResponse(
+                        role = 'user', 
+                        content = '0', 
+                        id = '', 
+                        conversation_id = '', 
+                        sequence_number = 56, 
+                        prompt_tokens = 56, 
+                        completion_tokens = 56, 
+                        total_tokens = 56, 
+                        model_used = '', 
+                        provider_used = '', 
+                        response_time_ms = 56, 
+                        cost = 1.337, 
+                        finish_reason = '', 
+                        rating = 0.0, 
+                        rating_count = 0.0, 
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
+                    ],
         )
         """
 

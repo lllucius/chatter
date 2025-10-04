@@ -281,8 +281,13 @@ __all__ = [
     "WorkflowNode",
     "WorkflowNodeData",
     "WorkflowTemplateCreate",
+    "WorkflowTemplateExecutionRequest",
+    "WorkflowTemplateExportResponse",
+    "WorkflowTemplateImportRequest",
     "WorkflowTemplateResponse",
     "WorkflowTemplateUpdate",
+    "WorkflowTemplateValidationRequest",
+    "WorkflowTemplateValidationResponse",
     "WorkflowTemplatesResponse",
     "WorkflowUpdateResponse",
     "WorkflowValidationResponse",
@@ -555,8 +560,13 @@ from chatter_sdk.models.workflow_execution_response import WorkflowExecutionResp
 from chatter_sdk.models.workflow_node import WorkflowNode as WorkflowNode
 from chatter_sdk.models.workflow_node_data import WorkflowNodeData as WorkflowNodeData
 from chatter_sdk.models.workflow_template_create import WorkflowTemplateCreate as WorkflowTemplateCreate
+from chatter_sdk.models.workflow_template_execution_request import WorkflowTemplateExecutionRequest as WorkflowTemplateExecutionRequest
+from chatter_sdk.models.workflow_template_export_response import WorkflowTemplateExportResponse as WorkflowTemplateExportResponse
+from chatter_sdk.models.workflow_template_import_request import WorkflowTemplateImportRequest as WorkflowTemplateImportRequest
 from chatter_sdk.models.workflow_template_response import WorkflowTemplateResponse as WorkflowTemplateResponse
 from chatter_sdk.models.workflow_template_update import WorkflowTemplateUpdate as WorkflowTemplateUpdate
+from chatter_sdk.models.workflow_template_validation_request import WorkflowTemplateValidationRequest as WorkflowTemplateValidationRequest
+from chatter_sdk.models.workflow_template_validation_response import WorkflowTemplateValidationResponse as WorkflowTemplateValidationResponse
 from chatter_sdk.models.workflow_templates_response import WorkflowTemplatesResponse as WorkflowTemplatesResponse
 from chatter_sdk.models.workflow_update_response import WorkflowUpdateResponse as WorkflowUpdateResponse
 from chatter_sdk.models.workflow_validation_response import WorkflowValidationResponse as WorkflowValidationResponse

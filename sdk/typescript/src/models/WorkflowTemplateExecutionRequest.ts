@@ -1,9 +1,9 @@
 /**
- * Chatter API
- * Advanced AI Chatbot Backend API Platform
+ * Generated from OpenAPI schema: WorkflowTemplateExecutionRequest
  */
-
 export interface WorkflowTemplateExecutionRequest {
-  input_data?: Record<string, any>;
+  /** Input data for execution */
+  input_data?: Record<string, unknown> | null;
+  /** Enable debug mode */
   debug_mode?: boolean;
 }

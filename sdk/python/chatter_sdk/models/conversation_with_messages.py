@@ -56,7 +56,7 @@ class ConversationWithMessages(BaseModel):
     created_at: datetime = Field(description="Creation timestamp")
     updated_at: datetime = Field(description="Last update timestamp")
     last_message_at: Optional[datetime] = None
-    messages: Optional[List[MessageResponse]] = Field(default=None, description="Conversation messages")
+    messages: List[MessageResponse] = Field(description="Conversation messages")
     __properties: ClassVar[List[str]] = ["title", "description", "id", "user_id", "profile_id", "status", "llm_provider", "llm_model", "temperature", "max_tokens", "enable_retrieval", "message_count", "total_tokens", "total_cost", "system_prompt", "context_window", "memory_enabled", "memory_strategy", "retrieval_limit", "retrieval_score_threshold", "tags", "extra_metadata", "workflow_config", "created_at", "updated_at", "last_message_at", "messages"]
 
     model_config = ConfigDict(

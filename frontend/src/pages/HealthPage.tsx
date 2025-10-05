@@ -48,7 +48,17 @@ const HealthPage: React.FC = () => {
     redis?: { status?: string };
   }
 
+  interface MetricsData {
+    cpu_usage?: number;
+    memory_usage?: number;
+    disk_usage?: number;
+    network_latency?: number;
+    uptime_hours?: number;
+    active_connections?: number;
+  }
+
   const [health, setHealth] = useState<HealthData | null>(null);
+  const [metrics, setMetrics] = useState<MetricsData | null>(null);
   const [toolServers, setToolServers] = useState<ToolServerResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -61,11 +71,13 @@ const HealthPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const [healthResponse, toolServerResponse] = await Promise.all([
+      const [healthResponse, metricsResponse, toolServerResponse] = await Promise.all([
         getSDK().health.healthCheckEndpointHealthz(),
+        getSDK().health.getMetricsMetrics().catch(() => null), // Metrics might not be available
         getSDK().toolServers.listToolServersApiV1ToolserversServers({}),
       ]);
       setHealth(healthResponse);
+      setMetrics(metricsResponse as unknown as MetricsData);
       setToolServers(toolServerResponse);
     } catch (err: unknown) {
       handleError(err, {
@@ -113,14 +125,14 @@ const HealthPage: React.FC = () => {
     }
   };
 
-  // Mock system metrics (in a real app, these would come from the API)
-  const systemMetrics = {
-    cpu_usage: 45,
-    memory_usage: 68,
-    disk_usage: 32,
-    network_latency: 12,
-    uptime_hours: 720,
-    active_connections: 156,
+  // System metrics from API (with fallback for display)
+  const systemMetrics = metrics || {
+    cpu_usage: 0,
+    memory_usage: 0,
+    disk_usage: 0,
+    network_latency: 0,
+    uptime_hours: 0,
+    active_connections: 0,
   };
 
   if (loading) {

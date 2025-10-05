@@ -92,7 +92,7 @@ Content-Type: application/json
   },
   "input_data": {
     "temperature": 0.9,
-    "user_query": "What is the weather?"
+    "message": "What is the weather?"
   },
   "debug_mode": false
 }

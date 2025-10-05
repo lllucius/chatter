@@ -37,7 +37,7 @@ async def example_temporary_template_execution():
     input_data = {
         "temperature": 0.9,  # Override the default temperature
         "max_tokens": 1000,
-        "user_query": "What are the latest developments in quantum computing?",
+        "message": "What are the latest developments in quantum computing?",
     }
     
     # Create the execution request
@@ -82,7 +82,7 @@ async def example_vs_stored_template():
     
     print("\nStep 2: Execute the stored template")
     execution_request = {
-        "input_data": {"customer_query": "How do I reset my password?"},
+        "input_data": {"message": "How do I reset my password?"},
         "debug_mode": False,
     }
     print(f"POST /api/v1/workflows/templates/template_123/execute")
@@ -99,7 +99,7 @@ async def example_vs_stored_template():
             "category": "custom",
             "default_params": {"model": "gpt-4", "temperature": 0.7},
         },
-        "input_data": {"customer_query": "How do I reset my password?"},
+        "input_data": {"message": "How do I reset my password?"},
         "debug_mode": False,
     }
     print(f"POST /api/v1/workflows/templates/execute")
@@ -139,7 +139,7 @@ async def example_testing_workflow():
         execution_request = {
             "template": template_data,
             "input_data": {
-                "prompt": "Write a short poem about the ocean.",
+                "message": "Write a short poem about the ocean.",
             },
             "debug_mode": True,  # Enable debug mode for testing
         }

@@ -27,6 +27,7 @@ from chatter.schemas.workflows import (
     WorkflowExecutionRequest,
     WorkflowExecutionResponse,
     WorkflowTemplateCreate,
+    WorkflowTemplateDirectExecutionRequest,
     WorkflowTemplateExecutionRequest,
     WorkflowTemplateExportResponse,
     WorkflowTemplateImportRequest,
@@ -578,6 +579,52 @@ async def execute_workflow_template(
         logger.error(f"Failed to execute workflow template: {e}")
         raise InternalServerProblem(
             detail=f"Failed to execute workflow template: {str(e)}"
+        ) from e
+
+
+@router.post(
+    "/templates/execute",
+    response_model=WorkflowExecutionResponse,
+)
+async def execute_temporary_workflow_template(
+    execution_request: WorkflowTemplateDirectExecutionRequest,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+    execution_service: WorkflowExecutionService = Depends(
+        get_workflow_execution_service
+    ),
+) -> WorkflowExecutionResponse:
+    """Execute a temporary workflow template directly without storing it.
+    
+    This endpoint allows you to pass template data directly and execute it
+    without persisting the template to the database first.
+    """
+    try:
+        # Create a temporary workflow definition from the template data
+        definition = await workflow_service.create_workflow_definition_from_template_data(
+            template_data=execution_request.template,
+            owner_id=current_user.id,
+            user_input=execution_request.input_data,
+            is_temporary=True,
+        )
+        
+        # Execute the workflow definition
+        result = await execution_service.execute_workflow_definition(
+            definition=definition,
+            input_data=execution_request.input_data,
+            user_id=current_user.id,
+            debug_mode=execution_request.debug_mode,
+        )
+        
+        return WorkflowExecutionResponse(**result)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to execute temporary workflow template: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to execute temporary workflow template: {str(e)}"
         ) from e
 
 

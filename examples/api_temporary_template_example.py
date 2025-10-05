@@ -52,7 +52,7 @@ def execute_temporary_template_with_api():
     input_data = {
         "temperature": 0.9,  # Override default temperature
         "max_tokens": 1000,
-        "user_query": "What are the latest developments in quantum computing?"
+        "message": "What are the latest developments in quantum computing?"
     }
     
     # Create the execution request
@@ -187,7 +187,7 @@ def compare_with_stored_template():
     print(f"   POST {base_url}/api/v1/workflows/templates/template_123/execute")
     
     execution_request = {
-        "input_data": {"customer_query": "How do I reset my password?"},
+        "input_data": {"message": "How do I reset my password?"},
         "debug_mode": False
     }
     print(json.dumps(execution_request, indent=2))
@@ -205,7 +205,7 @@ def compare_with_stored_template():
             "category": "custom",
             "default_params": {"model": "gpt-4", "temperature": 0.7}
         },
-        "input_data": {"customer_query": "How do I reset my password?"},
+        "input_data": {"message": "How do I reset my password?"},
         "debug_mode": False
     }
     print(json.dumps(temp_execution_request, indent=2))

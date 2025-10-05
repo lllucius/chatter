@@ -61,7 +61,7 @@ async def execute_temporary_template_with_sdk():
         input_data = {
             "temperature": 0.9,  # Override default temperature
             "max_tokens": 1000,
-            "user_query": "What are the latest developments in quantum computing?"
+            "message": "What are the latest developments in quantum computing?"
         }
         
         # Create the execution request

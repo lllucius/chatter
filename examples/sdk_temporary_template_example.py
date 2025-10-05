@@ -29,7 +29,7 @@ async def execute_temporary_template_with_sdk():
     # Configure the SDK
     configuration = Configuration(
         host=base_url,
-        api_key={"HTTPBearer": api_key}
+        access_token=api_key
     )
     
     print("=" * 80)

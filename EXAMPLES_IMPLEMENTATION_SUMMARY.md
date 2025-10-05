@@ -34,7 +34,7 @@ from chatter_sdk.models import WorkflowTemplateDirectExecutionRequest
 # Configure SDK
 configuration = Configuration(
     host=base_url,
-    api_key={"HTTPBearer": api_key}
+    access_token=api_key
 )
 
 # Create request

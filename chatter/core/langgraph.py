@@ -253,51 +253,47 @@ class LangGraphWorkflowManager:
         try:
             start_time = time.time()
             
-            # Use astream to collect usage_metadata from ALL nodes
+            # Use astream with stream_mode='values' to get full state at each step
+            # and collect usage_metadata from ALL node executions
             total_prompt_tokens = 0
             total_completion_tokens = 0
             total_tokens = 0
             result = None
+            seen_usage_metadata = []
             
-            async for update in workflow.astream(context, config=config):
-                # Each update contains the state after a node execution
-                result = update
+            async for state in workflow.astream(context, config=config, stream_mode='values'):
+                # Track the final state (last iteration)
+                result = state
                 
-                # Aggregate usage_metadata from each node
-                for node_state in update.values():
-                    if isinstance(node_state, dict):
-                        usage_metadata = node_state.get("usage_metadata", {})
-                        if isinstance(usage_metadata, dict):
-                            # Extract tokens using various field names
-                            prompt_tokens = usage_metadata.get(
-                                'input_tokens'
-                            ) or usage_metadata.get('prompt_tokens', 0) or 0
-                            completion_tokens = usage_metadata.get(
-                                'output_tokens'
-                            ) or usage_metadata.get('completion_tokens', 0) or 0
-                            node_total = usage_metadata.get('total_tokens', 0) or 0
-                            
-                            # If total is not provided, calculate it
-                            if not node_total and (prompt_tokens or completion_tokens):
-                                node_total = prompt_tokens + completion_tokens
-                            
-                            # Aggregate tokens
-                            total_prompt_tokens += prompt_tokens
-                            total_completion_tokens += completion_tokens
-                            total_tokens += node_total
+                # Collect usage_metadata from this state if it's new
+                usage_metadata = state.get("usage_metadata", {})
+                if isinstance(usage_metadata, dict) and usage_metadata:
+                    # Check if this is a new usage_metadata (not seen before)
+                    # by comparing the dict itself
+                    if usage_metadata not in seen_usage_metadata:
+                        seen_usage_metadata.append(usage_metadata.copy())
+                        
+                        # Extract tokens using various field names
+                        prompt_tokens = usage_metadata.get(
+                            'input_tokens'
+                        ) or usage_metadata.get('prompt_tokens', 0) or 0
+                        completion_tokens = usage_metadata.get(
+                            'output_tokens'
+                        ) or usage_metadata.get('completion_tokens', 0) or 0
+                        node_total = usage_metadata.get('total_tokens', 0) or 0
+                        
+                        # If total is not provided, calculate it
+                        if not node_total and (prompt_tokens or completion_tokens):
+                            node_total = prompt_tokens + completion_tokens
+                        
+                        # Aggregate tokens from this node
+                        total_prompt_tokens += prompt_tokens
+                        total_completion_tokens += completion_tokens
+                        total_tokens += node_total
             
-            # Get the final state (last update)
+            # Use the final state from the last iteration
             if result is None:
                 result = context
-            else:
-                # Extract the actual final state from the last update
-                # The update is a dict with node names as keys
-                # We need to merge all values to get the complete final state
-                final_state = {}
-                for node_state in result.values():
-                    if isinstance(node_state, dict):
-                        final_state.update(node_state)
-                result = final_state
             
             execution_time = int((time.time() - start_time) * 1000)
 

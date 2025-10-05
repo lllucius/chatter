@@ -1,11 +1,10 @@
 """Test token aggregation across workflow nodes."""
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 from langchain_core.messages import AIMessage, HumanMessage
 
 from chatter.core.langgraph import LangGraphWorkflowManager
-from chatter.core.workflow_graph_builder import WorkflowGraphBuilder
 
 
 @pytest.mark.asyncio
@@ -15,44 +14,52 @@ async def test_token_aggregation_across_multiple_nodes():
     # Create a mock workflow that simulates multiple nodes with token usage
     mock_workflow = MagicMock()
     
-    # Simulate astream returning multiple node updates with usage_metadata
-    async def mock_astream(context, config):
-        # First node update (e.g., a model node)
+    # Simulate astream with stream_mode='values' returning full state at each step
+    async def mock_astream(context, config, stream_mode=None):
+        # Initial state (no usage_metadata yet)
         yield {
-            "node1": {
-                "messages": [AIMessage(content="Response from node 1")],
-                "usage_metadata": {
-                    "input_tokens": 100,
-                    "output_tokens": 50,
-                    "total_tokens": 150,
-                }
+            "messages": [HumanMessage(content="Test")],
+        }
+        
+        # After first node execution
+        yield {
+            "messages": [
+                HumanMessage(content="Test"),
+                AIMessage(content="Response from node 1")
+            ],
+            "usage_metadata": {
+                "input_tokens": 100,
+                "output_tokens": 50,
+                "total_tokens": 150,
             }
         }
         
-        # Second node update (e.g., another model node)
+        # After second node execution
         yield {
-            "node2": {
-                "messages": [AIMessage(content="Response from node 2")],
-                "usage_metadata": {
-                    "input_tokens": 75,
-                    "output_tokens": 25,
-                    "total_tokens": 100,
-                }
+            "messages": [
+                HumanMessage(content="Test"),
+                AIMessage(content="Response from node 1"),
+                AIMessage(content="Response from node 2"),
+            ],
+            "usage_metadata": {
+                "input_tokens": 75,
+                "output_tokens": 25,
+                "total_tokens": 100,
             }
         }
         
-        # Final state
+        # After third node execution
         yield {
-            "node3": {
-                "messages": [
-                    AIMessage(content="Response from node 1"),
-                    AIMessage(content="Response from node 2"),
-                ],
-                "usage_metadata": {
-                    "input_tokens": 50,
-                    "output_tokens": 30,
-                    "total_tokens": 80,
-                }
+            "messages": [
+                HumanMessage(content="Test"),
+                AIMessage(content="Response from node 1"),
+                AIMessage(content="Response from node 2"),
+                AIMessage(content="Response from node 3"),
+            ],
+            "usage_metadata": {
+                "input_tokens": 50,
+                "output_tokens": 30,
+                "total_tokens": 80,
             }
         }
     
@@ -69,11 +76,9 @@ async def test_token_aggregation_across_multiple_nodes():
     )
     
     # Verify token aggregation
-    # Total should be: (100+50+150) + (75+25+100) + (50+30+80) = 330
-    # But we're summing the individual tokens, not total_tokens
-    # Actually: prompt_tokens = 100 + 75 + 50 = 225
-    #          completion_tokens = 50 + 25 + 30 = 105
-    #          total_tokens = 150 + 100 + 80 = 330
+    # Total should be: 150 + 100 + 80 = 330
+    # Prompt tokens: 100 + 75 + 50 = 225
+    # Completion tokens: 50 + 25 + 30 = 105
     
     assert "tokens_used" in result
     assert result["tokens_used"] == 330, f"Expected 330 tokens, got {result['tokens_used']}"
@@ -89,6 +94,9 @@ async def test_token_aggregation_across_multiple_nodes():
     expected_cost = (225 * 0.00003) + (105 * 0.00006)
     assert abs(result["cost"] - expected_cost) < 0.0001, f"Expected cost {expected_cost}, got {result['cost']}"
     
+    # Verify final state has correct messages
+    assert len(result["messages"]) == 4, "Final state should have 4 messages"
+    
     print(f"✓ Token aggregation successful!")
     print(f"  Tokens used: {result['tokens_used']}")
     print(f"  Prompt tokens: {result['prompt_tokens']}")
@@ -102,15 +110,16 @@ async def test_token_aggregation_with_alternative_field_names():
     
     mock_workflow = MagicMock()
     
-    async def mock_astream(context, config):
+    async def mock_astream(context, config, stream_mode=None):
+        # Initial state
+        yield {"messages": [HumanMessage(content="Test")]}
+        
         # Node with alternative field names
         yield {
-            "node1": {
-                "messages": [AIMessage(content="Response")],
-                "usage_metadata": {
-                    "prompt_tokens": 200,
-                    "completion_tokens": 100,
-                }
+            "messages": [HumanMessage(content="Test"), AIMessage(content="Response")],
+            "usage_metadata": {
+                "prompt_tokens": 200,
+                "completion_tokens": 100,
             }
         }
     
@@ -137,12 +146,13 @@ async def test_no_tokens_returns_zero():
     
     mock_workflow = MagicMock()
     
-    async def mock_astream(context, config):
+    async def mock_astream(context, config, stream_mode=None):
+        # Initial state
+        yield {"messages": [HumanMessage(content="Test")]}
+        
         # Node without usage_metadata
         yield {
-            "node1": {
-                "messages": [AIMessage(content="Response")],
-            }
+            "messages": [HumanMessage(content="Test"), AIMessage(content="Response")],
         }
     
     mock_workflow.astream = mock_astream

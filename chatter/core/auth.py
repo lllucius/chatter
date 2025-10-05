@@ -712,10 +712,10 @@ class AuthService:
         return permissions
 
     async def get_current_user(self, token: str) -> User:
-        """Get current user from JWT token with enhanced security validation.
+        """Get current user from JWT token or API key with enhanced security validation.
 
         Args:
-            token: JWT token
+            token: JWT token or API key
 
         Returns:
             Current user
@@ -723,39 +723,55 @@ class AuthService:
         Raises:
             AuthenticationError: If token is invalid or user not found
         """
+        # Try JWT token validation first
         payload = verify_token(token)
-        if not payload:
-            raise AuthenticationError("Invalid token") from None
+        if payload:
+            # Enhanced token validation
+            jti = payload.get("jti")
+            if jti:
+                # Check if token is blacklisted
+                try:
+                    from chatter.core.token_manager import get_token_manager
 
-        # Enhanced token validation
-        jti = payload.get("jti")
-        if jti:
-            # Check if token is blacklisted
-            try:
-                from chatter.core.token_manager import get_token_manager
+                    token_manager = await get_token_manager()
+                    if await token_manager.is_token_blacklisted(jti):
+                        raise AuthenticationError(
+                            "Token has been revoked"
+                        ) from None
+                except Exception as e:
+                    logger.debug(f"Token blacklist check failed: {e}")
 
-                token_manager = await get_token_manager()
-                if await token_manager.is_token_blacklisted(jti):
-                    raise AuthenticationError(
-                        "Token has been revoked"
-                    ) from None
-            except Exception as e:
-                logger.debug(f"Token blacklist check failed: {e}")
+            user_id = payload.get("sub")
+            if not user_id:
+                raise AuthenticationError("Invalid token") from None
 
-        user_id = payload.get("sub")
-        if not user_id:
-            raise AuthenticationError("Invalid token") from None
+            user = await self.get_user_by_id(user_id)
+            if not user:
+                raise AuthenticationError("User not found") from None
 
-        user = await self.get_user_by_id(user_id)
-        if not user:
-            raise AuthenticationError("User not found") from None
+            if not user.is_active:
+                raise AuthenticationError(
+                    "User account is deactivated"
+                ) from None
 
-        if not user.is_active:
-            raise AuthenticationError(
-                "User account is deactivated"
-            ) from None
+            return user
 
-        return user
+        # If JWT validation failed, try API key authentication
+        user = await self.get_user_by_api_key(token)
+        if user:
+            if not user.is_active:
+                raise AuthenticationError(
+                    "User account is deactivated"
+                ) from None
+            
+            logger.info(
+                "User authenticated via API key",
+                user_id=user.id,
+            )
+            return user
+
+        # Neither JWT nor API key worked
+        raise AuthenticationError("Invalid token or API key") from None
 
     async def refresh_access_token(
         self, refresh_token: str

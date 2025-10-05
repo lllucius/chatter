@@ -281,3 +281,165 @@ async def test_export_import_roundtrip(
         == exported_data["template"]["description"]
     )
     assert imported_data["category"] == exported_data["template"]["category"]
+
+
+@pytest.mark.asyncio
+async def test_execute_temporary_workflow_template(
+    client: AsyncClient, auth_headers
+):
+    """Test executing a temporary workflow template without storing it."""
+    with patch(
+        "chatter.services.workflow_execution.WorkflowExecutionService.execute_workflow_definition"
+    ) as mock_execute:
+        mock_execute.return_value = {
+            "id": "exec_123",
+            "definition_id": "def_123",
+            "owner_id": "user_123",
+            "status": "completed",
+            "started_at": None,
+            "completed_at": None,
+            "execution_time_ms": 1000,
+            "output_data": {"result": "success"},
+            "error_message": None,
+            "tokens_used": 100,
+            "cost": 0.01,
+            "execution_log": [],
+            "debug_info": None,
+            "created_at": None,
+            "updated_at": None,
+        }
+
+        template_data = {
+            "name": "Temporary Template",
+            "description": "A temporary template for testing",
+            "category": "custom",
+            "default_params": {
+                "model": "gpt-4",
+                "temperature": 0.7,
+            },
+        }
+
+        response = await client.post(
+            "/api/v1/workflows/templates/execute",
+            json={
+                "template": template_data,
+                "input_data": {"message": "test"},
+                "debug_mode": False,
+            },
+            headers=auth_headers,
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert "id" in data
+        assert data["status"] == "completed"
+
+
+@pytest.mark.asyncio
+async def test_execute_temporary_template_missing_required_fields(
+    client: AsyncClient, auth_headers
+):
+    """Test executing a temporary template with missing required fields."""
+    # Missing description
+    template_data = {
+        "name": "Incomplete Template",
+        "category": "custom",
+    }
+
+    response = await client.post(
+        "/api/v1/workflows/templates/execute",
+        json={
+            "template": template_data,
+            "input_data": {},
+        },
+        headers=auth_headers,
+    )
+
+    # Should fail validation
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+
+    # Missing name
+    template_data = {
+        "description": "A template without a name",
+        "category": "custom",
+    }
+
+    response = await client.post(
+        "/api/v1/workflows/templates/execute",
+        json={
+            "template": template_data,
+            "input_data": {},
+        },
+        headers=auth_headers,
+    )
+
+    # Should fail validation
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+
+
+@pytest.mark.asyncio
+async def test_execute_temporary_template_with_merged_params(
+    client: AsyncClient, auth_headers
+):
+    """Test that user input properly merges with template default params."""
+    with patch(
+        "chatter.services.workflow_management.WorkflowManagementService.create_workflow_definition"
+    ) as mock_create_def, patch(
+        "chatter.services.workflow_execution.WorkflowExecutionService.execute_workflow_definition"
+    ) as mock_execute:
+        # Mock workflow definition creation
+        mock_definition = AsyncMock()
+        mock_definition.id = "def_123"
+        mock_definition.name = "Temporary Template (Execution)"
+        mock_create_def.return_value = mock_definition
+
+        # Mock execution
+        mock_execute.return_value = {
+            "id": "exec_123",
+            "definition_id": "def_123",
+            "owner_id": "user_123",
+            "status": "completed",
+            "started_at": None,
+            "completed_at": None,
+            "execution_time_ms": 1000,
+            "output_data": {"result": "success"},
+            "error_message": None,
+            "tokens_used": 100,
+            "cost": 0.01,
+            "execution_log": [],
+            "debug_info": None,
+            "created_at": None,
+            "updated_at": None,
+        }
+
+        template_data = {
+            "name": "Temporary Template",
+            "description": "A temporary template",
+            "category": "custom",
+            "default_params": {
+                "model": "gpt-4",
+                "temperature": 0.7,
+                "system_prompt": "Default prompt",
+            },
+        }
+
+        # User input should override temperature
+        user_input = {
+            "temperature": 0.9,
+            "max_tokens": 1000,
+        }
+
+        response = await client.post(
+            "/api/v1/workflows/templates/execute",
+            json={
+                "template": template_data,
+                "input_data": user_input,
+                "debug_mode": False,
+            },
+            headers=auth_headers,
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["status"] == "completed"
+

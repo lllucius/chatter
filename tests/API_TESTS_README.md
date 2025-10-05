@@ -10,7 +10,8 @@ This document explains the comprehensive API test suite for Chatter's REST endpo
    - User registration and login workflows
    - Token management and validation
    - Password operations
-   - API key management
+   - API key management and authentication
+   - API keys can be used directly for authentication without requiring JWT tokens
 
 2. **Documents API** (`test_documents_unit.py`, `test_documents_integration.py`)
    - Document upload and processing

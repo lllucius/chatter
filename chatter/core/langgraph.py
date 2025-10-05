@@ -252,30 +252,54 @@ class LangGraphWorkflowManager:
 
         try:
             start_time = time.time()
-            result = await workflow.ainvoke(context, config=config)
-            execution_time = int((time.time() - start_time) * 1000)
-
-            # Aggregate token usage from usage_metadata if present
-            usage_metadata = result.get("usage_metadata", {})
+            
+            # Use astream to collect usage_metadata from ALL nodes
+            total_prompt_tokens = 0
+            total_completion_tokens = 0
             total_tokens = 0
-            prompt_tokens = 0
-            completion_tokens = 0
-
-            if isinstance(usage_metadata, dict):
-                # Extract tokens using various field names
-                prompt_tokens = usage_metadata.get(
-                    'input_tokens'
-                ) or usage_metadata.get('prompt_tokens', 0)
-                completion_tokens = usage_metadata.get(
-                    'output_tokens'
-                ) or usage_metadata.get('completion_tokens', 0)
-                total_tokens = usage_metadata.get('total_tokens', 0)
-
-                # Calculate total if not provided
-                if not total_tokens and (
-                    prompt_tokens or completion_tokens
-                ):
-                    total_tokens = prompt_tokens + completion_tokens
+            result = None
+            
+            async for update in workflow.astream(context, config=config):
+                # Each update contains the state after a node execution
+                result = update
+                
+                # Aggregate usage_metadata from each node
+                for node_state in update.values():
+                    if isinstance(node_state, dict):
+                        usage_metadata = node_state.get("usage_metadata", {})
+                        if isinstance(usage_metadata, dict):
+                            # Extract tokens using various field names
+                            prompt_tokens = usage_metadata.get(
+                                'input_tokens'
+                            ) or usage_metadata.get('prompt_tokens', 0) or 0
+                            completion_tokens = usage_metadata.get(
+                                'output_tokens'
+                            ) or usage_metadata.get('completion_tokens', 0) or 0
+                            node_total = usage_metadata.get('total_tokens', 0) or 0
+                            
+                            # If total is not provided, calculate it
+                            if not node_total and (prompt_tokens or completion_tokens):
+                                node_total = prompt_tokens + completion_tokens
+                            
+                            # Aggregate tokens
+                            total_prompt_tokens += prompt_tokens
+                            total_completion_tokens += completion_tokens
+                            total_tokens += node_total
+            
+            # Get the final state (last update)
+            if result is None:
+                result = context
+            else:
+                # Extract the actual final state from the last update
+                # The update is a dict with node names as keys
+                # We need to merge all values to get the complete final state
+                final_state = {}
+                for node_state in result.values():
+                    if isinstance(node_state, dict):
+                        final_state.update(node_state)
+                result = final_state
+            
+            execution_time = int((time.time() - start_time) * 1000)
 
             # Add execution metadata
             result["metadata"] = result.get("metadata", {})
@@ -285,13 +309,13 @@ class LangGraphWorkflowManager:
             # Add aggregated token information to result
             if total_tokens > 0:
                 result["tokens_used"] = total_tokens
-                result["prompt_tokens"] = prompt_tokens
-                result["completion_tokens"] = completion_tokens
+                result["prompt_tokens"] = total_prompt_tokens
+                result["completion_tokens"] = total_completion_tokens
 
                 # Estimate cost (rough estimate, should be provider-specific in production)
                 # Using approximate OpenAI GPT-4 pricing as default
-                cost = (prompt_tokens * 0.00003) + (
-                    completion_tokens * 0.00006
+                cost = (total_prompt_tokens * 0.00003) + (
+                    total_completion_tokens * 0.00006
                 )
                 result["cost"] = cost
 

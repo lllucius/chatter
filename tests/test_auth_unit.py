@@ -455,3 +455,71 @@ class TestAuthServiceUnit:
         assert isinstance(tokens["refresh_token"], str)
         assert len(tokens["access_token"]) > 0
         assert len(tokens["refresh_token"]) > 0
+
+    @pytest.mark.unit
+    async def test_api_key_authentication(self, db_session: AsyncSession):
+        """Test that API keys can be used for authentication."""
+        auth_service = AuthService(db_session)
+        import uuid
+
+        unique_id = str(uuid.uuid4())[:8]
+
+        # Create a user
+        user_data = UserCreate(
+            username=f"apiuser_{unique_id}",
+            email=f"api_{unique_id}@example.com",
+            password="SecurePassword123!",
+            full_name="API User",
+        )
+        user = await auth_service.create_user(user_data)
+
+        # Create an API key
+        api_key = await auth_service.create_api_key(
+            user.id, "Test API Key"
+        )
+        assert api_key is not None
+
+        # Test authentication using the API key
+        authenticated_user = await auth_service.get_current_user(api_key)
+        assert authenticated_user is not None
+        assert authenticated_user.id == user.id
+        assert authenticated_user.username == user.username
+        assert authenticated_user.email == user.email
+
+    @pytest.mark.unit
+    async def test_api_key_and_jwt_token_both_work(
+        self, db_session: AsyncSession
+    ):
+        """Test that both API keys and JWT tokens work for authentication."""
+        auth_service = AuthService(db_session)
+        import uuid
+
+        unique_id = str(uuid.uuid4())[:8]
+
+        # Create a user
+        user_data = UserCreate(
+            username=f"multiuser_{unique_id}",
+            email=f"multi_{unique_id}@example.com",
+            password="SecurePassword123!",
+            full_name="Multi Auth User",
+        )
+        user = await auth_service.create_user(user_data)
+
+        # Test 1: JWT token authentication
+        tokens = auth_service.create_tokens(user)
+        jwt_authenticated_user = await auth_service.get_current_user(
+            tokens["access_token"]
+        )
+        assert jwt_authenticated_user is not None
+        assert jwt_authenticated_user.id == user.id
+
+        # Test 2: API key authentication
+        api_key = await auth_service.create_api_key(user.id, "Test Key")
+        api_key_authenticated_user = await auth_service.get_current_user(
+            api_key
+        )
+        assert api_key_authenticated_user is not None
+        assert api_key_authenticated_user.id == user.id
+
+        # Verify both methods authenticate to the same user
+        assert jwt_authenticated_user.id == api_key_authenticated_user.id

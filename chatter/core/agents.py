@@ -429,6 +429,7 @@ class TaskOrientedAgent(BaseAgent):
                 "error_state": {},
                 "conditional_results": {},
                 "execution_history": [],
+                "usage_metadata": {},
             }
 
             # Execute workflow

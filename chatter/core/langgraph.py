@@ -343,6 +343,7 @@ class LangGraphWorkflowManager:
             "error_state": state.get("error_state", {}),
             "conditional_results": state.get("conditional_results", {}),
             "execution_history": state.get("execution_history", []),
+            "usage_metadata": state.get("usage_metadata", {}),
         }
 
         return context

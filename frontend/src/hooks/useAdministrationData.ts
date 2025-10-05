@@ -8,6 +8,7 @@ import {
   PluginResponse,
   JobResponse,
   JobStatsResponse,
+  UserResponse,
 } from 'chatter-sdk';
 import {
   JobStartedEvent,
@@ -102,16 +103,6 @@ interface BackupSSEEventData {
   error?: string;
 }
 
-interface User {
-  id: string;
-  email: string;
-  role: string;
-  lastLogin: string;
-  status: string;
-  name: string;
-  isActive: boolean;
-}
-
 export const useAdministrationData = () => {
   const { isConnected, on } = useSSE();
   const { showNotification } = useNotifications();
@@ -122,9 +113,9 @@ export const useAdministrationData = () => {
   const [jobs, setJobs] = useState<JobResponse[]>([]);
   const [jobStats, setJobStats] = useState<JobStatsResponse | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
-
-  // Users should come from backend API - removed mock data
-  const [users] = useState<User[]>([]);
+  
+  // Users from backend API
+  const [users, setUsers] = useState<UserResponse[]>([]);
 
   const [lastJobStates, setLastJobStates] = useState<Map<string, string>>(
     new Map()
@@ -250,6 +241,28 @@ export const useAdministrationData = () => {
     }
   }, []);
 
+  const loadUsers = useCallback(async () => {
+    if (isAPICallRecentlyMade('loadUsers')) {
+      return; // Skip if called recently
+    }
+    markAPICallMade('loadUsers');
+
+    try {
+      const response = await callWithRateLimitRetry('loadUsers', () =>
+        getSDK().auth.listUsersApiV1AuthUsers({
+          page: 1,
+          pageSize: 100,
+        })
+      );
+      setUsers(response?.users || []);
+    } catch (error) {
+      handleError(error, {
+        source: 'useAdministrationData.loadUsers',
+        operation: 'load users',
+      });
+    }
+  }, []);
+
   // SSE Event handlers
   useEffect(() => {
     if (!isConnected) return;
@@ -345,7 +358,8 @@ export const useAdministrationData = () => {
     loadPlugins();
     loadJobs();
     loadJobStats();
-  }, [loadBackups, loadPlugins, loadJobs, loadJobStats]); // Include dependencies
+    loadUsers();
+  }, [loadBackups, loadPlugins, loadJobs, loadJobStats, loadUsers]); // Include dependencies
 
   return {
     // Data
@@ -361,5 +375,6 @@ export const useAdministrationData = () => {
     loadPlugins,
     loadJobs,
     loadJobStats,
+    loadUsers,
   };
 };

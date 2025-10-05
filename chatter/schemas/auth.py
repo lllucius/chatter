@@ -327,3 +327,15 @@ class PasswordResetConfirmResponse(BaseModel):
     """Schema for password reset confirmation response."""
 
     message: str = Field(..., description="Success message")
+
+
+class UserListResponse(BaseModel):
+    """Schema for users list response."""
+
+    users: list[UserResponse] = Field(
+        ..., description="List of users"
+    )
+    total: int = Field(..., description="Total number of users")
+    page: int = Field(..., description="Current page number")
+    page_size: int = Field(..., description="Number of users per page")
+

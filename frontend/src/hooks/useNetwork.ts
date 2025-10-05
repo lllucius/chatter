@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { errorHandler } from '../utils/error-handler';
 import { toastService } from '../services/toast-service';
+import { getSDK } from '../services/auth-service';
 
 interface NetworkStatus {
   isOnline: boolean;
@@ -35,17 +36,14 @@ export function useNetwork(options: UseNetworkOptions = {}) {
   });
 
   /**
-   * Check connectivity by attempting to fetch a resource
+   * Check connectivity by attempting to call SDK health check
    */
   const checkConnectivity = useCallback(async (): Promise<boolean> => {
     try {
-      // Use a small timeout and no-cache to ensure fresh check
-      const response = await fetch(pingUrl, {
-        method: 'HEAD',
-        cache: 'no-cache',
-        signal: AbortSignal.timeout(5000), // 5 second timeout
-      });
-      return response.ok;
+      const sdk = getSDK();
+      // Use liveness check for lightweight connectivity verification
+      const result = await sdk.health.livenessCheckLive();
+      return result.status === 'healthy';
     } catch (error) {
       // Log connectivity check failure but don't show toast for routine checks
       errorHandler.handleError(

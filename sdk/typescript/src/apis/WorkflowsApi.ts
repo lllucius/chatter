@@ -1,7 +1,7 @@
 /**
  * Generated API client for Workflows
  */
-import { Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, ChatRequest, ChatResponse, DetailedWorkflowExecutionResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateExecutionRequest, WorkflowTemplateExportResponse, WorkflowTemplateImportRequest, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplateValidationRequest, WorkflowTemplateValidationResponse, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
+import { Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, ChatRequest, ChatResponse, DetailedWorkflowExecutionResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateDirectExecutionRequest, WorkflowTemplateExecutionRequest, WorkflowTemplateExportResponse, WorkflowTemplateImportRequest, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplateValidationRequest, WorkflowTemplateValidationResponse, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class WorkflowsApi extends BaseAPI {
@@ -225,6 +225,25 @@ export class WorkflowsApi extends BaseAPI {
   public async executeWorkflowTemplateApiV1WorkflowsTemplatesTemplateIdExecute(templateId: string, data: WorkflowTemplateExecutionRequest): Promise<WorkflowExecutionResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/templates/${templateId}/execute`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<WorkflowExecutionResponse>;
+  }
+  /**Execute Temporary Workflow Template
+   * Execute a temporary workflow template directly without storing it.
+
+This endpoint allows you to pass template data directly and execute it
+without persisting the template to the database first.
+   */
+  public async executeTemporaryWorkflowTemplateApiV1WorkflowsTemplatesExecute(data: WorkflowTemplateDirectExecutionRequest): Promise<WorkflowExecutionResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/templates/execute`,
       method: 'POST' as HTTPMethod,
       headers: {
         'Content-Type': 'application/json',

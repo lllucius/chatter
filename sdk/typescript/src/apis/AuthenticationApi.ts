@@ -1,7 +1,7 @@
 /**
  * Generated API client for Authentication
  */
-import { APIKeyCreate, APIKeyResponse, APIKeyRevokeResponse, AccountDeactivateResponse, LogoutResponse, PasswordChange, PasswordChangeResponse, PasswordResetConfirmResponse, PasswordResetRequestResponse, TokenRefreshResponse, TokenResponse, UserCreate, UserLogin, UserResponse, UserUpdate } from '../models/index';
+import { APIKeyCreate, APIKeyResponse, APIKeyRevokeResponse, AccountDeactivateResponse, LogoutResponse, PasswordChange, PasswordChangeResponse, PasswordResetConfirmResponse, PasswordResetRequestResponse, TokenRefreshResponse, TokenResponse, UserCreate, UserListResponse, UserLogin, UserResponse, UserUpdate } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class AuthenticationApi extends BaseAPI {
@@ -317,5 +317,34 @@ Returns:
 
     const response = await this.request(requestContext);
     return response.json() as Promise<AccountDeactivateResponse>;
+  }
+  /**List Users
+   * List all users (admin only).
+
+Args:
+    page: Page number (1-indexed)
+    page_size: Number of users per page
+    current_user: Current authenticated admin user
+    session: Database session
+
+Returns:
+    List of users with pagination info
+   */
+  public async listUsersApiV1AuthUsers(options?: { page?: number; pageSize?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<UserListResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/users`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
+      query: {
+        'page': options?.page,
+        'page_size': options?.pageSize,
+        ...options?.query
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<UserListResponse>;
   }
 }

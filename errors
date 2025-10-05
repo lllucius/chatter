@@ -1,286 +1,965 @@
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-429a1e03-3d90-4a0e-93c9-d7287327e229', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': 'what is the date', 'role': 'user'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'date', 'description': 'Returns the current date/time ', 'parameters': {'properties': {}, 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'weather', 'description': 'A weather tool ', 'parameters': {'properties': {'city': {'type': 'string'}}, 'required': ['city'], 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
-connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716adca0>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'text/event-stream'), (b'Server', b'llama.cpp'), (b'Transfer-Encoding', b'chunked'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
-HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
-request_id: None
-receive_response_body.started request=<Request [b'POST']>
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={}, response_metadata={}, id='run--336a8b8c-c69f-437a-a424-7943db2e441e')}, 'run_id': '336a8b8c-c69f-437a-a424-7943db2e441e', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 5, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'df8e93cd-e7a8-4b0d-a6cc-a39b39d80719']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={'tool_calls': [{'index': 0, 'id': 'ZOvHjZWIbRO0QPJBjhK1WN16rpsWOWWu', 'function': {'arguments': '{', 'name': 'date'}, 'type': 'function'}]}, response_metadata={}, id='run--336a8b8c-c69f-437a-a424-7943db2e441e', tool_calls=[{'name': 'date', 'args': {}, 'id': 'ZOvHjZWIbRO0QPJBjhK1WN16rpsWOWWu', 'type': 'tool_call'}], tool_call_chunks=[{'name': 'date', 'args': '{', 'id': 'ZOvHjZWIbRO0QPJBjhK1WN16rpsWOWWu', 'index': 0, 'type': 'tool_call_chunk'}])}, 'run_id': '336a8b8c-c69f-437a-a424-7943db2e441e', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 5, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'df8e93cd-e7a8-4b0d-a6cc-a39b39d80719']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={'tool_calls': [{'index': 0, 'id': None, 'function': {'arguments': '}', 'name': None}, 'type': None}]}, response_metadata={}, id='run--336a8b8c-c69f-437a-a424-7943db2e441e', invalid_tool_calls=[{'name': None, 'args': '}', 'id': None, 'error': None, 'type': 'invalid_tool_call'}], tool_call_chunks=[{'name': None, 'args': '}', 'id': None, 'index': 0, 'type': 'tool_call_chunk'}])}, 'run_id': '336a8b8c-c69f-437a-a424-7943db2e441e', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 5, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'df8e93cd-e7a8-4b0d-a6cc-a39b39d80719']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={}, response_metadata={'finish_reason': 'tool_calls', 'model_name': 'gpt-4', 'system_fingerprint': 'b5833-a0374a67'}, id='run--336a8b8c-c69f-437a-a424-7943db2e441e', usage_metadata={'input_tokens': 232, 'output_tokens': 12, 'total_tokens': 244, 'input_token_details': {}, 'output_token_details': {}})}, 'run_id': '336a8b8c-c69f-437a-a424-7943db2e441e', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 5, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'checkpoint_ns': 'call_model:2739a3e0-0d66-9990-ef9a-536fe5f9989c', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'df8e93cd-e7a8-4b0d-a6cc-a39b39d80719']}
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-close.complete
-Connecting to StreamableHTTP endpoint: http://0.0.0.0:9000/mcp
-Sending client message: root=JSONRPCRequest(method='initialize', params={'protocolVersion': '2025-06-18', 'capabilities': {}, 'clientInfo': {'name': 'mcp', 'version': '0.1.0'}}, jsonrpc='2.0', id=0)
-connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716ae240>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:57 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'1b9c9f39d1b3445b89d1c5dc9722246c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
-HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
-Received session ID: 1b9c9f39d1b3445b89d1c5dc9722246c
-receive_response_body.started request=<Request [b'POST']>
-SSE message: root=JSONRPCResponse(jsonrpc='2.0', id=0, result={'protocolVersion': '2025-06-18', 'capabilities': {'experimental': {}, 'prompts': {'listChanged': True}, 'resources': {'subscribe': False, 'listChanged': True}, 'tools': {'listChanged': True}}, 'serverInfo': {'name': 'mcp', 'version': '1.13.0'}})
-Negotiated protocol version: 2025-06-18
-response_closed.started
-response_closed.complete
-Sending client message: root=JSONRPCNotification(method='notifications/initialized', params=None, jsonrpc='2.0')
-connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
-connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
-receive_response_body.failed exception=GeneratorExit()
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716afdd0>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716ae930>
-send_request_headers.started request=<Request [b'GET']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'GET']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'GET']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 202, b'Accepted', [(b'date', b'Fri, 03 Oct 2025 14:28:57 GMT'), (b'server', b'uvicorn'), (b'content-type', b'application/json'), (b'mcp-session-id', b'1b9c9f39d1b3445b89d1c5dc9722246c'), (b'content-length', b'0')])
-HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 202 Accepted"
-Received 202 Accepted
-response_closed.started
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:57 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'1b9c9f39d1b3445b89d1c5dc9722246c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
-HTTP Request: GET http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
-GET SSE connection established
-receive_response_body.started request=<Request [b'GET']>
-response_closed.complete
-Sending client message: root=JSONRPCRequest(method='tools/call', params={'name': 'date', 'arguments': {}}, jsonrpc='2.0', id=1)
-connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716e5610>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:57 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'1b9c9f39d1b3445b89d1c5dc9722246c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
-HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-SSE message: root=JSONRPCResponse(jsonrpc='2.0', id=1, result={'content': [{'type': 'text', 'text': '2025-10-03 14:28:57'}], 'structuredContent': {'result': '2025-10-03 14:28:57'}, 'isError': False})
-response_closed.started
-response_closed.complete
-Sending client message: root=JSONRPCRequest(method='tools/list', params=None, jsonrpc='2.0', id=2)
-connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
-receive_response_body.failed exception=GeneratorExit()
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716e67e0>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:57 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'1b9c9f39d1b3445b89d1c5dc9722246c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
-HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-SSE message: root=JSONRPCResponse(jsonrpc='2.0', id=2, result={'tools': [{'name': 'date', 'description': 'Returns the current date/time ', 'inputSchema': {'properties': {}, 'type': 'object'}, 'outputSchema': {'properties': {'result': {'title': 'Result', 'type': 'string'}}, 'required': ['result'], 'title': '_WrappedResult', 'type': 'object', 'x-fastmcp-wrap-result': True}, '_meta': {'_fastmcp': {'tags': []}}}, {'name': 'weather', 'description': 'A weather tool ', 'inputSchema': {'properties': {'city': {'title': 'City', 'type': 'string'}}, 'required': ['city'], 'type': 'object'}, 'outputSchema': {'properties': {'result': {'title': 'Result', 'type': 'string'}}, 'required': ['result'], 'title': '_WrappedResult', 'type': 'object', 'x-fastmcp-wrap-result': True}, '_meta': {'_fastmcp': {'tags': []}}}]})
-response_closed.started
-response_closed.complete
-connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
-receive_response_body.failed exception=GeneratorExit()
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346720eb650>
-send_request_headers.started request=<Request [b'DELETE']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'DELETE']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'DELETE']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:57 GMT'), (b'server', b'uvicorn'), (b'content-type', b'application/json'), (b'mcp-session-id', b'1b9c9f39d1b3445b89d1c5dc9722246c'), (b'content-length', b'0')])
-HTTP Request: DELETE http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'DELETE']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-receive_response_body.complete
-response_closed.started
-close.complete
-close.started
-response_closed.complete
-close.complete
-2025-10-03T14:28:57.717682Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6N7KM000TKNGHX16RWN260N has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-19bdd703-9c45-492e-858a-7a8de1c54c63', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-03 14:28:57', 'role': 'tool', 'tool_call_id': 'ZOvHjZWIbRO0QPJBjhK1WN16rpsWOWWu'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'date', 'description': 'Returns the current date/time ', 'parameters': {'properties': {}, 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'weather', 'description': 'A weather tool ', 'parameters': {'properties': {'city': {'type': 'string'}}, 'required': ['city'], 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
-connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716ec6e0>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'text/event-stream'), (b'Server', b'llama.cpp'), (b'Transfer-Encoding', b'chunked'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
-HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
-request_id: None
-receive_response_body.started request=<Request [b'POST']>
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={}, response_metadata={}, id='run--fde2831c-2d0a-4b41-9f99-6855ed33a650')}, 'run_id': 'fde2831c-2d0a-4b41-9f99-6855ed33a650', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 9, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'f975d5f0-d579-4260-82fa-22e35b108e35']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={'tool_calls': [{'index': 0, 'id': 'fMmo1NkNmmA4xGyS2jJHICH6oc29ca5j', 'function': {'arguments': '{', 'name': 'date'}, 'type': 'function'}]}, response_metadata={}, id='run--fde2831c-2d0a-4b41-9f99-6855ed33a650', tool_calls=[{'name': 'date', 'args': {}, 'id': 'fMmo1NkNmmA4xGyS2jJHICH6oc29ca5j', 'type': 'tool_call'}], tool_call_chunks=[{'name': 'date', 'args': '{', 'id': 'fMmo1NkNmmA4xGyS2jJHICH6oc29ca5j', 'index': 0, 'type': 'tool_call_chunk'}])}, 'run_id': 'fde2831c-2d0a-4b41-9f99-6855ed33a650', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 9, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'f975d5f0-d579-4260-82fa-22e35b108e35']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={'tool_calls': [{'index': 0, 'id': None, 'function': {'arguments': '}', 'name': None}, 'type': None}]}, response_metadata={}, id='run--fde2831c-2d0a-4b41-9f99-6855ed33a650', invalid_tool_calls=[{'name': None, 'args': '}', 'id': None, 'error': None, 'type': 'invalid_tool_call'}], tool_call_chunks=[{'name': None, 'args': '}', 'id': None, 'index': 0, 'type': 'tool_call_chunk'}])}, 'run_id': 'fde2831c-2d0a-4b41-9f99-6855ed33a650', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 9, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'f975d5f0-d579-4260-82fa-22e35b108e35']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={}, response_metadata={'finish_reason': 'tool_calls', 'model_name': 'gpt-4', 'system_fingerprint': 'b5833-a0374a67'}, id='run--fde2831c-2d0a-4b41-9f99-6855ed33a650', usage_metadata={'input_tokens': 243, 'output_tokens': 19, 'total_tokens': 262, 'input_token_details': {}, 'output_token_details': {}})}, 'run_id': 'fde2831c-2d0a-4b41-9f99-6855ed33a650', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 9, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'checkpoint_ns': 'call_model:29c30564-9032-494d-73ae-22e2f4c72c8a', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'f975d5f0-d579-4260-82fa-22e35b108e35']}
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-close.complete
-Connecting to StreamableHTTP endpoint: http://0.0.0.0:9000/mcp
-Sending client message: root=JSONRPCRequest(method='initialize', params={'protocolVersion': '2025-06-18', 'capabilities': {}, 'clientInfo': {'name': 'mcp', 'version': '0.1.0'}}, jsonrpc='2.0', id=0)
-connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716aeae0>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:59 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'24f2485c0b1c4b3697bb1a2f53369c8c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
-HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
-Received session ID: 24f2485c0b1c4b3697bb1a2f53369c8c
-receive_response_body.started request=<Request [b'POST']>
-SSE message: root=JSONRPCResponse(jsonrpc='2.0', id=0, result={'protocolVersion': '2025-06-18', 'capabilities': {'experimental': {}, 'prompts': {'listChanged': True}, 'resources': {'subscribe': False, 'listChanged': True}, 'tools': {'listChanged': True}}, 'serverInfo': {'name': 'mcp', 'version': '1.13.0'}})
-Negotiated protocol version: 2025-06-18
-response_closed.started
-response_closed.complete
-Sending client message: root=JSONRPCNotification(method='notifications/initialized', params=None, jsonrpc='2.0')
-connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
-connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
-receive_response_body.failed exception=GeneratorExit()
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716e63c0>
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716aeea0>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.started request=<Request [b'GET']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'GET']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'GET']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:59 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'24f2485c0b1c4b3697bb1a2f53369c8c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
-HTTP Request: GET http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
-GET SSE connection established
-receive_response_body.started request=<Request [b'GET']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 202, b'Accepted', [(b'date', b'Fri, 03 Oct 2025 14:28:59 GMT'), (b'server', b'uvicorn'), (b'content-type', b'application/json'), (b'mcp-session-id', b'24f2485c0b1c4b3697bb1a2f53369c8c'), (b'content-length', b'0')])
-HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 202 Accepted"
-Received 202 Accepted
-response_closed.started
-response_closed.complete
-Sending client message: root=JSONRPCRequest(method='tools/call', params={'name': 'date', 'arguments': {}}, jsonrpc='2.0', id=1)
-connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716e4320>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:59 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'24f2485c0b1c4b3697bb1a2f53369c8c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
-HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-SSE message: root=JSONRPCResponse(jsonrpc='2.0', id=1, result={'content': [{'type': 'text', 'text': '2025-10-03 14:28:59'}], 'structuredContent': {'result': '2025-10-03 14:28:59'}, 'isError': False})
-response_closed.started
-response_closed.complete
-Sending client message: root=JSONRPCRequest(method='tools/list', params=None, jsonrpc='2.0', id=2)
-connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
-receive_response_body.failed exception=GeneratorExit()
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716edb80>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:59 GMT'), (b'server', b'uvicorn'), (b'cache-control', b'no-cache, no-transform'), (b'connection', b'keep-alive'), (b'content-type', b'text/event-stream'), (b'mcp-session-id', b'24f2485c0b1c4b3697bb1a2f53369c8c'), (b'x-accel-buffering', b'no'), (b'transfer-encoding', b'chunked')])
-HTTP Request: POST http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-SSE message: root=JSONRPCResponse(jsonrpc='2.0', id=2, result={'tools': [{'name': 'date', 'description': 'Returns the current date/time ', 'inputSchema': {'properties': {}, 'type': 'object'}, 'outputSchema': {'properties': {'result': {'title': 'Result', 'type': 'string'}}, 'required': ['result'], 'title': '_WrappedResult', 'type': 'object', 'x-fastmcp-wrap-result': True}, '_meta': {'_fastmcp': {'tags': []}}}, {'name': 'weather', 'description': 'A weather tool ', 'inputSchema': {'properties': {'city': {'title': 'City', 'type': 'string'}}, 'required': ['city'], 'type': 'object'}, 'outputSchema': {'properties': {'result': {'title': 'Result', 'type': 'string'}}, 'required': ['result'], 'title': '_WrappedResult', 'type': 'object', 'x-fastmcp-wrap-result': True}, '_meta': {'_fastmcp': {'tags': []}}}]})
-response_closed.started
-response_closed.complete
-connect_tcp.started host='0.0.0.0' port=9000 local_address=None timeout=30 socket_options=None
-receive_response_body.failed exception=GeneratorExit()
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346720e9160>
-send_request_headers.started request=<Request [b'DELETE']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'DELETE']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'DELETE']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'date', b'Fri, 03 Oct 2025 14:28:59 GMT'), (b'server', b'uvicorn'), (b'content-type', b'application/json'), (b'mcp-session-id', b'24f2485c0b1c4b3697bb1a2f53369c8c'), (b'content-length', b'0')])
-HTTP Request: DELETE http://0.0.0.0:9000/mcp "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'DELETE']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-receive_response_body.complete
-response_closed.started
-close.complete
-close.started
-response_closed.complete
-close.complete
-2025-10-03T14:28:59.926998Z [info     ] LLM Node call_model applying context [chatter.core.workflow_graph_builder] correlation_id=01K6N7KM000TKNGHX16RWN260N has_retrieval_context=False retrieval_context_length=0
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-21876321-0236-4c52-befe-c0679520f94a', 'json_data': {'messages': [{'content': 'You are a helpful assistant.', 'role': 'system'}, {'content': '2025-10-03 14:28:59', 'role': 'tool', 'tool_call_id': 'fMmo1NkNmmA4xGyS2jJHICH6oc29ca5j'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': True, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'date', 'description': 'Returns the current date/time ', 'parameters': {'properties': {}, 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'weather', 'description': 'A weather tool ', 'parameters': {'properties': {'city': {'type': 'string'}}, 'required': ['city'], 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
-connect_tcp.started host='localhost' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7346716efe00>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'text/event-stream'), (b'Server', b'llama.cpp'), (b'Transfer-Encoding', b'chunked'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
-HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'text/event-stream', 'server': 'llama.cpp', 'transfer-encoding': 'chunked', 'access-control-allow-origin': ''})
-request_id: None
-receive_response_body.started request=<Request [b'POST']>
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='{"type": "function", "function', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
-2025-10-03T14:29:00.904595Z [debug    ] HTTP Response                  [chatter.main] correlation_id=01K6N7KM000TKNGHX16RWN260N duration=7.017157316207886 duration_ms=7017.157316207886 headers={'cache-control': 'no-cache', 'connection': 'keep-alive', 'content-type': 'text/event-stream; charset=utf-8', 'x-content-type-options': 'nosniff', 'x-frame-options': 'DENY', 'x-xss-protection': '1; mode=block', 'strict-transport-security': 'max-age=31536000; includeSubDomains', 'referrer-policy': 'strict-origin-when-cross-origin', 'x-correlation-id': '01K6N7KM000TKNGHX16RWN260N', 'x-ratelimit-limit': '100', 'x-ratelimit-remaining': '99', 'x-ratelimit-reset': '1759501793', 'x-ratelimit-window': '60'} status_code=200
-2025-10-03T14:29:00.904999Z [debug    ] Recorded request metrics       [chatter.core.monitoring] method=POST path=/api/v1/workflows/execute/chat/streaming response_time_ms=7017.157316207886
-INFO:     127.0.0.1:49748 - "POST /api/v1/workflows/execute/chat/streaming HTTP/1.1" 200 OK
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='":', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content=' "', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='date', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='",', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content=' "', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='parameters', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='":', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content=' {}}', additional_kwargs={}, response_metadata={}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710')}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
-universal ================================================================
-{'event': 'on_chat_model_stream', 'data': {'chunk': AIMessageChunk(content='', additional_kwargs={}, response_metadata={'finish_reason': 'stop', 'model_name': 'gpt-4', 'system_fingerprint': 'b5833-a0374a67'}, id='run--9349c5f2-464f-4b1d-a3e3-6be733ce0710', usage_metadata={'input_tokens': 243, 'output_tokens': 19, 'total_tokens': 262, 'input_token_details': {}, 'output_token_details': {}})}, 'run_id': '9349c5f2-464f-4b1d-a3e3-6be733ce0710', 'name': 'ChatOpenAI', 'tags': ['seq:step:1'], 'metadata': {'thread_id': '01K6JWZP1QGCAPDBF68FB5T9YN', 'langgraph_step': 13, 'langgraph_node': 'call_model', 'langgraph_triggers': ('branch:to:call_model',), 'langgraph_path': ('__pregel_pull', 'call_model'), 'langgraph_checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'checkpoint_ns': 'call_model:ecf6d7fc-964a-f8ab-706a-03138e6d9275', 'ls_provider': 'openai', 'ls_model_name': 'gpt-4', 'ls_model_type': 'chat', 'ls_temperature': 0.7, 'ls_max_tokens': 4096}, 'parent_ids': ['fb707d18-f994-447f-960f-20e762503b17', 'd1163242-d19e-42eb-a17d-fd6ccca8bd2e']}
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-close.started
-close.complete
-2025-10-03T14:29:02.018808Z [info     ] Updated workflow execution 01K6N7KM16NFY25E5JWYHQQKG2 [chatter.services.workflow_management] correlation_id=01K6N7KM000TKNGHX16RWN260N
-2025-10-03T14:29:02.018947Z [info     ] Universal template streaming execution 01K6N7KM16NFY25E5JWYHQQKG2 completed successfully [chatter.services.workflow_execution] correlation_id=01K6N7KM000TKNGHX16RWN260N
+content-script.js:1 cornhusk, shared-service, error: TypeError: Failed to construct 'URL': Invalid URLInvalid url: 
+extractOriginPath @ content-script.js:1
+fingerprintPage @ content-script.js:1
+observeCheckoutMutations @ content-script.js:1
+attributes
+addClasses$1 @ simplebar-react.js?v=3463eab0:296
+SimpleBarCore2.onMouseEnter @ simplebar-react.js?v=3463eab0:431
+content-script.js:1 cornhusk, shared-service, error: TypeError: Failed to construct 'URL': Invalid URLInvalid url: 
+extractOriginPath @ content-script.js:1
+fingerprintPage @ content-script.js:1
+observeCheckoutMutations @ content-script.js:1
+attributes
+(anonymous) @ simplebar-react.js?v=3463eab0:302
+removeClasses$1 @ simplebar-react.js?v=3463eab0:301
+SimpleBarCore2._onMouseEntered @ simplebar-react.js?v=3463eab0:439
+invokeFunc @ simplebar-react.js?v=3463eab0:157
+trailingEdge @ simplebar-react.js?v=3463eab0:183
+timerExpired @ simplebar-react.js?v=3463eab0:176
+setTimeout
+leadingEdge @ simplebar-react.js?v=3463eab0:162
+debounced @ simplebar-react.js?v=3463eab0:205
+SimpleBarCore2.onMouseEnter @ simplebar-react.js?v=3463eab0:436
+content-script.js:1 cornhusk, shared-service, error: TypeError: Failed to construct 'URL': Invalid URLInvalid url: 
+extractOriginPath @ content-script.js:1
+fingerprintPage @ content-script.js:1
+observeCheckoutMutations @ content-script.js:1
+attributes
+SimpleBarCore2.toggleTrackVisibility @ simplebar-react.js?v=3463eab0:800
+SimpleBarCore2.recalculate @ simplebar-react.js?v=3463eab0:742
+(anonymous) @ simplebar-react.js?v=3463eab0:694
+requestAnimationFrame
+(anonymous) @ simplebar-react.js?v=3463eab0:693
+childList
+insertOrAppendPlacementNode @ react-dom_client.js?v=3463eab0:8773
+insertOrAppendPlacementNode @ react-dom_client.js?v=3463eab0:8776
+insertOrAppendPlacementNode @ react-dom_client.js?v=3463eab0:8775
+commitPlacement @ react-dom_client.js?v=3463eab0:8804
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+commitReconciliationEffects @ react-dom_client.js?v=3463eab0:9662
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9375
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9593
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9583
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9387
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+<ForwardRef(TouchRipple2)>
+exports.jsx @ chunk-OBYCLIUT.js?v=3463eab0:250
+ButtonBase2 @ @mui_material.js?v=3463eab0:3789
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateForwardRef @ react-dom_client.js?v=3463eab0:6461
+beginWork @ react-dom_client.js?v=3463eab0:7864
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=3463eab0:11623
+performWorkUntilDeadline @ react-dom_client.js?v=3463eab0:36
+content-script.js:1 cornhusk, shared-service, error: TypeError: Failed to construct 'URL': Invalid URLInvalid url: 
+extractOriginPath @ content-script.js:1
+fingerprintPage @ content-script.js:1
+observeCheckoutMutations @ content-script.js:1
+attributes
+SimpleBarCore2.toggleTrackVisibility @ simplebar-react.js?v=3463eab0:800
+SimpleBarCore2.recalculate @ simplebar-react.js?v=3463eab0:742
+(anonymous) @ simplebar-react.js?v=3463eab0:694
+requestAnimationFrame
+(anonymous) @ simplebar-react.js?v=3463eab0:693
+childList
+insertOrAppendPlacementNode @ react-dom_client.js?v=3463eab0:8773
+insertOrAppendPlacementNode @ react-dom_client.js?v=3463eab0:8775
+insertOrAppendPlacementNode @ react-dom_client.js?v=3463eab0:8776
+commitPlacement @ react-dom_client.js?v=3463eab0:8804
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+commitReconciliationEffects @ react-dom_client.js?v=3463eab0:9662
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9375
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9387
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9593
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9583
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+<MuiTouchRippleRipple>
+exports.jsx @ chunk-OBYCLIUT.js?v=3463eab0:250
+(anonymous) @ @mui_material.js?v=3463eab0:3392
+basicStateReducer @ react-dom_client.js?v=3463eab0:4406
+dispatchSetStateInternal @ react-dom_client.js?v=3463eab0:5340
+dispatchSetState @ react-dom_client.js?v=3463eab0:5321
+(anonymous) @ @mui_material.js?v=3463eab0:3392
+(anonymous) @ @mui_material.js?v=3463eab0:3475
+(anonymous) @ @mui_material.js?v=3463eab0:3137
+Promise.then
+start @ @mui_material.js?v=3463eab0:3137
+(anonymous) @ @mui_material.js?v=3463eab0:3802
+(anonymous) @ chunk-WHYNLZ6V.js?v=3463eab0:455
+executeDispatch @ react-dom_client.js?v=3463eab0:11736
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+processDispatchQueue @ react-dom_client.js?v=3463eab0:11772
+(anonymous) @ react-dom_client.js?v=3463eab0:12182
+batchedUpdates$1 @ react-dom_client.js?v=3463eab0:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=3463eab0:11877
+dispatchEvent @ react-dom_client.js?v=3463eab0:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=3463eab0:14773
+content-script.js:1 cornhusk, shared-service, error: TypeError: Failed to construct 'URL': Invalid URLInvalid url: 
+extractOriginPath @ content-script.js:1
+fingerprintPage @ content-script.js:1
+observeCheckoutMutations @ content-script.js:1
+attributes
+SimpleBarCore2.toggleTrackVisibility @ simplebar-react.js?v=3463eab0:800
+SimpleBarCore2.recalculate @ simplebar-react.js?v=3463eab0:742
+(anonymous) @ simplebar-react.js?v=3463eab0:694
+requestAnimationFrame
+(anonymous) @ simplebar-react.js?v=3463eab0:693
+childList
+removeChild @ react-dom_client.js?v=3463eab0:13969
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+commitDeletionEffectsOnFiber @ react-dom_client.js?v=3463eab0:9192
+recursivelyTraverseDeletionEffects @ react-dom_client.js?v=3463eab0:9118
+commitDeletionEffectsOnFiber @ react-dom_client.js?v=3463eab0:9239
+recursivelyTraverseDeletionEffects @ react-dom_client.js?v=3463eab0:9118
+commitDeletionEffectsOnFiber @ react-dom_client.js?v=3463eab0:9239
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9355
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9387
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9593
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9583
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9502
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9655
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+commitMutationEffectsOnFiber @ react-dom_client.js?v=3463eab0:9374
+recursivelyTraverseMutationEffects @ react-dom_client.js?v=3463eab0:9365
+<span>
+exports.jsx @ chunk-OBYCLIUT.js?v=3463eab0:250
+Ripple @ @mui_material.js?v=3463eab0:3202
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateFunctionComponent @ react-dom_client.js?v=3463eab0:6619
+beginWork @ react-dom_client.js?v=3463eab0:7654
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=3463eab0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=3463eab0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=3463eab0:11558
+(anonymous) @ react-dom_client.js?v=3463eab0:11649
+<Ripple>
+exports.createElement @ chunk-BQYK6RGN.js?v=3463eab0:776
+(anonymous) @ chunk-4RTYTH7D.js?v=3463eab0:3278
+MuiTouchRipple-ripple @ chunk-4RTYTH7D.js?v=3463eab0:2389
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateForwardRef @ react-dom_client.js?v=3463eab0:6461
+beginWork @ react-dom_client.js?v=3463eab0:7864
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=3463eab0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=3463eab0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=3463eab0:11558
+(anonymous) @ react-dom_client.js?v=3463eab0:11649
+<MuiTouchRippleRipple>
+exports.jsx @ chunk-OBYCLIUT.js?v=3463eab0:250
+(anonymous) @ @mui_material.js?v=3463eab0:3392
+basicStateReducer @ react-dom_client.js?v=3463eab0:4406
+dispatchSetStateInternal @ react-dom_client.js?v=3463eab0:5340
+dispatchSetState @ react-dom_client.js?v=3463eab0:5321
+(anonymous) @ @mui_material.js?v=3463eab0:3392
+(anonymous) @ @mui_material.js?v=3463eab0:3475
+(anonymous) @ @mui_material.js?v=3463eab0:3137
+Promise.then
+start @ @mui_material.js?v=3463eab0:3137
+(anonymous) @ @mui_material.js?v=3463eab0:3802
+(anonymous) @ chunk-WHYNLZ6V.js?v=3463eab0:455
+executeDispatch @ react-dom_client.js?v=3463eab0:11736
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+processDispatchQueue @ react-dom_client.js?v=3463eab0:11772
+(anonymous) @ react-dom_client.js?v=3463eab0:12182
+batchedUpdates$1 @ react-dom_client.js?v=3463eab0:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=3463eab0:11877
+dispatchEvent @ react-dom_client.js?v=3463eab0:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=3463eab0:14773
+error-handler.ts:246 [Error Handler] WorkflowTemplatesPage.handleExportTemplate: TypeError: sdk.workflows.exportWorkflowTemplateApiV1WorkflowsTemplatesTemplateIdExport is not a function
+    at Object.handleExportTemplate [as onClick] (WorkflowTemplatesPage.tsx:59:29)
+overrideMethod @ hook.js:608
+handleError @ error-handler.ts:246
+handleError @ error-handler.ts:363
+handleExportTemplate @ WorkflowTemplatesPage.tsx:78
+await in handleExportTemplate
+handleActionClick @ CrudDataTable.tsx:250
+onClick @ CrudDataTable.tsx:400
+executeDispatch @ react-dom_client.js?v=3463eab0:11736
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+processDispatchQueue @ react-dom_client.js?v=3463eab0:11772
+(anonymous) @ react-dom_client.js?v=3463eab0:12182
+batchedUpdates$1 @ react-dom_client.js?v=3463eab0:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=3463eab0:11877
+dispatchEvent @ react-dom_client.js?v=3463eab0:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=3463eab0:14773
+<li>
+exports.createElement @ chunk-BQYK6RGN.js?v=3463eab0:776
+(anonymous) @ chunk-4RTYTH7D.js?v=3463eab0:3278
+MuiButtonBase-root @ chunk-4RTYTH7D.js?v=3463eab0:2389
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateForwardRef @ react-dom_client.js?v=3463eab0:6461
+beginWork @ react-dom_client.js?v=3463eab0:7864
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=3463eab0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=3463eab0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=3463eab0:11558
+(anonymous) @ react-dom_client.js?v=3463eab0:11649
+<MuiButtonBaseRoot>
+exports.jsxs @ chunk-OBYCLIUT.js?v=3463eab0:263
+ButtonBase2 @ @mui_material.js?v=3463eab0:3767
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateForwardRef @ react-dom_client.js?v=3463eab0:6461
+beginWork @ react-dom_client.js?v=3463eab0:7864
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=3463eab0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=3463eab0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=3463eab0:11558
+(anonymous) @ react-dom_client.js?v=3463eab0:11649
+<ForwardRef(ButtonBase2)>
+exports.createElement @ chunk-BQYK6RGN.js?v=3463eab0:776
+(anonymous) @ chunk-4RTYTH7D.js?v=3463eab0:3278
+MuiMenuItem-root @ chunk-4RTYTH7D.js?v=3463eab0:2389
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateForwardRef @ react-dom_client.js?v=3463eab0:6461
+beginWork @ react-dom_client.js?v=3463eab0:7864
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=3463eab0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=3463eab0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=3463eab0:11558
+(anonymous) @ react-dom_client.js?v=3463eab0:11649
+<MuiMenuItemRoot>
+exports.jsx @ chunk-OBYCLIUT.js?v=3463eab0:250
+MenuItem2 @ @mui_material.js?v=3463eab0:27365
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateForwardRef @ react-dom_client.js?v=3463eab0:6461
+beginWork @ react-dom_client.js?v=3463eab0:7864
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=3463eab0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=3463eab0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=3463eab0:11558
+(anonymous) @ react-dom_client.js?v=3463eab0:11649
+<ForwardRef(MenuItem2)>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=3463eab0:250
+(anonymous) @ CrudDataTable.tsx:400
+CrudDataTableInner @ CrudDataTable.tsx:399
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateForwardRef @ react-dom_client.js?v=3463eab0:6461
+beginWork @ react-dom_client.js?v=3463eab0:7864
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=3463eab0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=3463eab0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=3463eab0:11558
+(anonymous) @ react-dom_client.js?v=3463eab0:11649
+error-handler.ts:248 Full Error Details:
+ Source: WorkflowTemplatesPage.handleExportTemplate
+Operation: export template
+Timestamp: 2025-10-04T23:24:08.630Z
+Error Type: TypeError
+Message: sdk.workflows.exportWorkflowTemplateApiV1WorkflowsTemplatesTemplateIdExport is not a function
+Stack Trace:
+TypeError: sdk.workflows.exportWorkflowTemplateApiV1WorkflowsTemplatesTemplateIdExport is not a function
+    at Object.handleExportTemplate [as onClick] (http://localhost:3000/src/pages/WorkflowTemplatesPage.tsx:60:44)
+overrideMethod @ hook.js:608
+handleError @ error-handler.ts:248
+handleError @ error-handler.ts:363
+handleExportTemplate @ WorkflowTemplatesPage.tsx:78
+await in handleExportTemplate
+handleActionClick @ CrudDataTable.tsx:250
+onClick @ CrudDataTable.tsx:400
+executeDispatch @ react-dom_client.js?v=3463eab0:11736
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+processDispatchQueue @ react-dom_client.js?v=3463eab0:11772
+(anonymous) @ react-dom_client.js?v=3463eab0:12182
+batchedUpdates$1 @ react-dom_client.js?v=3463eab0:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=3463eab0:11877
+dispatchEvent @ react-dom_client.js?v=3463eab0:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=3463eab0:14773
+<li>
+exports.createElement @ chunk-BQYK6RGN.js?v=3463eab0:776
+(anonymous) @ chunk-4RTYTH7D.js?v=3463eab0:3278
+MuiButtonBase-root @ chunk-4RTYTH7D.js?v=3463eab0:2389
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateForwardRef @ react-dom_client.js?v=3463eab0:6461
+beginWork @ react-dom_client.js?v=3463eab0:7864
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=3463eab0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=3463eab0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=3463eab0:11558
+(anonymous) @ react-dom_client.js?v=3463eab0:11649
+<MuiButtonBaseRoot>
+exports.jsxs @ chunk-OBYCLIUT.js?v=3463eab0:263
+ButtonBase2 @ @mui_material.js?v=3463eab0:3767
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateForwardRef @ react-dom_client.js?v=3463eab0:6461
+beginWork @ react-dom_client.js?v=3463eab0:7864
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=3463eab0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=3463eab0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=3463eab0:11558
+(anonymous) @ react-dom_client.js?v=3463eab0:11649
+<ForwardRef(ButtonBase2)>
+exports.createElement @ chunk-BQYK6RGN.js?v=3463eab0:776
+(anonymous) @ chunk-4RTYTH7D.js?v=3463eab0:3278
+MuiMenuItem-root @ chunk-4RTYTH7D.js?v=3463eab0:2389
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateForwardRef @ react-dom_client.js?v=3463eab0:6461
+beginWork @ react-dom_client.js?v=3463eab0:7864
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=3463eab0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=3463eab0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=3463eab0:11558
+(anonymous) @ react-dom_client.js?v=3463eab0:11649
+<MuiMenuItemRoot>
+exports.jsx @ chunk-OBYCLIUT.js?v=3463eab0:250
+MenuItem2 @ @mui_material.js?v=3463eab0:27365
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateForwardRef @ react-dom_client.js?v=3463eab0:6461
+beginWork @ react-dom_client.js?v=3463eab0:7864
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=3463eab0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=3463eab0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=3463eab0:11558
+(anonymous) @ react-dom_client.js?v=3463eab0:11649
+<ForwardRef(MenuItem2)>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=3463eab0:250
+(anonymous) @ CrudDataTable.tsx:400
+CrudDataTableInner @ CrudDataTable.tsx:399
+react_stack_bottom_frame @ react-dom_client.js?v=3463eab0:17424
+renderWithHooksAgain @ react-dom_client.js?v=3463eab0:4281
+renderWithHooks @ react-dom_client.js?v=3463eab0:4217
+updateForwardRef @ react-dom_client.js?v=3463eab0:6461
+beginWork @ react-dom_client.js?v=3463eab0:7864
+runWithFiberInDEV @ react-dom_client.js?v=3463eab0:1485
+performUnitOfWork @ react-dom_client.js?v=3463eab0:10868
+workLoopSync @ react-dom_client.js?v=3463eab0:10728
+renderRootSync @ react-dom_client.js?v=3463eab0:10711
+performWorkOnRoot @ react-dom_client.js?v=3463eab0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=3463eab0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=3463eab0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=3463eab0:11558
+(anonymous) @ react-dom_client.js?v=3463eab0:11649
+

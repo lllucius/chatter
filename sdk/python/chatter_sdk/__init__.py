@@ -281,6 +281,7 @@ __all__ = [
     "WorkflowNode",
     "WorkflowNodeData",
     "WorkflowTemplateCreate",
+    "WorkflowTemplateDirectExecutionRequest",
     "WorkflowTemplateExecutionRequest",
     "WorkflowTemplateExportResponse",
     "WorkflowTemplateImportRequest",
@@ -560,6 +561,7 @@ from chatter_sdk.models.workflow_execution_response import WorkflowExecutionResp
 from chatter_sdk.models.workflow_node import WorkflowNode as WorkflowNode
 from chatter_sdk.models.workflow_node_data import WorkflowNodeData as WorkflowNodeData
 from chatter_sdk.models.workflow_template_create import WorkflowTemplateCreate as WorkflowTemplateCreate
+from chatter_sdk.models.workflow_template_direct_execution_request import WorkflowTemplateDirectExecutionRequest as WorkflowTemplateDirectExecutionRequest
 from chatter_sdk.models.workflow_template_execution_request import WorkflowTemplateExecutionRequest as WorkflowTemplateExecutionRequest
 from chatter_sdk.models.workflow_template_export_response import WorkflowTemplateExportResponse as WorkflowTemplateExportResponse
 from chatter_sdk.models.workflow_template_import_request import WorkflowTemplateImportRequest as WorkflowTemplateImportRequest

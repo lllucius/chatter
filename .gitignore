@@ -231,3 +231,4 @@ data/
 /test_analytics_tracing_changes.py
 /ui_preview.html
 test_analytics_fix.py
+.env

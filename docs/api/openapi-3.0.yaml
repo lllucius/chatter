@@ -10426,6 +10426,30 @@ components:
       - description
       title: WorkflowTemplateCreate
       type: object
+    WorkflowTemplateDirectExecutionRequest:
+      description: Schema for executing a temporary template directly.
+      properties:
+        debug_mode:
+          default: false
+          description: Enable debug mode
+          title: Debug Mode
+          type: boolean
+        input_data:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          description: Input data for execution
+          title: Input Data
+        template:
+          additionalProperties: true
+          description: Template data to execute
+          title: Template
+          type: object
+      required:
+      - template
+      title: WorkflowTemplateDirectExecutionRequest
+      type: object
     WorkflowTemplateExecutionRequest:
       description: Schema for template execution request.
       properties:
@@ -20656,6 +20680,52 @@ paths:
       security:
       - CustomHTTPBearer: []
       summary: Create Workflow Template
+      tags:
+      - Workflows
+  /api/v1/workflows/templates/execute:
+    post:
+      description: 'Execute a temporary workflow template directly without storing
+        it.
+
+
+        This endpoint allows you to pass template data directly and execute it
+
+        without persisting the template to the database first.'
+      operationId: execute_temporary_workflow_template_api_v1_workflows_templates_execute_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowTemplateDirectExecutionRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowExecutionResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Execute Temporary Workflow Template
       tags:
       - Workflows
   /api/v1/workflows/templates/import:

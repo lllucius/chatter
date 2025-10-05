@@ -299,6 +299,7 @@ Class | Method | HTTP request | Description
 *WorkflowsApi* | [**execute_chat_workflow_api_v1_workflows_execute_chat_post**](docs/WorkflowsApi.md#execute_chat_workflow_api_v1_workflows_execute_chat_post) | **POST** /api/v1/workflows/execute/chat | Execute Chat Workflow
 *WorkflowsApi* | [**execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post**](docs/WorkflowsApi.md#execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post) | **POST** /api/v1/workflows/execute/chat/streaming | Execute Chat Workflow Streaming
 *WorkflowsApi* | [**execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post**](docs/WorkflowsApi.md#execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post) | **POST** /api/v1/workflows/definitions/custom/execute | Execute Custom Workflow
+*WorkflowsApi* | [**execute_temporary_workflow_template_api_v1_workflows_templates_execute_post**](docs/WorkflowsApi.md#execute_temporary_workflow_template_api_v1_workflows_templates_execute_post) | **POST** /api/v1/workflows/templates/execute | Execute Temporary Workflow Template
 *WorkflowsApi* | [**execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post**](docs/WorkflowsApi.md#execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post) | **POST** /api/v1/workflows/definitions/{workflow_id}/execute | Execute Workflow
 *WorkflowsApi* | [**execute_workflow_template_api_v1_workflows_templates_template_id_execute_post**](docs/WorkflowsApi.md#execute_workflow_template_api_v1_workflows_templates_template_id_execute_post) | **POST** /api/v1/workflows/templates/{template_id}/execute | Execute Workflow Template
 *WorkflowsApi* | [**export_workflow_template_api_v1_workflows_templates_template_id_export_get**](docs/WorkflowsApi.md#export_workflow_template_api_v1_workflows_templates_template_id_export_get) | **GET** /api/v1/workflows/templates/{template_id}/export | Export Workflow Template
@@ -577,6 +578,7 @@ Class | Method | HTTP request | Description
  - [WorkflowNode](docs/WorkflowNode.md)
  - [WorkflowNodeData](docs/WorkflowNodeData.md)
  - [WorkflowTemplateCreate](docs/WorkflowTemplateCreate.md)
+ - [WorkflowTemplateDirectExecutionRequest](docs/WorkflowTemplateDirectExecutionRequest.md)
  - [WorkflowTemplateExecutionRequest](docs/WorkflowTemplateExecutionRequest.md)
  - [WorkflowTemplateExportResponse](docs/WorkflowTemplateExportResponse.md)
  - [WorkflowTemplateImportRequest](docs/WorkflowTemplateImportRequest.md)

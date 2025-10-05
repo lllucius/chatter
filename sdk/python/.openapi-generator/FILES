@@ -240,6 +240,7 @@ chatter_sdk/models/trending_search_response.py
 chatter_sdk/models/usage_metrics_response.py
 chatter_sdk/models/user_behavior_analytics_response.py
 chatter_sdk/models/user_create.py
+chatter_sdk/models/user_list_response.py
 chatter_sdk/models/user_login.py
 chatter_sdk/models/user_response.py
 chatter_sdk/models/user_role.py
@@ -505,6 +506,7 @@ docs/TrendingSearchResponse.md
 docs/UsageMetricsResponse.md
 docs/UserBehaviorAnalyticsResponse.md
 docs/UserCreate.md
+docs/UserListResponse.md
 docs/UserLogin.md
 docs/UserResponse.md
 docs/UserRole.md
@@ -776,6 +778,7 @@ test/test_trending_search_response.py
 test/test_usage_metrics_response.py
 test/test_user_behavior_analytics_response.py
 test/test_user_create.py
+test/test_user_list_response.py
 test/test_user_login.py
 test/test_user_response.py
 test/test_user_role.py

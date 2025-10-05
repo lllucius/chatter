@@ -69,6 +69,13 @@ class TestAuthenticationApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_list_users_api_v1_auth_users_get(self) -> None:
+        """Test case for list_users_api_v1_auth_users_get
+
+        List Users
+        """
+        pass
+
     async def test_login_api_v1_auth_login_post(self) -> None:
         """Test case for login_api_v1_auth_login_post
 

@@ -257,6 +257,7 @@ __all__ = [
     "UsageMetricsResponse",
     "UserBehaviorAnalyticsResponse",
     "UserCreate",
+    "UserListResponse",
     "UserLogin",
     "UserResponse",
     "UserRole",
@@ -537,6 +538,7 @@ from chatter_sdk.models.trending_search_response import TrendingSearchResponse a
 from chatter_sdk.models.usage_metrics_response import UsageMetricsResponse as UsageMetricsResponse
 from chatter_sdk.models.user_behavior_analytics_response import UserBehaviorAnalyticsResponse as UserBehaviorAnalyticsResponse
 from chatter_sdk.models.user_create import UserCreate as UserCreate
+from chatter_sdk.models.user_list_response import UserListResponse as UserListResponse
 from chatter_sdk.models.user_login import UserLogin as UserLogin
 from chatter_sdk.models.user_response import UserResponse as UserResponse
 from chatter_sdk.models.user_role import UserRole as UserRole

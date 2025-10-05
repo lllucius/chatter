@@ -225,6 +225,7 @@ from chatter_sdk.models.trending_search_response import TrendingSearchResponse
 from chatter_sdk.models.usage_metrics_response import UsageMetricsResponse
 from chatter_sdk.models.user_behavior_analytics_response import UserBehaviorAnalyticsResponse
 from chatter_sdk.models.user_create import UserCreate
+from chatter_sdk.models.user_list_response import UserListResponse
 from chatter_sdk.models.user_login import UserLogin
 from chatter_sdk.models.user_response import UserResponse
 from chatter_sdk.models.user_role import UserRole

@@ -153,6 +153,7 @@ Class | Method | HTTP request | Description
 *AuthenticationApi* | [**deactivate_account_api_v1_auth_account_delete**](docs/AuthenticationApi.md#deactivate_account_api_v1_auth_account_delete) | **DELETE** /api/v1/auth/account | Deactivate Account
 *AuthenticationApi* | [**get_current_user_info_api_v1_auth_me_get**](docs/AuthenticationApi.md#get_current_user_info_api_v1_auth_me_get) | **GET** /api/v1/auth/me | Get Current User Info
 *AuthenticationApi* | [**list_api_keys_api_v1_auth_api_keys_get**](docs/AuthenticationApi.md#list_api_keys_api_v1_auth_api_keys_get) | **GET** /api/v1/auth/api-keys | List Api Keys
+*AuthenticationApi* | [**list_users_api_v1_auth_users_get**](docs/AuthenticationApi.md#list_users_api_v1_auth_users_get) | **GET** /api/v1/auth/users | List Users
 *AuthenticationApi* | [**login_api_v1_auth_login_post**](docs/AuthenticationApi.md#login_api_v1_auth_login_post) | **POST** /api/v1/auth/login | Login
 *AuthenticationApi* | [**logout_api_v1_auth_logout_post**](docs/AuthenticationApi.md#logout_api_v1_auth_logout_post) | **POST** /api/v1/auth/logout | Logout
 *AuthenticationApi* | [**refresh_token_api_v1_auth_refresh_post**](docs/AuthenticationApi.md#refresh_token_api_v1_auth_refresh_post) | **POST** /api/v1/auth/refresh | Refresh Token
@@ -554,6 +555,7 @@ Class | Method | HTTP request | Description
  - [UsageMetricsResponse](docs/UsageMetricsResponse.md)
  - [UserBehaviorAnalyticsResponse](docs/UserBehaviorAnalyticsResponse.md)
  - [UserCreate](docs/UserCreate.md)
+ - [UserListResponse](docs/UserListResponse.md)
  - [UserLogin](docs/UserLogin.md)
  - [UserResponse](docs/UserResponse.md)
  - [UserRole](docs/UserRole.md)

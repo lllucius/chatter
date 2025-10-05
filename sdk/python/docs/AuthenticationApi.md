@@ -10,6 +10,7 @@ Method | HTTP request | Description
 [**deactivate_account_api_v1_auth_account_delete**](AuthenticationApi.md#deactivate_account_api_v1_auth_account_delete) | **DELETE** /api/v1/auth/account | Deactivate Account
 [**get_current_user_info_api_v1_auth_me_get**](AuthenticationApi.md#get_current_user_info_api_v1_auth_me_get) | **GET** /api/v1/auth/me | Get Current User Info
 [**list_api_keys_api_v1_auth_api_keys_get**](AuthenticationApi.md#list_api_keys_api_v1_auth_api_keys_get) | **GET** /api/v1/auth/api-keys | List Api Keys
+[**list_users_api_v1_auth_users_get**](AuthenticationApi.md#list_users_api_v1_auth_users_get) | **GET** /api/v1/auth/users | List Users
 [**login_api_v1_auth_login_post**](AuthenticationApi.md#login_api_v1_auth_login_post) | **POST** /api/v1/auth/login | Login
 [**logout_api_v1_auth_logout_post**](AuthenticationApi.md#logout_api_v1_auth_logout_post) | **POST** /api/v1/auth/logout | Logout
 [**refresh_token_api_v1_auth_refresh_post**](AuthenticationApi.md#refresh_token_api_v1_auth_refresh_post) | **POST** /api/v1/auth/refresh | Refresh Token
@@ -517,6 +518,96 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **list_users_api_v1_auth_users_get**
+> UserListResponse list_users_api_v1_auth_users_get(page=page, page_size=page_size)
+
+List Users
+
+List all users (admin only).
+
+Args:
+    page: Page number (1-indexed)
+    page_size: Number of users per page
+    current_user: Current authenticated admin user
+    session: Database session
+
+Returns:
+    List of users with pagination info
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.user_list_response import UserListResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.AuthenticationApi(api_client)
+    page = 1 # int |  (optional) (default to 1)
+    page_size = 50 # int |  (optional) (default to 50)
+
+    try:
+        # List Users
+        api_response = await api_instance.list_users_api_v1_auth_users_get(page=page, page_size=page_size)
+        print("The response of AuthenticationApi->list_users_api_v1_auth_users_get:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling AuthenticationApi->list_users_api_v1_auth_users_get: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **page** | **int**|  | [optional] [default to 1]
+ **page_size** | **int**|  | [optional] [default to 50]
+
+### Return type
+
+[**UserListResponse**](UserListResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

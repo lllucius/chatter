@@ -21,28 +21,28 @@ from chatter_sdk.models import WorkflowTemplateDirectExecutionRequest
 
 async def execute_temporary_template_with_sdk():
     """Execute a temporary template using the Python SDK."""
-    
+
     # Configuration
     api_key = os.getenv("CHATTER_API_KEY", "your-api-key-here")
     base_url = os.getenv("CHATTER_API_BASE_URL", "http://localhost:8000")
-    
+
     # Configure the SDK
     configuration = Configuration(
         host=base_url,
         access_token=api_key
     )
-    
+
     print("=" * 80)
     print("Executing Temporary Template with Python SDK")
     print("=" * 80)
     print(f"\nAPI Base URL: {base_url}")
     print(f"Using API Key: {api_key[:10]}..." if len(api_key) > 10 else f"Using API Key: {api_key}")
-    
+
     # Create the API client
     async with ApiClient(configuration) as api_client:
         # Create the workflows API instance
         workflows_api = WorkflowsApi(api_client)
-        
+
         # Define the temporary template
         template_data = {
             "name": "Quick Search Assistant",
@@ -56,21 +56,21 @@ async def execute_temporary_template_with_sdk():
             "required_tools": ["search"],
             "required_retrievers": None
         }
-        
+
         # Define input data for this execution
         input_data = {
             "temperature": 0.9,  # Override default temperature
             "max_tokens": 1000,
             "message": "What are the latest developments in quantum computing?"
         }
-        
+
         # Create the execution request
         execution_request = WorkflowTemplateDirectExecutionRequest(
             template=template_data,
             input_data=input_data,
             debug_mode=False
         )
-        
+
         print("\n" + "-" * 80)
         print("Template Configuration:")
         print("-" * 80)
@@ -81,37 +81,49 @@ async def execute_temporary_template_with_sdk():
         print(f"Temperature (default): {template_data['default_params']['temperature']}")
         print(f"Temperature (override): {input_data['temperature']}")
         print(f"Required Tools: {template_data['required_tools']}")
-        
+
         print("\n" + "-" * 80)
         print("Executing Temporary Template...")
         print("-" * 80)
-        
+
         try:
             # Execute the temporary template
             response = await workflows_api.execute_temporary_workflow_template_api_v1_workflows_templates_execute_post(
                 workflow_template_direct_execution_request=execution_request
             )
-            
+
             print("\n✅ Execution Successful!")
             print("-" * 80)
             print(f"Execution ID: {response.id}")
             print(f"Status: {response.status}")
             print(f"Created At: {response.created_at}")
-            
+
             if hasattr(response, 'completed_at') and response.completed_at:
                 print(f"Completed At: {response.completed_at}")
-            
+
+            # Display execution stats
+            if hasattr(response, 'execution_time_ms') and response.execution_time_ms is not None:
+                print(f"Execution Time: {response.execution_time_ms} ms")
+
+            if hasattr(response, 'tokens_used'):
+                tokens = response.tokens_used if response.tokens_used is not None else 0
+                print(f"Tokens Used: {tokens}")
+
+            if hasattr(response, 'cost'):
+                cost = response.cost if response.cost is not None else 0.0
+                print(f"Cost: ${cost:.6f}")
+
             if hasattr(response, 'output_data') and response.output_data:
-                print(f"\nOutput Data:")
+                print("\nOutput Data:")
                 print(response.output_data)
-            
+
         except Exception as e:
-            print(f"\n❌ Execution Failed!")
+            print("\n❌ Execution Failed!")
             print("-" * 80)
             print(f"Error: {str(e)}")
             if hasattr(e, 'body'):
                 print(f"Details: {e.body}")
-    
+
     print("\n" + "=" * 80)
 
 
@@ -126,9 +138,9 @@ async def main():
     print("- Chatter API server running (default: http://localhost:8000)")
     print("- Valid API key set in CHATTER_API_KEY environment variable")
     print("=" * 80 + "\n")
-    
+
     await execute_temporary_template_with_sdk()
-    
+
     print("\n" + "=" * 80)
     print("Example Complete")
     print("=" * 80)

@@ -20,12 +20,14 @@ Shows how to use the Chatter Python SDK to execute temporary templates.
 
 **Prerequisites:**
 - Chatter API server running (default: http://localhost:8000)
-- Valid API key set in `CHATTER_API_KEY` environment variable
+- Valid credentials set in `CHATTER_USERNAME` and `CHATTER_PASSWORD` environment variables
+  (or uses defaults: user@example.com/secure_password)
 - Python SDK installed (automatically available in development)
 
 **Run the example:**
 ```bash
-export CHATTER_API_KEY="your-api-key"
+export CHATTER_USERNAME="your-username"
+export CHATTER_PASSWORD="your-password"
 python examples/sdk_temporary_template_example.py
 ```
 
@@ -37,12 +39,14 @@ Shows how to use direct HTTP requests (using the `requests` library) to execute 
 
 **Prerequisites:**
 - Chatter API server running (default: http://localhost:8000)
-- Valid API key set in `CHATTER_API_KEY` environment variable
+- Valid credentials set in `CHATTER_USERNAME` and `CHATTER_PASSWORD` environment variables
+  (or uses defaults: user@example.com/secure_password)
 - requests library (`pip install requests`)
 
 **Run the example:**
 ```bash
-export CHATTER_API_KEY="your-api-key"
+export CHATTER_USERNAME="your-username"
+export CHATTER_PASSWORD="your-password"
 pip install requests
 python examples/api_temporary_template_example.py
 ```

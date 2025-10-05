@@ -15,28 +15,66 @@ sdk_path = Path(__file__).parent.parent / "sdk" / "python"
 if str(sdk_path) not in sys.path:
     sys.path.insert(0, str(sdk_path))
 
-from chatter_sdk import ApiClient, Configuration, WorkflowsApi
+from chatter_sdk import ApiClient, Configuration, WorkflowsApi, AuthenticationApi, UserLogin
 from chatter_sdk.models import WorkflowTemplateDirectExecutionRequest
+
+
+async def login_and_get_token(base_url):
+    """Login to the API and get access token."""
+    # Get credentials from environment or use defaults for examples
+    username = os.getenv("CHATTER_USERNAME", "user@example.com")
+    password = os.getenv("CHATTER_PASSWORD", "secure_password")
+    
+    print("\n" + "-" * 80)
+    print("Logging in to Chatter API...")
+    print("-" * 80)
+    print(f"Username: {username}")
+    
+    # Configure the SDK for login (no auth required for login endpoint)
+    configuration = Configuration(host=base_url)
+    
+    try:
+        async with ApiClient(configuration) as api_client:
+            auth_api = AuthenticationApi(api_client)
+            user_login = UserLogin(username=username, password=password)
+            
+            response = await auth_api.login_api_v1_auth_login_post(user_login=user_login)
+            
+            print("✅ Login Successful!")
+            print(f"Token expires in: {response.expires_in} seconds")
+            return response.access_token
+            
+    except Exception as e:
+        print(f"❌ Login Failed: {str(e)}")
+        print("\nPlease set CHATTER_USERNAME and CHATTER_PASSWORD environment variables")
+        print("or ensure the Chatter API server is running with correct credentials")
+        return None
 
 
 async def execute_temporary_template_with_sdk():
     """Execute a temporary template using the Python SDK."""
     
     # Configuration
-    api_key = os.getenv("CHATTER_API_KEY", "your-api-key-here")
     base_url = os.getenv("CHATTER_API_BASE_URL", "http://localhost:8000")
-    
-    # Configure the SDK
-    configuration = Configuration(
-        host=base_url,
-        api_key={"HTTPBearer": api_key}
-    )
     
     print("=" * 80)
     print("Executing Temporary Template with Python SDK")
     print("=" * 80)
     print(f"\nAPI Base URL: {base_url}")
-    print(f"Using API Key: {api_key[:10]}..." if len(api_key) > 10 else f"Using API Key: {api_key}")
+    
+    # Login to get access token
+    api_key = await login_and_get_token(base_url)
+    if not api_key:
+        print("\n❌ Cannot proceed without authentication")
+        return
+    
+    print(f"\nUsing API Key: {api_key[:10]}..." if len(api_key) > 10 else f"\nUsing API Key: {api_key}")
+    
+    # Configure the SDK with the obtained token
+    configuration = Configuration(
+        host=base_url,
+        api_key={"HTTPBearer": api_key}
+    )
     
     # Create the API client
     async with ApiClient(configuration) as api_client:
@@ -124,7 +162,8 @@ async def main():
     print("without storing it in the database using the Python SDK.")
     print("\nPrerequisites:")
     print("- Chatter API server running (default: http://localhost:8000)")
-    print("- Valid API key set in CHATTER_API_KEY environment variable")
+    print("- Valid credentials set in CHATTER_USERNAME and CHATTER_PASSWORD")
+    print("  environment variables (or uses defaults: user@example.com/secure_password)")
     print("=" * 80 + "\n")
     
     await execute_temporary_template_with_sdk()

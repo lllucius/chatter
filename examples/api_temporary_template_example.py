@@ -19,11 +19,54 @@ except ImportError:
     sys.exit(1)
 
 
+def login_and_get_token(base_url):
+    """Login to the API and get access token."""
+    # Get credentials from environment or use defaults for examples
+    username = os.getenv("CHATTER_USERNAME", "user@example.com")
+    password = os.getenv("CHATTER_PASSWORD", "secure_password")
+    
+    login_endpoint = f"{base_url}/api/v1/auth/login"
+    login_data = {
+        "username": username,
+        "password": password
+    }
+    
+    print("\n" + "-" * 80)
+    print("Logging in to Chatter API...")
+    print("-" * 80)
+    print(f"Login Endpoint: {login_endpoint}")
+    print(f"Username: {username}")
+    
+    try:
+        response = requests.post(
+            login_endpoint,
+            json=login_data,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            access_token = result.get("access_token")
+            print("✅ Login Successful!")
+            print(f"Token expires in: {result.get('expires_in', 'N/A')} seconds")
+            return access_token
+        else:
+            print(f"❌ Login Failed! Status Code: {response.status_code}")
+            print(f"Response: {response.text}")
+            print("\nPlease set CHATTER_USERNAME and CHATTER_PASSWORD environment variables")
+            return None
+            
+    except Exception as e:
+        print(f"❌ Login Error: {str(e)}")
+        print("\nPlease ensure the Chatter API server is running and credentials are correct")
+        return None
+
+
 def execute_temporary_template_with_api():
     """Execute a temporary template using direct API calls."""
     
     # Configuration
-    api_key = os.getenv("CHATTER_API_KEY", "your-api-key-here")
     base_url = os.getenv("CHATTER_API_BASE_URL", "http://localhost:8000")
     endpoint = f"{base_url}/api/v1/workflows/templates/execute"
     
@@ -32,7 +75,14 @@ def execute_temporary_template_with_api():
     print("=" * 80)
     print(f"\nAPI Base URL: {base_url}")
     print(f"Endpoint: {endpoint}")
-    print(f"Using API Key: {api_key[:10]}..." if len(api_key) > 10 else f"Using API Key: {api_key}")
+    
+    # Login to get access token
+    api_key = login_and_get_token(base_url)
+    if not api_key:
+        print("\n❌ Cannot proceed without authentication")
+        return
+    
+    print(f"\nUsing API Key: {api_key[:10]}..." if len(api_key) > 10 else f"\nUsing API Key: {api_key}")
     
     # Define the temporary template
     template_data = {
@@ -230,7 +280,8 @@ def main():
     print("without storing it in the database using direct API calls.")
     print("\nPrerequisites:")
     print("- Chatter API server running (default: http://localhost:8000)")
-    print("- Valid API key set in CHATTER_API_KEY environment variable")
+    print("- Valid credentials set in CHATTER_USERNAME and CHATTER_PASSWORD")
+    print("  environment variables (or uses defaults: user@example.com/secure_password)")
     print("- requests library installed (pip install requests)")
     print("=" * 80 + "\n")
     

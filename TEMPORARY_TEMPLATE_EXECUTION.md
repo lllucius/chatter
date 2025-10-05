@@ -31,7 +31,7 @@ This document describes the new API endpoint for executing temporary workflow te
   "input_data": {
     "temperature": 0.9,
     "max_tokens": 1000,
-    "user_query": "What is the weather today?"
+    "message": "What is the weather today?"
   },
   "debug_mode": false
 }

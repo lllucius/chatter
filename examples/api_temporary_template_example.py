@@ -114,6 +114,10 @@ def execute_temporary_template_with_api():
             if 'execution_time_ms' in result and result['execution_time_ms'] is not None:
                 print(f"Execution Time: {result['execution_time_ms']} ms")
 
+            # Note: tokens_used and cost will only be non-zero when:
+            # 1. A real LLM provider is configured (e.g., OpenAI, Anthropic with valid API keys)
+            # 2. The workflow actually calls the LLM
+            # 3. The LLM provider returns usage metadata in the response
             if 'tokens_used' in result:
                 print(f"Tokens Used: {result.get('tokens_used', 0)}")
 

@@ -14,7 +14,7 @@ vi.mock('chatter-sdk', () => ({
       deleteConversationApiV1ConversationsConversationId: vi.fn(),
     },
     workflows: {
-      getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat: vi.fn(),
+      listWorkflowTemplatesApiV1WorkflowsTemplates: vi.fn(),
     },
     withAuth: vi.fn().mockImplementation(() => ({
       conversations: {
@@ -22,7 +22,7 @@ vi.mock('chatter-sdk', () => ({
         deleteConversationApiV1ConversationsConversationId: vi.fn(),
       },
       workflows: {
-        getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat: vi.fn(),
+        listWorkflowTemplatesApiV1WorkflowsTemplates: vi.fn(),
       },
     })),
   })),
@@ -32,7 +32,7 @@ describe('SDK Initialization Fix', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset the initialized state by setting the private property
-    (authService as { initialized: boolean }).initialized = false;
+    (authService as unknown as { initialized: boolean }).initialized = false;
   });
 
   afterEach(() => {
@@ -87,7 +87,7 @@ describe('SDK Initialization Fix', () => {
     const sdk = getSDK();
     expect(sdk.workflows).toBeDefined();
     expect(
-      sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat
+      sdk.workflows.listWorkflowTemplatesApiV1WorkflowsTemplates
     ).toBeDefined();
   });
 

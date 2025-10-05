@@ -118,7 +118,9 @@ describe('WorkflowManagementPage', () => {
     });
 
     // Check that the copied data contains expected template information
-    const clipboardData = JSON.parse(mockWriteText.mock.calls[0][0]);
+    const clipboardData = JSON.parse(
+      (mockWriteText as unknown as Mock).mock.calls[0][0]
+    );
     expect(clipboardData.name).toBe('Test Template (Copy)');
     expect(clipboardData.description).toBe('A test workflow template');
     expect(clipboardData.capabilities).toBe('sequential');

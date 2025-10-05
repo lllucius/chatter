@@ -69,7 +69,7 @@ describe('AgentsPage', () => {
       agents: {
         listAgentsApiV1Agents: mockListAgents,
       },
-    } as { agents: { listAgentsApiV1Agents: unknown } });
+    } as unknown as ReturnType<typeof getSDK>);
 
     renderAgentsPage();
 

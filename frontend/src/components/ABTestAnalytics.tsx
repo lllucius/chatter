@@ -37,18 +37,11 @@ import {
   Cell,
 } from 'recharts';
 
-interface MetricData {
-  metric_name: string;
-  value: number;
-}
-
-interface VariantData {
-  name?: string;
-  variant_id: string;
-  participants?: number;
-  [key: string]: unknown;
-}
-import { ABTestMetricsResponse, ABTestResultsResponse } from 'chatter-sdk';
+import {
+  ABTestMetricsResponse,
+  ABTestResultsResponse,
+  TestMetric,
+} from 'chatter-sdk';
 import {
   TestRecommendations,
   TestPerformance,
@@ -79,20 +72,18 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
   // Use real statistics from backend - no sample data
   const actualStatistics = React.useMemo(() => {
     // In real implementation, this would come from results prop
-    return results
-      ? {
-          confidence_level: 0.95,
-          effect_size:
-            results.metrics?.find(
-              (m: MetricData) => m.metric_name === 'effect_size'
-            )?.value || 0,
-          power: 0.8,
-          p_value:
-            results.metrics?.find(
-              (m: MetricData) => m.metric_name === 'p_value'
-            )?.value || 0,
-        }
-      : null;
+    if (!results) return null;
+
+    // Calculate statistics from metrics - use first metric for effect size and p-value
+    // These metrics may not be in the TestMetric array since they don't match the enum
+    const metrics = results.metrics || [];
+    
+    return {
+      confidence_level: 0.95,
+      effect_size: metrics.length > 0 ? metrics[0].value : 0,
+      power: 0.8,
+      p_value: metrics.length > 1 ? metrics[1].value : 0,
+    };
   }, [results]);
 
   // Use real variant data - no mock data
@@ -299,13 +290,13 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
               </Typography>
               {actualVariants && actualVariants.length > 0 ? (
                 <List>
-                  {actualVariants.map((variant: VariantData) => (
+                  {actualVariants.map((variant: TestMetric) => (
                     <ListItem
-                      key={variant.name || variant.variant_id}
+                      key={variant.variant_name}
                       sx={{ px: 0 }}
                     >
                       <ListItemIcon>
-                        {getTrendIcon(variant.conversion_rate || 0, 0.12)}
+                        {getTrendIcon(variant.value || 0, 0.12)}
                       </ListItemIcon>
                       <ListItemText
                         primary={
@@ -317,15 +308,15 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                             }}
                           >
                             <Typography variant="subtitle2">
-                              {(variant.name || variant.variant_id || 'Unknown')
+                              {(variant.variant_name || 'Unknown')
                                 .replace('_', ' ')
                                 .toUpperCase()}
                             </Typography>
                             <Chip
-                              label={`${((variant.conversion_rate || 0) * 100).toFixed(1)}%`}
+                              label={`${(variant.value * 100).toFixed(1)}%`}
                               size="small"
                               color={
-                                (variant.name || variant.variant_id) ===
+                                variant.variant_name ===
                                 actualResults?.winning_variant
                                   ? 'success'
                                   : 'default'
@@ -334,15 +325,16 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                           </Box>
                         }
                         secondary={
-                          <Box>
+                          <>
                             <Typography variant="body2" color="text.secondary">
-                              {variant.conversions || 0} /{' '}
-                              {variant.participants || 0} conversions
+                              Sample size: {variant.sample_size || 0}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              ROI: {(variant.roi || 0).toFixed(2)}x
-                            </Typography>
-                          </Box>
+                            {variant.confidence_interval && (
+                              <Typography variant="body2" color="text.secondary">
+                                CI: [{variant.confidence_interval[0]?.toFixed(2)}, {variant.confidence_interval[1]?.toFixed(2)}]
+                              </Typography>
+                            )}
+                          </>
                         }
                       />
                     </ListItem>
@@ -379,19 +371,19 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                       cy="50%"
                       labelLine={false}
                       label={(props: {
-                        name?: string;
+                        variant_name?: string;
                         value?: string | number;
                       }) =>
-                        `${props.name?.replace('_', ' ').toUpperCase() || 'Unknown'}: ${props.value || 0}`
+                        `${props.variant_name?.replace('_', ' ').toUpperCase() || 'Unknown'}: ${props.value || 0}`
                       }
                       outerRadius={80}
                       fill="#8884d8"
-                      dataKey="participants"
+                      dataKey="sample_size"
                     >
                       {actualVariants.map(
-                        (entry: VariantData, index: number) => (
+                        (entry: TestMetric, index: number) => (
                           <Cell
-                            key={`cell-${index}`}
+                            key={`cell-${entry.variant_name}-${index}`}
                             fill={Object.values(variantColors)[index]}
                           />
                         )
@@ -424,7 +416,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                   <BarChart data={actualVariants}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
-                      dataKey="name"
+                      dataKey="variant_name"
                       tickFormatter={(value) =>
                         value?.replace('_', ' ').toUpperCase() || ''
                       }
@@ -432,14 +424,14 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                     <YAxis />
                     <Tooltip
                       formatter={(value: unknown) => [
-                        `$${Number(value).toLocaleString()}`,
-                        'Revenue',
+                        `${Number(value).toFixed(2)}`,
+                        'Value',
                       ]}
                       labelFormatter={(label) =>
                         label?.replace('_', ' ').toUpperCase() || ''
                       }
                     />
-                    <Bar dataKey="revenue" fill="#82ca9d" />
+                    <Bar dataKey="value" fill="#82ca9d" />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (

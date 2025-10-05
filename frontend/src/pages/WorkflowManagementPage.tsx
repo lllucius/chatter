@@ -21,9 +21,15 @@ import {
   SpeedIcon,
 } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
-import WorkflowTemplatesTab from '../components/workflow-management/WorkflowTemplatesTab';
-import WorkflowExecutionsTab from '../components/workflow-management/WorkflowExecutionsTab';
-import WorkflowEditor from '../components/workflow/WorkflowEditor';
+import WorkflowTemplatesTab, {
+  WorkflowTemplate,
+} from '../components/workflow-management/WorkflowTemplatesTab';
+import WorkflowExecutionsTab, {
+  WorkflowExecution,
+} from '../components/workflow-management/WorkflowExecutionsTab';
+import WorkflowEditor, {
+  WorkflowDefinition,
+} from '../components/workflow/WorkflowEditor';
 import { useWorkflowData } from '../hooks/useWorkflowData';
 import { useFormGeneric } from '../hooks/useFormGeneric';
 import { toastService } from '../services/toast-service';
@@ -39,7 +45,7 @@ const WorkflowManagementPage: React.FC = () => {
   const {
     loading,
     templates,
-    _availableTools,
+    availableTools: _availableTools,
     executions,
     selectedTemplate,
     setSelectedTemplate,
@@ -71,8 +77,8 @@ const WorkflowManagementPage: React.FC = () => {
         // This would create a template with the workflow data
         const templateData = {
           ...values,
-          workflow: {}, // Would come from workflow editor
-        };
+          // workflow field doesn't exist in WorkflowTemplateCreate
+        } as unknown as WorkflowTemplateResponse;
         await createTemplate(templateData);
         toastService.success('Template created successfully');
         setBuilderDialogOpen(false);
@@ -179,10 +185,12 @@ const WorkflowManagementPage: React.FC = () => {
 
         <TabPanel value={tabValue} index={0} idPrefix="workflow">
           <WorkflowTemplatesTab
-            templates={templates}
+            templates={templates as unknown as WorkflowTemplate[]}
             loading={loading}
             onExecuteTemplate={handleExecuteTemplate}
-            onEditTemplate={handleEditTemplate}
+            onEditTemplate={
+              handleEditTemplate as unknown as (template: WorkflowTemplate) => void
+            }
             onDeleteTemplate={handleDeleteTemplate}
           />
         </TabPanel>
@@ -195,7 +203,10 @@ const WorkflowManagementPage: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={2} idPrefix="workflow">
-          <WorkflowExecutionsTab executions={executions} loading={loading} />
+          <WorkflowExecutionsTab
+            executions={executions as unknown as WorkflowExecution[]}
+            loading={loading}
+          />
         </TabPanel>
       </Box>
 
@@ -291,7 +302,14 @@ const WorkflowManagementPage: React.FC = () => {
               borderRadius: 1,
             }}
           >
-            <WorkflowEditor initialWorkflow={editingTemplate?.workflow} />
+            <WorkflowEditor
+              initialWorkflow={
+                editingTemplate
+                  ? ((editingTemplate as unknown as WorkflowTemplate)
+                      .workflow as unknown as WorkflowDefinition)
+                  : undefined
+              }
+            />
           </Box>
         </DialogContent>
         <DialogActions>

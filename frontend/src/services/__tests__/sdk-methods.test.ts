@@ -49,7 +49,7 @@ describe('SDK Method Integration', () => {
         .executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming
     ).toBe('function');
     expect(
-      typeof sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat
+      typeof sdk.workflows.listWorkflowTemplatesApiV1WorkflowsTemplates
     ).toBe('function');
   });
 

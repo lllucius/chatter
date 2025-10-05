@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { describe, test, beforeEach, expect, vi } from 'vitest';
+import { describe, test, beforeEach, expect, vi, type Mock } from 'vitest';
 import WorkflowManagementPage from '../WorkflowManagementPage';
 
 // Mock the auth service
@@ -118,7 +118,9 @@ describe('WorkflowManagementPage', () => {
     });
 
     // Check that the copied data contains expected template information
-    const clipboardData = JSON.parse(mockWriteText.mock.calls[0][0]);
+    const clipboardData = JSON.parse(
+      (mockWriteText as unknown as Mock).mock.calls[0][0]
+    );
     expect(clipboardData.name).toBe('Test Template (Copy)');
     expect(clipboardData.description).toBe('A test workflow template');
     expect(clipboardData.capabilities).toBe('sequential');

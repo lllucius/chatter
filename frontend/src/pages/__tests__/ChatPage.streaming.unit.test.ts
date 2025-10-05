@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 
 interface MockMessage {
   id: string;
+  role?: string;
   content: string;
+  timestamp?: Date;
   metadata?: {
     tokens?: number;
   };

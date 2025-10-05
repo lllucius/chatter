@@ -1134,6 +1134,7 @@ async def execute_custom_workflow(
             "error_state": {},
             "conditional_results": {},
             "execution_history": [],
+            "usage_metadata": {},
         }
 
         # Execute workflow

@@ -46,6 +46,7 @@ class WorkflowNodeContext(TypedDict):
     execution_history: list[
         dict[str, Any]
     ]  # For debugging and progress tracking
+    usage_metadata: dict[str, Any]  # For token usage tracking
 
 
 class WorkflowNode(ABC):

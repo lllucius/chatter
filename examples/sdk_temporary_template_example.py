@@ -105,6 +105,10 @@ async def execute_temporary_template_with_sdk():
             if hasattr(response, 'execution_time_ms') and response.execution_time_ms is not None:
                 print(f"Execution Time: {response.execution_time_ms} ms")
 
+            # Note: tokens_used and cost will only be non-zero when:
+            # 1. A real LLM provider is configured (e.g., OpenAI, Anthropic with valid API keys)
+            # 2. The workflow actually calls the LLM
+            # 3. The LLM provider returns usage metadata in the response
             if hasattr(response, 'tokens_used'):
                 tokens = response.tokens_used if response.tokens_used is not None else 0
                 print(f"Tokens Used: {tokens}")

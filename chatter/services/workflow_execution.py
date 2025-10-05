@@ -547,6 +547,7 @@ class WorkflowExecutionService:
                 "error_state": {},
                 "conditional_results": {},
                 "execution_history": [],
+                "usage_metadata": {},
             }
 
             # Execute workflow
@@ -942,6 +943,7 @@ class WorkflowExecutionService:
                 "error_state": {},
                 "conditional_results": {},
                 "execution_history": [],
+                "usage_metadata": {},
             }
 
             # Execute workflow
@@ -1360,6 +1362,7 @@ class WorkflowExecutionService:
                 "error_state": {},
                 "conditional_results": {},
                 "execution_history": [],
+                "usage_metadata": {},
             }
 
             # Stream workflow execution
@@ -1763,6 +1766,7 @@ class WorkflowExecutionService:
                 "error_state": {},
                 "conditional_results": {},
                 "execution_history": [],
+                "usage_metadata": {},
             }
 
             # Stream workflow execution
@@ -2019,6 +2023,7 @@ class WorkflowExecutionService:
                 "error_state": {},
                 "conditional_results": {},
                 "execution_history": [],
+                "usage_metadata": {},
             }
 
             # Execute workflow
@@ -2249,6 +2254,7 @@ class WorkflowExecutionService:
                 "error_state": {},
                 "conditional_results": {},
                 "execution_history": [],
+                "usage_metadata": {},
             }
 
             # Log workflow structure for debugging

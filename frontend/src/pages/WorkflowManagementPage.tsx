@@ -27,7 +27,9 @@ import WorkflowTemplatesTab, {
 import WorkflowExecutionsTab, {
   WorkflowExecution,
 } from '../components/workflow-management/WorkflowExecutionsTab';
-import WorkflowEditor from '../components/workflow/WorkflowEditor';
+import WorkflowEditor, {
+  WorkflowDefinition,
+} from '../components/workflow/WorkflowEditor';
 import { useWorkflowData } from '../hooks/useWorkflowData';
 import { useFormGeneric } from '../hooks/useFormGeneric';
 import { toastService } from '../services/toast-service';

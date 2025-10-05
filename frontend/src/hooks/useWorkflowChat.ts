@@ -12,8 +12,17 @@ export interface ChatWorkflowConfig extends Record<string, unknown> {
     temperature?: number;
     max_tokens?: number;
   };
-  tool_config?: Record<string, unknown>;
-  retrieval_config?: Record<string, unknown>;
+  tool_config?: {
+    allowed_tools?: string[];
+    max_tool_calls?: number;
+    parallel_tool_calls?: boolean;
+    [key: string]: unknown;
+  };
+  retrieval_config?: {
+    max_documents?: number;
+    rerank?: boolean;
+    [key: string]: unknown;
+  };
 }
 
 export interface ChatWorkflowRequest extends Record<string, unknown> {

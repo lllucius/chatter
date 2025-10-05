@@ -872,6 +872,101 @@ class WorkflowManagementService:
             )
             raise
 
+    async def create_workflow_definition_from_template_data(
+        self,
+        template_data: dict[str, Any],
+        owner_id: str,
+        user_input: dict[str, Any] | None = None,
+        is_temporary: bool = True,
+    ) -> WorkflowDefinition:
+        """Create a workflow definition from template data without persisting the template.
+
+        Args:
+            template_data: Template data dictionary
+            owner_id: ID of the user creating the definition
+            user_input: Optional user input to merge with template params
+            is_temporary: Whether this is a temporary definition for execution
+
+        Returns:
+            Created workflow definition
+
+        Raises:
+            BadRequestProblem: If template data is invalid
+        """
+        try:
+            from chatter.utils.problem import BadRequestProblem
+
+            # Validate required fields
+            required_fields = ["name", "description"]
+            for field in required_fields:
+                if field not in template_data:
+                    raise BadRequestProblem(
+                        detail=f"Missing required field in template: {field}"
+                    )
+
+            # Create a temporary template object for workflow generation
+            # This is not persisted to the database
+            class TemporaryTemplate:
+                """Temporary template object for workflow generation."""
+                def __init__(self, data: dict[str, Any]):
+                    self.name = data.get("name", "Temporary Template")
+                    self.description = data.get("description", "")
+                    self.category = data.get("category", "custom")
+                    self.default_params = data.get("default_params", {})
+                    self.required_tools = data.get("required_tools")
+                    self.required_retrievers = data.get("required_retrievers")
+                    self.tags = data.get("tags")
+                    self.is_public = data.get("is_public", False)
+
+            temp_template = TemporaryTemplate(template_data)
+
+            # Create name for the definition
+            definition_name = f"{temp_template.name}"
+            if is_temporary:
+                definition_name += " (Execution)"
+
+            # Merge template default params with user input
+            merged_input = {**(temp_template.default_params or {})}
+            if user_input:
+                merged_input.update(user_input)
+
+            # Generate workflow structure based on template
+            nodes, edges = self._generate_workflow_from_template(
+                temp_template, merged_input
+            )
+
+            # Create the workflow definition
+            definition = await self.create_workflow_definition(
+                owner_id=owner_id,
+                name=definition_name,
+                description=f"Generated from temporary template: {temp_template.name}",
+                nodes=nodes,
+                edges=edges,
+                metadata={
+                    "generated_from_template_data": True,
+                    "template_name": temp_template.name,
+                    "user_input": user_input,
+                    "is_temporary": is_temporary,
+                    "required_tools": temp_template.required_tools,
+                    "required_retrievers": temp_template.required_retrievers,
+                },
+                template_id=None,
+            )
+
+            logger.info(
+                f"Created workflow definition {definition.id} from temporary template data"
+            )
+
+            return definition
+
+        except BadRequestProblem:
+            raise
+        except Exception as e:
+            logger.error(
+                f"Failed to create workflow definition from template data: {e}"
+            )
+            raise
+
     def _generate_workflow_from_template(
         self,
         template: "WorkflowTemplate",

@@ -461,6 +461,20 @@ class WorkflowTemplateExecutionRequest(BaseModel):
     )
 
 
+class WorkflowTemplateDirectExecutionRequest(BaseModel):
+    """Schema for executing a temporary template directly."""
+
+    template: dict[str, Any] = Field(
+        ..., description="Template data to execute"
+    )
+    input_data: dict[str, Any] | None = Field(
+        default_factory=dict, description="Input data for execution"
+    )
+    debug_mode: bool = Field(
+        default=False, description="Enable debug mode"
+    )
+
+
 # Analytics schemas
 class ComplexityMetrics(BaseModel):
     """Schema for workflow complexity metrics."""

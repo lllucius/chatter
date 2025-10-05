@@ -252,30 +252,50 @@ class LangGraphWorkflowManager:
 
         try:
             start_time = time.time()
-            result = await workflow.ainvoke(context, config=config)
-            execution_time = int((time.time() - start_time) * 1000)
-
-            # Aggregate token usage from usage_metadata if present
-            usage_metadata = result.get("usage_metadata", {})
+            
+            # Use astream with stream_mode='values' to get full state at each step
+            # and collect usage_metadata from ALL node executions
+            total_prompt_tokens = 0
+            total_completion_tokens = 0
             total_tokens = 0
-            prompt_tokens = 0
-            completion_tokens = 0
-
-            if isinstance(usage_metadata, dict):
-                # Extract tokens using various field names
-                prompt_tokens = usage_metadata.get(
-                    'input_tokens'
-                ) or usage_metadata.get('prompt_tokens', 0)
-                completion_tokens = usage_metadata.get(
-                    'output_tokens'
-                ) or usage_metadata.get('completion_tokens', 0)
-                total_tokens = usage_metadata.get('total_tokens', 0)
-
-                # Calculate total if not provided
-                if not total_tokens and (
-                    prompt_tokens or completion_tokens
-                ):
-                    total_tokens = prompt_tokens + completion_tokens
+            result = None
+            seen_usage_metadata = []
+            
+            async for state in workflow.astream(context, config=config, stream_mode='values'):
+                # Track the final state (last iteration)
+                result = state
+                
+                # Collect usage_metadata from this state if it's new
+                usage_metadata = state.get("usage_metadata", {})
+                if isinstance(usage_metadata, dict) and usage_metadata:
+                    # Check if this is a new usage_metadata (not seen before)
+                    # by comparing the dict itself
+                    if usage_metadata not in seen_usage_metadata:
+                        seen_usage_metadata.append(usage_metadata.copy())
+                        
+                        # Extract tokens using various field names
+                        prompt_tokens = usage_metadata.get(
+                            'input_tokens'
+                        ) or usage_metadata.get('prompt_tokens', 0) or 0
+                        completion_tokens = usage_metadata.get(
+                            'output_tokens'
+                        ) or usage_metadata.get('completion_tokens', 0) or 0
+                        node_total = usage_metadata.get('total_tokens', 0) or 0
+                        
+                        # If total is not provided, calculate it
+                        if not node_total and (prompt_tokens or completion_tokens):
+                            node_total = prompt_tokens + completion_tokens
+                        
+                        # Aggregate tokens from this node
+                        total_prompt_tokens += prompt_tokens
+                        total_completion_tokens += completion_tokens
+                        total_tokens += node_total
+            
+            # Use the final state from the last iteration
+            if result is None:
+                result = context
+            
+            execution_time = int((time.time() - start_time) * 1000)
 
             # Add execution metadata
             result["metadata"] = result.get("metadata", {})
@@ -285,13 +305,13 @@ class LangGraphWorkflowManager:
             # Add aggregated token information to result
             if total_tokens > 0:
                 result["tokens_used"] = total_tokens
-                result["prompt_tokens"] = prompt_tokens
-                result["completion_tokens"] = completion_tokens
+                result["prompt_tokens"] = total_prompt_tokens
+                result["completion_tokens"] = total_completion_tokens
 
                 # Estimate cost (rough estimate, should be provider-specific in production)
                 # Using approximate OpenAI GPT-4 pricing as default
-                cost = (prompt_tokens * 0.00003) + (
-                    completion_tokens * 0.00006
+                cost = (total_prompt_tokens * 0.00003) + (
+                    total_completion_tokens * 0.00006
                 )
                 result["cost"] = cost
 

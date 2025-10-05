@@ -21,6 +21,8 @@ interface WorkflowTemplate {
   updated_at: string;
 }
 
+export type { WorkflowTemplate };
+
 interface WorkflowTemplatesTabProps {
   templates: WorkflowTemplate[];
   loading: boolean;

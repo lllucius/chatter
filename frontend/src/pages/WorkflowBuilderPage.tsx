@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Node } from '@xyflow/react';
+import { Node, Edge } from '@xyflow/react';
 import { useLocation } from 'react-router-dom';
 import {
   Box,
@@ -46,6 +46,7 @@ import {
   WorkflowDefinition,
   WorkflowNodeData,
   WorkflowNodeType,
+  WorkflowEdgeData,
 } from '../components/workflow/WorkflowEditor';
 import { useWorkflowData } from '../hooks/useWorkflowData';
 import { toastService } from '../services/toast-service';
@@ -242,6 +243,8 @@ const WorkflowBuilderPage: React.FC = () => {
         workflow?: { nodes?: unknown[]; edges?: unknown[] };
         name?: string;
         description?: string;
+        created_at?: string;
+        updated_at?: string;
       };
     } | null;
     if (state?.editTemplate) {
@@ -249,8 +252,8 @@ const WorkflowBuilderPage: React.FC = () => {
       // If template has workflow data, load it
       if (template.workflow) {
         setCurrentWorkflow({
-          nodes: template.workflow.nodes || [],
-          edges: template.workflow.edges || [],
+          nodes: template.workflow.nodes as Node<WorkflowNodeData>[] || [],
+          edges: template.workflow.edges as Edge<WorkflowEdgeData>[] || [],
           metadata: {
             name: template.name || 'Template Workflow',
             description: template.description || '',

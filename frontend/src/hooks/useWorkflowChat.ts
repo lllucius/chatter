@@ -1,10 +1,25 @@
 import { useState, useCallback, useEffect } from 'react';
 import { getSDK } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
-import { ChatWorkflowConfig, ChatWorkflowRequest } from 'chatter-sdk';
 
-// Re-export types for components
-export type { ChatWorkflowConfig, ChatWorkflowRequest } from 'chatter-sdk';
+// Define workflow config types based on ChatRequest fields
+export interface ChatWorkflowConfig {
+  enable_retrieval?: boolean;
+  enable_tools?: boolean;
+  enable_memory?: boolean;
+  enable_web_search?: boolean;
+  llm_config?: {
+    temperature?: number;
+    max_tokens?: number;
+  };
+}
+
+export interface ChatWorkflowRequest {
+  message: string;
+  conversation_id?: string;
+  workflow_config?: ChatWorkflowConfig;
+  [key: string]: unknown;
+}
 
 export const useWorkflowChat = () => {
   const [customWorkflowConfig, setCustomWorkflowConfig] =

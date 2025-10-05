@@ -20,9 +20,9 @@ import { handleError } from '../utils/error-handler';
 import { ChatMessage } from '../components/EnhancedMessage';
 import type {
   ConversationResponse,
-  ChatWorkflowRequest,
   ChatResponse,
 } from 'chatter-sdk';
+import type { ChatWorkflowRequest } from '../hooks/useWorkflowChat';
 import { parseSSELine } from '../utils/sse-parser';
 import { useRightSidebar } from '../components/RightSidebarContext';
 

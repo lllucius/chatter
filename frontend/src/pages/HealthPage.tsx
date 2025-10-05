@@ -237,7 +237,7 @@ const HealthPage: React.FC = () => {
                   Uptime
                 </Typography>
                 <Typography variant="h6">
-                  {Math.floor(systemMetrics.uptime_hours / 24)} days
+                  {Math.floor((systemMetrics.uptime_hours || 0) / 24)} days
                 </Typography>
               </Box>
               <Box sx={{ mb: 2 }}>
@@ -288,11 +288,11 @@ const HealthPage: React.FC = () => {
                 </Box>
                 <LinearProgress
                   variant="determinate"
-                  value={systemMetrics.cpu_usage}
+                  value={systemMetrics.cpu_usage || 0}
                   color={
-                    systemMetrics.cpu_usage > 80
+                    (systemMetrics.cpu_usage || 0) > 80
                       ? 'error'
-                      : systemMetrics.cpu_usage > 60
+                      : (systemMetrics.cpu_usage || 0) > 60
                         ? 'warning'
                         : 'success'
                   }
@@ -313,11 +313,11 @@ const HealthPage: React.FC = () => {
                 </Box>
                 <LinearProgress
                   variant="determinate"
-                  value={systemMetrics.memory_usage}
+                  value={systemMetrics.memory_usage || 0}
                   color={
-                    systemMetrics.memory_usage > 80
+                    (systemMetrics.memory_usage || 0) > 80
                       ? 'error'
-                      : systemMetrics.memory_usage > 60
+                      : (systemMetrics.memory_usage || 0) > 60
                         ? 'warning'
                         : 'success'
                   }
@@ -338,11 +338,11 @@ const HealthPage: React.FC = () => {
                 </Box>
                 <LinearProgress
                   variant="determinate"
-                  value={systemMetrics.disk_usage}
+                  value={systemMetrics.disk_usage || 0}
                   color={
-                    systemMetrics.disk_usage > 80
+                    (systemMetrics.disk_usage || 0) > 80
                       ? 'error'
-                      : systemMetrics.disk_usage > 60
+                      : (systemMetrics.disk_usage || 0) > 60
                         ? 'warning'
                         : 'success'
                   }

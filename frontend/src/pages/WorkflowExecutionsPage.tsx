@@ -89,7 +89,7 @@ const WorkflowExecutionsPage: React.FC = () => {
       render: renderStatus,
     },
     {
-      id: 'duration',
+      id: 'execution_time_ms' as keyof WorkflowExecutionResponse,
       label: 'Duration',
       width: '80px',
       render: (value: unknown, execution: WorkflowExecutionResponse) => {
@@ -185,7 +185,7 @@ const WorkflowExecutionsPage: React.FC = () => {
       <Button
         variant="outlined"
         startIcon={<RefreshIcon />}
-        onClick={() => crudTableRef.current?.reload?.()}
+        onClick={() => crudTableRef.current?.handleRefresh()}
       >
         Refresh
       </Button>
@@ -201,7 +201,12 @@ const WorkflowExecutionsPage: React.FC = () => {
         </Typography>
       </Box>
 
-      <CrudDataTable ref={crudTableRef} config={config} service={service} />
+      <CrudDataTable<WorkflowExecutionResponse, never, never>
+        ref={crudTableRef}
+        config={config}
+        service={service}
+        getItemId={(item) => item.id}
+      />
     </PageLayout>
   );
 };

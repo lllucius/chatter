@@ -46,6 +46,8 @@ interface WorkflowExecution {
   execution_time_ms?: number;
 }
 
+export type { WorkflowExecution };
+
 interface WorkflowExecutionsTabProps {
   executions: WorkflowExecution[];
   loading: boolean;

@@ -10462,6 +10462,119 @@
         }
       }
     },
+    "/api/v1/workflows/templates/execute": {
+      "post": {
+        "tags": [
+          "Workflows"
+        ],
+        "summary": "Execute Temporary Workflow Template",
+        "description": "Execute a temporary workflow template directly without storing it.\n\nThis endpoint allows you to pass template data directly and execute it\nwithout persisting the template to the database first.",
+        "operationId": "execute_temporary_workflow_template_api_v1_workflows_templates_execute_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowTemplateDirectExecutionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowExecutionResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/workflows/definitions/{workflow_id}/analytics": {
       "get": {
         "tags": [
@@ -42304,6 +42417,41 @@
         ],
         "title": "WorkflowTemplateCreate",
         "description": "Schema for creating a workflow template."
+      },
+      "WorkflowTemplateDirectExecutionRequest": {
+        "properties": {
+          "template": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Template",
+            "description": "Template data to execute"
+          },
+          "input_data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Data",
+            "description": "Input data for execution"
+          },
+          "debug_mode": {
+            "type": "boolean",
+            "title": "Debug Mode",
+            "description": "Enable debug mode",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "template"
+        ],
+        "title": "WorkflowTemplateDirectExecutionRequest",
+        "description": "Schema for executing a temporary template directly."
       },
       "WorkflowTemplateExecutionRequest": {
         "properties": {

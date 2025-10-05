@@ -264,6 +264,7 @@ chatter_sdk/models/workflow_execution_response.py
 chatter_sdk/models/workflow_node.py
 chatter_sdk/models/workflow_node_data.py
 chatter_sdk/models/workflow_template_create.py
+chatter_sdk/models/workflow_template_direct_execution_request.py
 chatter_sdk/models/workflow_template_execution_request.py
 chatter_sdk/models/workflow_template_export_response.py
 chatter_sdk/models/workflow_template_import_request.py
@@ -528,6 +529,7 @@ docs/WorkflowExecutionResponse.md
 docs/WorkflowNode.md
 docs/WorkflowNodeData.md
 docs/WorkflowTemplateCreate.md
+docs/WorkflowTemplateDirectExecutionRequest.md
 docs/WorkflowTemplateExecutionRequest.md
 docs/WorkflowTemplateExportResponse.md
 docs/WorkflowTemplateImportRequest.md
@@ -798,6 +800,7 @@ test/test_workflow_execution_response.py
 test/test_workflow_node.py
 test/test_workflow_node_data.py
 test/test_workflow_template_create.py
+test/test_workflow_template_direct_execution_request.py
 test/test_workflow_template_execution_request.py
 test/test_workflow_template_export_response.py
 test/test_workflow_template_import_request.py

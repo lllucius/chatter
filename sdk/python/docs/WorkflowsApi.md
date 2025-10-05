@@ -14,6 +14,7 @@ Method | HTTP request | Description
 [**execute_chat_workflow_api_v1_workflows_execute_chat_post**](WorkflowsApi.md#execute_chat_workflow_api_v1_workflows_execute_chat_post) | **POST** /api/v1/workflows/execute/chat | Execute Chat Workflow
 [**execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post**](WorkflowsApi.md#execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post) | **POST** /api/v1/workflows/execute/chat/streaming | Execute Chat Workflow Streaming
 [**execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post**](WorkflowsApi.md#execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post) | **POST** /api/v1/workflows/definitions/custom/execute | Execute Custom Workflow
+[**execute_temporary_workflow_template_api_v1_workflows_templates_execute_post**](WorkflowsApi.md#execute_temporary_workflow_template_api_v1_workflows_templates_execute_post) | **POST** /api/v1/workflows/templates/execute | Execute Temporary Workflow Template
 [**execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post**](WorkflowsApi.md#execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post) | **POST** /api/v1/workflows/definitions/{workflow_id}/execute | Execute Workflow
 [**execute_workflow_template_api_v1_workflows_templates_template_id_execute_post**](WorkflowsApi.md#execute_workflow_template_api_v1_workflows_templates_template_id_execute_post) | **POST** /api/v1/workflows/templates/{template_id}/execute | Execute Workflow Template
 [**export_workflow_template_api_v1_workflows_templates_template_id_export_get**](WorkflowsApi.md#export_workflow_template_api_v1_workflows_templates_template_id_export_get) | **GET** /api/v1/workflows/templates/{template_id}/export | Export Workflow Template
@@ -993,6 +994,89 @@ Name | Type | Description  | Notes
 ### Return type
 
 **Dict[str, object]**
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **execute_temporary_workflow_template_api_v1_workflows_templates_execute_post**
+> WorkflowExecutionResponse execute_temporary_workflow_template_api_v1_workflows_templates_execute_post(workflow_template_direct_execution_request)
+
+Execute Temporary Workflow Template
+
+Execute a temporary workflow template directly without storing it.
+
+This endpoint allows you to pass template data directly and execute it
+without persisting the template to the database first.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.workflow_execution_response import WorkflowExecutionResponse
+from chatter_sdk.models.workflow_template_direct_execution_request import WorkflowTemplateDirectExecutionRequest
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.WorkflowsApi(api_client)
+    workflow_template_direct_execution_request = chatter_sdk.WorkflowTemplateDirectExecutionRequest() # WorkflowTemplateDirectExecutionRequest | 
+
+    try:
+        # Execute Temporary Workflow Template
+        api_response = await api_instance.execute_temporary_workflow_template_api_v1_workflows_templates_execute_post(workflow_template_direct_execution_request)
+        print("The response of WorkflowsApi->execute_temporary_workflow_template_api_v1_workflows_templates_execute_post:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling WorkflowsApi->execute_temporary_workflow_template_api_v1_workflows_templates_execute_post: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workflow_template_direct_execution_request** | [**WorkflowTemplateDirectExecutionRequest**](WorkflowTemplateDirectExecutionRequest.md)|  | 
+
+### Return type
+
+[**WorkflowExecutionResponse**](WorkflowExecutionResponse.md)
 
 ### Authorization
 

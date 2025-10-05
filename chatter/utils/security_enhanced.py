@@ -182,6 +182,16 @@ def verify_api_key_secure(plain_key: str, hashed_key: str) -> bool:
         True if API key matches, False otherwise
     """
     try:
+        # Detect if someone is mistakenly passing a bcrypt hash as the plaintext key
+        if plain_key.startswith("$2a$") or plain_key.startswith("$2b$") or plain_key.startswith("$2y$"):
+            logger.warning(
+                "API key verification failed: bcrypt hash provided instead of plaintext key. "
+                "The plaintext API key is only shown once during creation. "
+                "If you lost it, revoke the old key and create a new one.",
+                key_prefix=plain_key[:15]
+            )
+            return False
+        
         return bcrypt.checkpw(plain_key.encode(), hashed_key.encode())
     except Exception as e:
         logger.warning("API key verification failed", error=str(e))

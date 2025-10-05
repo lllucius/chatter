@@ -30,6 +30,7 @@ import {
   Delete as DeleteIcon,
   Add as AddIcon,
   Warning as WarningIcon,
+  ContentCopy as CopyIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { getSDK, authService } from '../services/auth-service';
@@ -68,6 +69,7 @@ const UserSettingsPage: React.FC = () => {
   const [apiKeysLoading, setApiKeysLoading] = useState(false);
   const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const [newlyCreatedApiKey, setNewlyCreatedApiKey] = useState<string | null>(null);
 
   const profileForm = useForm<ProfileFormValues>({
     initialValues: {
@@ -149,8 +151,8 @@ const UserSettingsPage: React.FC = () => {
           // Note: expires_in_days is not supported in the current API
         });
         setApiKeys([...apiKeys, newKey]);
+        setNewlyCreatedApiKey(newKey.api_key);
         toastService.success('API key created successfully');
-        setApiKeyDialogOpen(false);
         apiKeyForm.resetForm();
       } catch (error: unknown) {
         handleError(error, {
@@ -207,6 +209,18 @@ const UserSettingsPage: React.FC = () => {
         additionalData: { keyId: _keyId },
       });
     }
+  };
+
+  const handleCopyApiKey = () => {
+    if (newlyCreatedApiKey) {
+      navigator.clipboard.writeText(newlyCreatedApiKey);
+      toastService.success('API key copied to clipboard');
+    }
+  };
+
+  const handleCloseApiKeyDialog = () => {
+    setApiKeyDialogOpen(false);
+    setNewlyCreatedApiKey(null);
   };
 
   const handleDeactivateAccount = async () => {
@@ -498,45 +512,85 @@ const UserSettingsPage: React.FC = () => {
       {/* Create API Key Dialog */}
       <Dialog
         open={apiKeyDialogOpen}
-        onClose={() => setApiKeyDialogOpen(false)}
+        onClose={newlyCreatedApiKey ? handleCloseApiKeyDialog : () => setApiKeyDialogOpen(false)}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Create API Key</DialogTitle>
+        <DialogTitle>
+          {newlyCreatedApiKey ? 'API Key Created' : 'Create API Key'}
+        </DialogTitle>
         <DialogContent>
-          <Box sx={{ pt: 1 }}>
-            <TextField
-              fullWidth
-              label="Key Name"
-              value={apiKeyForm.values.name}
-              onChange={apiKeyForm.handleChange('name')}
-              error={Boolean(apiKeyForm.errors.name)}
-              helperText={apiKeyForm.errors.name}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Expires in Days"
-              type="number"
-              value={apiKeyForm.values.expires_in_days}
-              onChange={apiKeyForm.handleChange('expires_in_days')}
-              error={Boolean(apiKeyForm.errors.expires_in_days)}
-              helperText={
-                apiKeyForm.errors.expires_in_days ||
-                'Set to 0 for no expiration'
-              }
-            />
-          </Box>
+          {newlyCreatedApiKey ? (
+            <Box sx={{ pt: 1 }}>
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                <strong>Important:</strong> This is the only time you will see this API key.
+                Please copy it now and store it securely.
+              </Alert>
+              <TextField
+                fullWidth
+                label="API Key"
+                value={newlyCreatedApiKey}
+                slotProps={{
+                  input: {
+                    readOnly: true,
+                    endAdornment: (
+                      <IconButton onClick={handleCopyApiKey} edge="end">
+                        <CopyIcon />
+                      </IconButton>
+                    ),
+                  },
+                }}
+                sx={{ mb: 2 }}
+              />
+            </Box>
+          ) : (
+            <Box sx={{ pt: 1 }}>
+              <TextField
+                fullWidth
+                label="Key Name"
+                value={apiKeyForm.values.name}
+                onChange={apiKeyForm.handleChange('name')}
+                error={Boolean(apiKeyForm.errors.name)}
+                helperText={apiKeyForm.errors.name}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Expires in Days"
+                type="number"
+                value={apiKeyForm.values.expires_in_days}
+                onChange={apiKeyForm.handleChange('expires_in_days')}
+                error={Boolean(apiKeyForm.errors.expires_in_days)}
+                helperText={
+                  apiKeyForm.errors.expires_in_days ||
+                  'Set to 0 for no expiration'
+                }
+              />
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setApiKeyDialogOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={apiKeyForm.handleSubmit}
-            loading={apiKeyForm.isSubmitting}
-          >
-            Create Key
-          </Button>
+          {newlyCreatedApiKey ? (
+            <>
+              <Button onClick={handleCopyApiKey} startIcon={<CopyIcon />}>
+                Copy Key
+              </Button>
+              <Button variant="contained" onClick={handleCloseApiKeyDialog}>
+                Done
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button onClick={() => setApiKeyDialogOpen(false)}>Cancel</Button>
+              <Button
+                variant="contained"
+                onClick={apiKeyForm.handleSubmit}
+                loading={apiKeyForm.isSubmitting}
+              >
+                Create Key
+              </Button>
+            </>
+          )}
         </DialogActions>
       </Dialog>
 

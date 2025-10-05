@@ -103,6 +103,12 @@ class PythonSDKGenerator:
 
             print("✅ Python SDK generation completed")
 
+            # Post-process pyproject.toml to fix license field
+            if self._fix_license_field():
+                print("✅ Applied license field fix")
+            else:
+                print("⚠️  Failed to apply license field fix")
+
             # Post-process generated models to fix datetime serialization
             if self._fix_datetime_serialization():
                 print("✅ Applied datetime serialization fix")
@@ -328,4 +334,47 @@ class PythonSDKGenerator:
 
         except Exception as e:
             print(f"❌ Failed to fix datetime in {file_path}: {e}")
+            return False
+
+    def _fix_license_field(self) -> bool:
+        """Fix the license field in pyproject.toml to use the correct format.
+
+        OpenAPI Generator creates license = "NoLicense" by default, which is
+        not a valid SPDX identifier and causes errors with modern setuptools.
+        This method updates it to the proper format: license = {text = "MIT"}
+
+        Returns:
+            True if fix was applied successfully, False otherwise
+        """
+        try:
+            pyproject_path = self.config.output_dir / "pyproject.toml"
+            if not pyproject_path.exists():
+                print("❌ pyproject.toml not found")
+                return False
+
+            with open(pyproject_path) as f:
+                content = f.read()
+
+            original_content = content
+
+            # Replace invalid license formats with the correct table format
+            # Match both "NoLicense" and simple string licenses
+            content = re.sub(
+                r'^license\s*=\s*"(?:NoLicense|[^"]+)"',
+                'license = {text = "MIT"}',
+                content,
+                flags=re.MULTILINE
+            )
+
+            # Only write if content changed
+            if content != original_content:
+                with open(pyproject_path, 'w') as f:
+                    f.write(content)
+                print("📝 Updated license field in pyproject.toml")
+                return True
+
+            return False
+
+        except Exception as e:
+            print(f"❌ Failed to fix license field: {e}")
             return False

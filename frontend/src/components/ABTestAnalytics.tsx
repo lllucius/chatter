@@ -74,19 +74,15 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
     // In real implementation, this would come from results prop
     if (!results) return null;
 
-    // Calculate statistics from metrics
-    const effectSizeMetric = results.metrics?.find(
-      (m: TestMetric) => m.metric_type === 'effect_size'
-    );
-    const pValueMetric = results.metrics?.find(
-      (m: TestMetric) => m.metric_type === 'p_value'
-    );
-
+    // Calculate statistics from metrics - use first metric for effect size and p-value
+    // These metrics may not be in the TestMetric array since they don't match the enum
+    const metrics = results.metrics || [];
+    
     return {
       confidence_level: 0.95,
-      effect_size: effectSizeMetric?.value || 0,
+      effect_size: metrics.length > 0 ? metrics[0].value : 0,
       power: 0.8,
-      p_value: pValueMetric?.value || 0,
+      p_value: metrics.length > 1 ? metrics[1].value : 0,
     };
   }, [results]);
 

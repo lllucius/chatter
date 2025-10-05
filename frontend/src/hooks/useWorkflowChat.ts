@@ -3,7 +3,7 @@ import { getSDK } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
 
 // Define workflow config types based on ChatRequest fields
-export interface ChatWorkflowConfig {
+export interface ChatWorkflowConfig extends Record<string, unknown> {
   enable_retrieval?: boolean;
   enable_tools?: boolean;
   enable_memory?: boolean;
@@ -12,13 +12,14 @@ export interface ChatWorkflowConfig {
     temperature?: number;
     max_tokens?: number;
   };
+  tool_config?: Record<string, unknown>;
+  retrieval_config?: Record<string, unknown>;
 }
 
-export interface ChatWorkflowRequest {
+export interface ChatWorkflowRequest extends Record<string, unknown> {
   message: string;
   conversation_id?: string;
-  workflow_config?: ChatWorkflowConfig;
-  [key: string]: unknown;
+  workflow_config?: Record<string, unknown>;
 }
 
 export const useWorkflowChat = () => {

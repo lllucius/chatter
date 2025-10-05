@@ -186,7 +186,9 @@ const WorkflowManagementPage: React.FC = () => {
             templates={templates as unknown as WorkflowTemplate[]}
             loading={loading}
             onExecuteTemplate={handleExecuteTemplate}
-            onEditTemplate={handleEditTemplate as (template: WorkflowTemplate) => void}
+            onEditTemplate={
+              handleEditTemplate as unknown as (template: WorkflowTemplate) => void
+            }
             onDeleteTemplate={handleDeleteTemplate}
           />
         </TabPanel>
@@ -301,7 +303,8 @@ const WorkflowManagementPage: React.FC = () => {
             <WorkflowEditor
               initialWorkflow={
                 editingTemplate
-                  ? (editingTemplate as unknown as WorkflowTemplate).workflow
+                  ? ((editingTemplate as unknown as WorkflowTemplate)
+                      .workflow as unknown as WorkflowDefinition)
                   : undefined
               }
             />

@@ -90,11 +90,12 @@ def execute_temporary_template_with_api():
     
     try:
         # Make the POST request
+        # Timeout set to 300 seconds (5 minutes) to allow for LLM processing
         response = requests.post(
             endpoint,
             headers=headers,
             json=request_body,
-            timeout=30
+            timeout=300
         )
         
         # Check the response

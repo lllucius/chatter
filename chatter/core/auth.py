@@ -723,6 +723,18 @@ class AuthService:
         Raises:
             AuthenticationError: If token is invalid or user not found
         """
+        # Detect if someone is mistakenly using a bcrypt hash as the API key
+        if token.startswith("$2a$") or token.startswith("$2b$") or token.startswith("$2y$"):
+            logger.error(
+                "Authentication failed: bcrypt hash provided instead of API key",
+                hash_prefix=token[:15]
+            )
+            raise AuthenticationError(
+                "Invalid API key format. You appear to be using a hashed API key instead of the plaintext key. "
+                "The plaintext API key is only shown once during creation. "
+                "Please revoke the old key and create a new one."
+            ) from None
+        
         # Try JWT token validation first
         payload = verify_token(token)
         if payload:
@@ -846,27 +858,14 @@ class AuthService:
             # Return API key information if exists
             api_keys = []
             if user.api_key and user.api_key_name:
-                # Mask the actual API key for security
-                masked_key = (
-                    user.api_key[:8] + "..." + user.api_key[-4:]
-                    if len(user.api_key) > 12
-                    else "***"
-                )
+                # NOTE: user.api_key contains the HASHED key (bcrypt hash), not the plaintext key!
+                # The plaintext key is only returned once during creation.
+                # We should NEVER expose any part of the bcrypt hash.
                 api_keys.append(
                     {
-                        "name": user.api_key_name,
-                        "key_preview": masked_key,
-                        "created_at": (
-                            user.created_at.isoformat()
-                            if user.created_at
-                            else None
-                        ),
-                        "last_used": (
-                            user.last_login_at.isoformat()
-                            if user.last_login_at
-                            else None
-                        ),
-                        "is_active": bool(user.api_key),
+                        "id": user.id,
+                        "api_key": "••••••••",  # Never expose the hash or plaintext
+                        "api_key_name": user.api_key_name,
                     }
                 )
 

@@ -523,3 +523,40 @@ class TestAuthServiceUnit:
 
         # Verify both methods authenticate to the same user
         assert jwt_authenticated_user.id == api_key_authenticated_user.id
+
+    @pytest.mark.unit
+    async def test_bcrypt_hash_detection(self, db_session: AsyncSession):
+        """Test that bcrypt hash is detected and rejected when used as API key."""
+        from chatter.core.exceptions import AuthenticationError
+        
+        auth_service = AuthService(db_session)
+        
+        # Test with a bcrypt hash (this is what was in the error log)
+        bcrypt_hash = "$2b$12$znG96z4WOna0fQgPIuPqIuec5oqXBMCbnGV2T6GgPxqRmq0rPfH.C"
+        
+        # This should raise an AuthenticationError with a helpful message
+        with pytest.raises(AuthenticationError) as exc_info:
+            await auth_service.get_current_user(bcrypt_hash)
+        
+        # Verify the error message is helpful
+        error_message = str(exc_info.value)
+        assert "hashed API key" in error_message or "hash" in error_message.lower()
+        assert "plaintext" in error_message.lower()
+        assert "revoke" in error_message.lower()
+
+    @pytest.mark.unit
+    async def test_verify_api_key_secure_detects_hash(self):
+        """Test that verify_api_key_secure detects bcrypt hash."""
+        from chatter.utils.security_enhanced import verify_api_key_secure
+        
+        # Test with various bcrypt hash formats
+        test_hashes = [
+            "$2a$12$znG96z4WOna0fQgPIuPqIuec5oqXBMCbnGV2T6GgPxqRmq0rPfH.C",
+            "$2b$12$znG96z4WOna0fQgPIuPqIuec5oqXBMCbnGV2T6GgPxqRmq0rPfH.C",
+            "$2y$12$znG96z4WOna0fQgPIuPqIuec5oqXBMCbnGV2T6GgPxqRmq0rPfH.C",
+        ]
+        
+        for bcrypt_hash in test_hashes:
+            # Should return False when hash is passed as plaintext
+            result = verify_api_key_secure(bcrypt_hash, "some_stored_hash")
+            assert result is False, f"Should reject bcrypt hash: {bcrypt_hash[:10]}..."

@@ -386,6 +386,15 @@ npm install -g @openapitools/openapi-generator-cli
 python scripts/generate_openapi.py
 ```
 
+**Browser Cached Old JavaScript Bundle**
+If you see errors about SDK functions not being defined (e.g., "is not a function"), this is usually a browser cache issue. See [Browser Cache Issues](BROWSER_CACHE_ISSUES.md) for solutions.
+
+Quick fix:
+```bash
+# Hard refresh in browser: Ctrl+Shift+R (Windows/Linux) or Cmd+Shift+R (Mac)
+# Or clear browser cache and reload
+```
+
 ### Debug Mode
 ```python
 # Enable detailed HTTP request logging
@@ -413,4 +422,5 @@ export LOG_LEVEL=DEBUG
 - [TypeScript SDK Documentation](sdk/typescript/README.md)
 - [Message Rating Feature](message_rating.md)
 - [SDK Generation Guide](sdk-generation.md)
+- [Browser Cache Issues](BROWSER_CACHE_ISSUES.md)
 - [Test Suite Documentation](../tests/API_TESTS_README.md)

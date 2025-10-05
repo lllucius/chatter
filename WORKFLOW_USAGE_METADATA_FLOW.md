@@ -94,6 +94,31 @@ tokens = usage_metadata.get("total_tokens", 0)  # ❌ Only last node!
    - `prompt_tokens`/`completion_tokens` (alternative)
 3. **Total Calculation**: If `total_tokens` missing, calculates from input + output
 
+### Streaming vs Non-Streaming
+
+#### Non-Streaming Workflow Execution
+
+Uses aggregated fields from `run_workflow()` result:
+
+```python
+result = await workflow_manager.run_workflow(...)
+tokens_used = result.get("tokens_used", 0)  # Aggregated across all nodes
+```
+
+#### Streaming Workflow Execution
+
+Extracts `usage_metadata` from **LLM streaming events** in real-time:
+
+```python
+async for event in workflow_manager.stream_workflow(...):
+    if event.get("event") == "on_chat_model_end":
+        # Extract usage_metadata from LLM response event
+        usage_metadata = event["data"]["output"].usage_metadata
+        # Send to client in streaming chunk
+```
+
+**Note**: Streaming extracts per-LLM-call metadata from events, not from workflow result. This is correct because streaming provides real-time token information as each LLM call completes.
+
 ### Current Consumers
 
 All verified to use aggregated fields correctly:
@@ -102,6 +127,7 @@ All verified to use aggregated fields correctly:
 - ✅ `workflow_execution.py::_execute_with_dynamic_workflow()`
 - ✅ `workflow_execution.py::execute_workflow_definition()`
 - ✅ `api/workflows.py::execute_custom_workflow()` (fixed in this PR)
+- ✅ `workflow_execution.py::_execute_streaming_*()` (uses LLM event metadata - correct for streaming)
 
 ## Changes Made
 

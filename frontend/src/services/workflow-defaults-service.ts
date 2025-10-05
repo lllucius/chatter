@@ -81,7 +81,7 @@ class WorkflowDefaultsService {
     try {
       const sdk = getSDK();
       const response = await sdk.workflows.getWorkflowDefaultsApiV1WorkflowsDefaults();
-      return response as WorkflowDefaults;
+      return response as unknown as WorkflowDefaults;
     } catch (error) {
       handleError(error, {
         source: 'WorkflowDefaultsService.getWorkflowDefaults',
@@ -102,7 +102,7 @@ class WorkflowDefaultsService {
       const response = await sdk.workflows.getWorkflowDefaultsApiV1WorkflowsDefaults({
         nodeType,
       });
-      return response as NodeDefaultConfig;
+      return response as unknown as NodeDefaultConfig;
     } catch (error) {
       handleError(error, {
         source: 'WorkflowDefaultsService.getNodeDefaults',

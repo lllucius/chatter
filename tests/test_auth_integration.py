@@ -542,3 +542,50 @@ class TestAuthDatabaseIntegration:
         result_after = await db_session.execute(stmt)
         users_after = result_after.scalars().all()
         assert len(users_after) == initial_count
+
+    @pytest.mark.integration
+    async def test_api_key_authentication_without_jwt(
+        self, client: AsyncClient, test_user_data: dict
+    ):
+        """Test that API keys can be used for authentication without JWT tokens."""
+        # Step 1: Register user and get JWT token
+        register_response = await client.post(
+            "/api/v1/auth/register", json=test_user_data
+        )
+        assert register_response.status_code == 201
+        register_data = register_response.json()
+        access_token = register_data["access_token"]
+        auth_headers = {"Authorization": f"Bearer {access_token}"}
+
+        # Step 2: Create an API key using JWT token
+        api_key_data = {"name": "Test API Key for Auth"}
+        api_key_response = await client.post(
+            "/api/v1/auth/api-key",
+            json=api_key_data,
+            headers=auth_headers,
+        )
+        assert api_key_response.status_code == 200
+        api_key_response_data = api_key_response.json()
+        api_key = api_key_response_data["api_key"]
+        assert api_key is not None
+
+        # Step 3: Use API key directly for authentication (no JWT required)
+        api_key_headers = {"Authorization": f"Bearer {api_key}"}
+        
+        # Test accessing protected endpoint with API key
+        profile_response = await client.get(
+            "/api/v1/auth/me", headers=api_key_headers
+        )
+        assert profile_response.status_code == 200
+        profile_data = profile_response.json()
+        assert profile_data["username"] == test_user_data["username"]
+        assert profile_data["email"] == test_user_data["email"]
+
+        # Step 4: Verify API key works for other protected endpoints
+        list_api_keys_response = await client.get(
+            "/api/v1/auth/api-keys", headers=api_key_headers
+        )
+        assert list_api_keys_response.status_code == 200
+        api_keys = list_api_keys_response.json()
+        assert len(api_keys) == 1
+        assert api_keys[0]["api_key_name"] == api_key_data["name"]

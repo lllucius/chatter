@@ -9390,6 +9390,34 @@ components:
       - password
       title: UserCreate
       type: object
+    UserListResponse:
+      description: Schema for users list response.
+      properties:
+        page:
+          description: Current page number
+          title: Page
+          type: integer
+        page_size:
+          description: Number of users per page
+          title: Page Size
+          type: integer
+        total:
+          description: Total number of users
+          title: Total
+          type: integer
+        users:
+          description: List of users
+          items:
+            $ref: '#/components/schemas/UserResponse'
+          title: Users
+          type: array
+      required:
+      - users
+      - total
+      - page
+      - page_size
+      title: UserListResponse
+      type: object
     UserLogin:
       description: Schema for user login.
       properties:
@@ -14370,6 +14398,58 @@ paths:
             X-RateLimit-Remaining-Minute: *id004
             x-correlation-id: *id005
       summary: Register
+      tags:
+      - Authentication
+  /api/v1/auth/users:
+    get:
+      description: "List all users (admin only).\n\nArgs:\n    page: Page number (1-indexed)\n\
+        \    page_size: Number of users per page\n    current_user: Current authenticated\
+        \ admin user\n    session: Database session\n\nReturns:\n    List of users\
+        \ with pagination info"
+      operationId: list_users_api_v1_auth_users_get
+      parameters:
+      - in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          default: 50
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: List Users
       tags:
       - Authentication
   /api/v1/conversations/:

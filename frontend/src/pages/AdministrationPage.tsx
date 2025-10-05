@@ -38,6 +38,7 @@ import { useAdministrationData } from '../hooks/useAdministrationData';
 import BackupsTab from '../components/administration/BackupsTab';
 import JobsTab from '../components/administration/JobsTab';
 import UsersTab from '../components/administration/UsersTab';
+import { UserResponse } from 'chatter-sdk';
 
 interface User {
   id: string;
@@ -49,10 +50,29 @@ interface User {
   isActive: boolean;
 }
 
+// Helper to map UserResponse to User for display
+const mapUserResponseToUser = (userResponse: UserResponse): User => ({
+  id: userResponse.id,
+  email: userResponse.email,
+  role: userResponse.is_superuser ? 'Administrator' : 'User',
+  lastLogin: userResponse.last_login_at 
+    ? new Date(userResponse.last_login_at).toLocaleString() 
+    : 'Never',
+  status: userResponse.is_active ? 'Active' : 'Inactive',
+  name: userResponse.full_name || userResponse.username,
+  isActive: userResponse.is_active,
+});
+
 const AdministrationPage: React.FC = () => {
   // Use custom hook for data management
-  const { backups, jobs, jobStats, users, dataLoading, loadBackups, loadJobs } =
+  const { backups, jobs, jobStats, users: userResponses, dataLoading, loadBackups, loadJobs } =
     useAdministrationData();
+
+  // Map UserResponse to User for display
+  const users = React.useMemo(
+    () => userResponses.map(mapUserResponseToUser),
+    [userResponses]
+  );
 
   const [activeTab, setActiveTab] = useState<
     'backups' | 'jobs' | 'plugins' | 'users' | 'bulk'

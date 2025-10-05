@@ -26,6 +26,7 @@ from chatter.schemas.auth import (
     TokenRefreshResponse,
     TokenResponse,
     UserCreate,
+    UserListResponse,
     UserLogin,
     UserResponse,
     UserUpdate,
@@ -705,3 +706,52 @@ async def deactivate_account(
     return AccountDeactivateResponse(
         message="Account deactivated successfully"
     )
+
+
+@router.get("/users", response_model=UserListResponse)
+async def list_users(
+    page: int = 1,
+    page_size: int = 50,
+    current_user: User = Depends(get_current_admin_user),
+    session: AsyncSession = Depends(get_session_generator),
+) -> UserListResponse:
+    """List all users (admin only).
+
+    Args:
+        page: Page number (1-indexed)
+        page_size: Number of users per page
+        current_user: Current authenticated admin user
+        session: Database session
+
+    Returns:
+        List of users with pagination info
+    """
+    from sqlalchemy import select, func
+
+    # Calculate offset
+    offset = (page - 1) * page_size
+
+    # Get total count
+    count_query = select(func.count()).select_from(User)
+    total_result = await session.execute(count_query)
+    total = total_result.scalar() or 0
+
+    # Get paginated users
+    query = (
+        select(User)
+        .offset(offset)
+        .limit(page_size)
+        .order_by(User.created_at.desc())
+    )
+    result = await session.execute(query)
+    users = result.scalars().all()
+
+    return UserListResponse(
+        users=[
+            UserResponse.model_validate(user) for user in users
+        ],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
+

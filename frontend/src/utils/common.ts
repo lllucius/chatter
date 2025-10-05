@@ -2,6 +2,8 @@
  * Common utility functions used across the frontend
  */
 
+import { ulid } from 'ulidx';
+
 /**
  * Format file size in bytes to human readable format
  * @param bytes - Size in bytes
@@ -108,12 +110,14 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
 };
 
 /**
- * Generate a random ID
- * @param length - Length of the ID
- * @returns Random string ID
+ * Generate a ULID (Universally Unique Lexicographically Sortable Identifier)
+ * ULIDs are 26 character strings that are:
+ * - Lexicographically sortable
+ * - Timestamp-based
+ * - Case insensitive
+ * - URL safe
+ * @returns ULID string (26 characters)
  */
-export const generateId = (length: number = 8): string => {
-  return Math.random()
-    .toString(36)
-    .substring(2, 2 + length);
+export const generateId = (): string => {
+  return ulid();
 };

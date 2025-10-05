@@ -1,7 +1,8 @@
 /**
  * Service for fetching workflow defaults from profiles, models, and prompts
  */
-import { authService } from './auth-service';
+import { getSDK } from './auth-service';
+import { handleError } from '../utils/error-handler';
 
 export interface WorkflowDefaults {
   model_config: {
@@ -74,30 +75,18 @@ export interface NodeDefaultConfig {
 
 class WorkflowDefaultsService {
   /**
-   * Get all workflow defaults from the backend
+   * Get all workflow defaults from the backend using SDK
    */
   async getWorkflowDefaults(): Promise<WorkflowDefaults> {
     try {
-      const token = authService.getToken();
-
-      const response = await fetch('/api/v1/workflows/defaults', {
-        method: 'GET',
-        headers: {
-          ...(token && { Authorization: `Bearer ${token}` }),
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch workflow defaults: ${response.statusText}`
-        );
-      }
-
-      return await response.json();
+      const sdk = getSDK();
+      const response = await sdk.workflows.getWorkflowDefaultsApiV1WorkflowsDefaults();
+      return response as unknown as WorkflowDefaults;
     } catch (error) {
-      console.error('Error fetching workflow defaults:', error);
-      // No fallback - throw error to caller
+      handleError(error, {
+        source: 'WorkflowDefaultsService.getWorkflowDefaults',
+        operation: 'fetch workflow defaults',
+      });
       throw new Error(
         'Unable to fetch workflow defaults from server. Please check your connection and try again.'
       );
@@ -105,36 +94,20 @@ class WorkflowDefaultsService {
   }
 
   /**
-   * Get defaults for a specific node type
+   * Get defaults for a specific node type using SDK
    */
   async getNodeDefaults(nodeType: string): Promise<NodeDefaultConfig> {
     try {
-      const token = authService.getToken();
-
-      const response = await fetch(
-        `/api/v1/workflows/defaults?node_type=${nodeType}`,
-        {
-          method: 'GET',
-          headers: {
-            ...(token && { Authorization: `Bearer ${token}` }),
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch node defaults: ${response.statusText}`
-        );
-      }
-
-      return await response.json();
+      const sdk = getSDK();
+      const response = await sdk.workflows.getWorkflowDefaultsApiV1WorkflowsDefaults({
+        nodeType,
+      });
+      return response as unknown as NodeDefaultConfig;
     } catch (error) {
-      console.error(
-        `Error fetching defaults for node type ${nodeType}:`,
-        error
-      );
-      // No fallback - throw error to caller
+      handleError(error, {
+        source: 'WorkflowDefaultsService.getNodeDefaults',
+        operation: `fetch defaults for ${nodeType} node`,
+      });
       throw new Error(
         `Unable to fetch defaults for ${nodeType} node. Please check your connection and try again.`
       );

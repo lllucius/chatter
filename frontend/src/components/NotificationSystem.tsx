@@ -26,6 +26,7 @@ import {
   Speed as PerformanceIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
+import { ulid } from 'ulidx';
 
 export interface Notification {
   id: string;
@@ -131,7 +132,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
       const newNotification: Notification = {
         ...notification,
-        id: Math.random().toString(36).substring(7),
+        id: ulid(),
         timestamp: new Date(),
         read: false,
       };

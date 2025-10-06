@@ -808,7 +808,7 @@ class ChatWorkflowConfig(BaseModel):
 from chatter.schemas.chat import ChatRequest
 
 # ChatWorkflowRequest is now just an alias to ChatRequest
-# This maintains backward compatibility while eliminating duplication
+# Unified chat request type
 ChatWorkflowRequest = ChatRequest
 
 

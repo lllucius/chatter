@@ -3,7 +3,7 @@
 import pytest
 
 from chatter.schemas.chat import ChatRequest
-from chatter.services.workflow_execution import WorkflowExecutionService
+from chatter.services.unified_workflow_execution import UnifiedUnifiedWorkflowExecutionService
 
 
 class TestWorkflowConfigExtraction:
@@ -18,7 +18,7 @@ class TestWorkflowConfigExtraction:
             enable_memory=True,
         )
 
-        service = WorkflowExecutionService(
+        service = UnifiedWorkflowExecutionService(
             llm_service=None, message_service=None, session=None
         )
         settings = service._extract_workflow_config_settings(chat_request)
@@ -42,7 +42,7 @@ class TestWorkflowConfigExtraction:
             },
         )
 
-        service = WorkflowExecutionService(
+        service = UnifiedWorkflowExecutionService(
             llm_service=None, message_service=None, session=None
         )
         settings = service._extract_workflow_config_settings(chat_request)
@@ -64,7 +64,7 @@ class TestWorkflowConfigExtraction:
             },
         )
 
-        service = WorkflowExecutionService(
+        service = UnifiedWorkflowExecutionService(
             llm_service=None, message_service=None, session=None
         )
         settings = service._extract_workflow_config_settings(chat_request)
@@ -82,7 +82,7 @@ class TestWorkflowConfigExtraction:
             },
         )
 
-        service = WorkflowExecutionService(
+        service = UnifiedWorkflowExecutionService(
             llm_service=None, message_service=None, session=None
         )
         settings = service._extract_workflow_config_settings(chat_request)
@@ -99,7 +99,7 @@ class TestWorkflowConfigExtraction:
             enable_memory=False,
         )
 
-        service = WorkflowExecutionService(
+        service = UnifiedWorkflowExecutionService(
             llm_service=None, message_service=None, session=None
         )
         settings = service._extract_workflow_config_settings(chat_request)
@@ -118,7 +118,7 @@ class TestWorkflowConfigExtraction:
             workflow_config={},
         )
 
-        service = WorkflowExecutionService(
+        service = UnifiedWorkflowExecutionService(
             llm_service=None, message_service=None, session=None
         )
         settings = service._extract_workflow_config_settings(chat_request)
@@ -139,7 +139,7 @@ class TestWorkflowConfigExtraction:
             },
         )
 
-        service = WorkflowExecutionService(
+        service = UnifiedWorkflowExecutionService(
             llm_service=None, message_service=None, session=None
         )
         settings = service._extract_workflow_config_settings(chat_request)

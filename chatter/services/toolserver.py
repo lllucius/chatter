@@ -972,7 +972,7 @@ class ToolServerService:
                         server_id=server.id,
                         error=str(e),
                     )
-                    # Fallback to plain text for backward compatibility
+                    # Fallback to plain text if decryption fails
                     decrypted_secret = server.oauth_client_secret
 
                 oauth_config = OAuthConfig(

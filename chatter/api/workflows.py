@@ -42,7 +42,7 @@ from chatter.services.simplified_workflow_analytics import (
     SimplifiedWorkflowAnalyticsService,
 )
 from chatter.services.workflow_defaults import WorkflowDefaultsService
-from chatter.services.workflow_execution import WorkflowExecutionService
+from chatter.services.unified_workflow_execution import UnifiedWorkflowExecutionService
 from chatter.services.workflow_management import (
     WorkflowManagementService,
 )
@@ -79,7 +79,7 @@ async def get_workflow_defaults_service(
 
 async def get_workflow_execution_service(
     session: AsyncSession = Depends(get_session_generator),
-) -> WorkflowExecutionService:
+) -> UnifiedWorkflowExecutionService:
     """Get workflow execution service."""
     # Import here to avoid circular dependencies
     from chatter.services.llm import LLMService
@@ -87,7 +87,7 @@ async def get_workflow_execution_service(
 
     llm_service = LLMService()
     message_service = MessageService(session)
-    return WorkflowExecutionService(
+    return UnifiedWorkflowExecutionService(
         llm_service, message_service, session
     )
 
@@ -549,7 +549,7 @@ async def execute_workflow_template(
     workflow_service: WorkflowManagementService = Depends(
         get_workflow_management_service
     ),
-    execution_service: WorkflowExecutionService = Depends(
+    execution_service: UnifiedWorkflowExecutionService = Depends(
         get_workflow_execution_service
     ),
 ) -> WorkflowExecutionResponse:
@@ -592,7 +592,7 @@ async def execute_temporary_workflow_template(
     workflow_service: WorkflowManagementService = Depends(
         get_workflow_management_service
     ),
-    execution_service: WorkflowExecutionService = Depends(
+    execution_service: UnifiedWorkflowExecutionService = Depends(
         get_workflow_execution_service
     ),
 ) -> WorkflowExecutionResponse:
@@ -681,7 +681,7 @@ async def execute_workflow(
     workflow_service: WorkflowManagementService = Depends(
         get_workflow_management_service
     ),
-    execution_service: WorkflowExecutionService = Depends(
+    execution_service: UnifiedWorkflowExecutionService = Depends(
         get_workflow_execution_service
     ),
 ) -> WorkflowExecutionResponse:
@@ -984,7 +984,7 @@ async def get_workflow_execution_logs(
 async def execute_chat_workflow(
     request: ChatWorkflowRequest,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowExecutionService = Depends(
+    workflow_service: UnifiedWorkflowExecutionService = Depends(
         get_workflow_execution_service
     ),
 ) -> ChatResponse:
@@ -1032,7 +1032,7 @@ async def execute_chat_workflow_streaming(
     request: ChatWorkflowRequest,
     chat_request: Request,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowExecutionService = Depends(
+    workflow_service: UnifiedWorkflowExecutionService = Depends(
         get_workflow_execution_service
     ),
 ):
@@ -1078,7 +1078,7 @@ async def execute_custom_workflow(
     model: str = "gpt-4",
     conversation_id: str | None = None,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowExecutionService = Depends(
+    workflow_service: UnifiedWorkflowExecutionService = Depends(
         get_workflow_execution_service
     ),
 ) -> dict:

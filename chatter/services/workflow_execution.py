@@ -173,6 +173,13 @@ class WorkflowExecutionService:
         # Initialize enhanced components
         self.memory_manager = EnhancedMemoryManager()
         self.tool_executor = EnhancedToolExecutor()
+        
+        # Initialize new execution engine
+        from chatter.core.workflow_execution_engine import ExecutionEngine
+        self.execution_engine = ExecutionEngine(
+            session=session,
+            llm_service=llm_service,
+        )
 
     def _extract_workflow_config_settings(
         self, chat_request: ChatRequest
@@ -245,6 +252,74 @@ class WorkflowExecutionService:
             user_id=user_id,
         )
 
+        return conversation, message
+
+    async def execute_with_engine(
+        self,
+        user_id: str,
+        request: ChatRequest,
+    ) -> tuple[Conversation, Message]:
+        """Execute chat workflow using the new unified ExecutionEngine.
+        
+        This is the new implementation that will replace execute_chat_workflow.
+        Currently being tested before full migration.
+        """
+        from chatter.schemas.execution import ExecutionRequest
+        
+        # Get or create conversation
+        conversation = await self._get_or_create_conversation(
+            user_id, request
+        )
+        
+        # Convert ChatRequest to ExecutionRequest
+        execution_request = ExecutionRequest(
+            message=request.message,
+            provider=request.provider,
+            model=request.model,
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            system_prompt=request.system_prompt_override,
+            enable_memory=request.enable_memory,
+            enable_retrieval=request.enable_retrieval,
+            enable_tools=request.enable_tools,
+            streaming=False,
+            memory_window=getattr(request, 'memory_window', 10),
+            max_tool_calls=getattr(request, 'max_tool_calls', 10),
+            document_ids=request.document_ids,
+            conversation_id=conversation.id,
+            workflow_config=request.workflow_config or {},
+        )
+        
+        # Execute using the new engine
+        result = await self.execution_engine.execute(
+            request=execution_request,
+            user_id=user_id,
+        )
+        
+        # Create and save message
+        message = await self._create_and_save_message(
+            conversation=conversation,
+            content=result.response,
+            role=MessageRole.ASSISTANT,
+            metadata=result.metadata,
+            prompt_tokens=result.prompt_tokens,
+            completion_tokens=result.completion_tokens,
+            cost=result.cost,
+            provider_used=request.provider,
+            response_time_ms=result.execution_time_ms,
+        )
+        
+        # Update conversation aggregates
+        from chatter.services.conversation import ConversationService
+        conversation_service = ConversationService(self.session)
+        await conversation_service.update_conversation_aggregates(
+            conversation_id=conversation.id,
+            user_id=user_id,
+            tokens_delta=result.tokens_used,
+            cost_delta=result.cost,
+            message_count_delta=1,
+        )
+        
         return conversation, message
 
     async def _execute_chat_workflow_internal(

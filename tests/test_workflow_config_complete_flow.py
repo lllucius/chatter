@@ -3,7 +3,7 @@
 import pytest
 
 from chatter.schemas.chat import ChatRequest
-from chatter.services.workflow_execution import WorkflowExecutionService
+from chatter.services.unified_workflow_execution import UnifiedUnifiedWorkflowExecutionService
 
 
 class MockTool:
@@ -56,7 +56,7 @@ class TestCompleteWorkflowConfigFlow:
         )
         
         # Extract settings
-        service = WorkflowExecutionService(None, None, None)
+        service = UnifiedWorkflowExecutionService(None, None, None)
         settings = service._extract_workflow_config_settings(chat_request)
         
         # Verify extraction
@@ -102,7 +102,7 @@ class TestCompleteWorkflowConfigFlow:
             }
         )
         
-        service = WorkflowExecutionService(None, None, None)
+        service = UnifiedWorkflowExecutionService(None, None, None)
         settings = service._extract_workflow_config_settings(chat_request)
         
         assert settings['enable_tools'] is True
@@ -133,7 +133,7 @@ class TestCompleteWorkflowConfigFlow:
             }
         )
         
-        service = WorkflowExecutionService(None, None, None)
+        service = UnifiedWorkflowExecutionService(None, None, None)
         settings = service._extract_workflow_config_settings(chat_request)
         
         assert settings['enable_tools'] is False
@@ -159,7 +159,7 @@ class TestCompleteWorkflowConfigFlow:
             }
         )
         
-        service = WorkflowExecutionService(None, None, None)
+        service = UnifiedWorkflowExecutionService(None, None, None)
         settings = service._extract_workflow_config_settings(chat_request)
         
         assert settings['enable_tools'] is True
@@ -197,7 +197,7 @@ class TestCompleteWorkflowConfigFlow:
             }
         )
         
-        service = WorkflowExecutionService(None, None, None)
+        service = UnifiedWorkflowExecutionService(None, None, None)
         settings = service._extract_workflow_config_settings(chat_request)
         
         # Filter simulation

@@ -143,8 +143,9 @@ async def test_update_conversation_aggregates(result_processor, mock_session):
     mock_conversation = MagicMock()
     mock_conversation.id = "conv_123"
     
+    # Import path is within the method, so we need to patch it at that location
     with patch('chatter.services.workflow_result_processor.ConversationService') as mock_service_class:
-        mock_service = MagicMock()
+        mock_service = AsyncMock()
         mock_service.update_conversation_aggregates = AsyncMock()
         mock_service_class.return_value = mock_service
         
@@ -155,6 +156,10 @@ async def test_update_conversation_aggregates(result_processor, mock_session):
             cost_delta=0.05,
         )
         
+        # Verify ConversationService was instantiated with session
+        mock_service_class.assert_called_once_with(mock_session)
+        
+        # Verify update was called with correct parameters
         mock_service.update_conversation_aggregates.assert_called_once_with(
             conversation_id="conv_123",
             user_id="user_123",

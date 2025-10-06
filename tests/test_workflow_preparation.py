@@ -224,7 +224,8 @@ async def test_get_tools_with_filtering(preparation_service):
     mock_tool_2 = MagicMock()
     mock_tool_3 = MagicMock()
 
-    with patch('chatter.services.workflow_preparation.tool_registry') as mock_registry:
+    # Patch at the import location within the method
+    with patch('chatter.core.tool_registry.tool_registry') as mock_registry:
         mock_registry.get_enabled_tools_for_workspace = AsyncMock(
             return_value=[mock_tool_1, mock_tool_2, mock_tool_3]
         )

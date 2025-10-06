@@ -12,7 +12,7 @@ from chatter.core.workflow_capabilities import (
 )
 from chatter.models.conversation import Conversation
 from chatter.schemas.chat import ChatRequest
-from chatter.services.workflow_execution import WorkflowExecutionService
+from chatter.services.unified_workflow_execution import UnifiedUnifiedWorkflowExecutionService
 
 
 class MockWorkflow:
@@ -82,7 +82,7 @@ class TestWorkflowStreamingFix:
     async def test_plain_workflow_streaming_processes_all_events(
         self, mock_services, conversation, chat_request
     ):
-        """Test WorkflowExecutionService processes both manage_memory and call_model events for plain workflow."""
+        """Test UnifiedWorkflowExecutionService processes both manage_memory and call_model events for plain workflow."""
         llm_service, message_service, template_manager = mock_services
 
         # Mock workflow creation
@@ -91,7 +91,7 @@ class TestWorkflowStreamingFix:
         )
 
         # Create unified engine
-        engine = WorkflowExecutionService(
+        engine = UnifiedWorkflowExecutionService(
             llm_service, message_service, template_manager
         )
 
@@ -136,7 +136,7 @@ class TestWorkflowStreamingFix:
     async def test_rag_workflow_streaming_processes_all_events(
         self, mock_services, conversation, chat_request
     ):
-        """Test WorkflowExecutionService processes events correctly for RAG workflow."""
+        """Test UnifiedWorkflowExecutionService processes events correctly for RAG workflow."""
         llm_service, message_service, template_manager = mock_services
 
         # Mock workflow creation
@@ -145,7 +145,7 @@ class TestWorkflowStreamingFix:
         )
 
         # Create unified engine
-        engine = WorkflowExecutionService(
+        engine = UnifiedWorkflowExecutionService(
             llm_service, message_service, template_manager
         )
 
@@ -201,7 +201,7 @@ class TestWorkflowStreamingFix:
     async def test_tools_workflow_streaming_processes_all_events(
         self, mock_services, conversation, chat_request
     ):
-        """Test WorkflowExecutionService processes events correctly for tools workflow."""
+        """Test UnifiedWorkflowExecutionService processes events correctly for tools workflow."""
         llm_service, message_service, template_manager = mock_services
 
         # Mock workflow creation
@@ -210,7 +210,7 @@ class TestWorkflowStreamingFix:
         )
 
         # Create unified engine
-        engine = WorkflowExecutionService(
+        engine = UnifiedWorkflowExecutionService(
             llm_service, message_service, template_manager
         )
 
@@ -264,7 +264,7 @@ class TestWorkflowStreamingFix:
     async def test_full_workflow_streaming_processes_all_events(
         self, mock_services, conversation, chat_request
     ):
-        """Test WorkflowExecutionService processes events correctly for full workflow."""
+        """Test UnifiedWorkflowExecutionService processes events correctly for full workflow."""
         llm_service, message_service, template_manager = mock_services
 
         # Mock workflow creation
@@ -273,7 +273,7 @@ class TestWorkflowStreamingFix:
         )
 
         # Create unified engine
-        engine = WorkflowExecutionService(
+        engine = UnifiedWorkflowExecutionService(
             llm_service, message_service, template_manager
         )
 
@@ -367,7 +367,7 @@ class TestWorkflowStreamingFix:
         )
 
         # Create unified engine
-        engine = WorkflowExecutionService(
+        engine = UnifiedWorkflowExecutionService(
             llm_service, message_service, template_manager
         )
 
@@ -431,7 +431,7 @@ class TestWorkflowStreamingFix:
         )
 
         # Create unified engine
-        engine = WorkflowExecutionService(
+        engine = UnifiedWorkflowExecutionService(
             llm_service, message_service, template_manager
         )
 

@@ -101,7 +101,7 @@ class ValidatedULID(str):
 
     @classmethod
     def validate(cls, v):
-        """Validate ULID format (for backward compatibility)."""
+        """Validate ULID format ."""
         if isinstance(v, str):
             try:
                 ULID.from_str(v)

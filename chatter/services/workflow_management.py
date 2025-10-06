@@ -80,8 +80,14 @@ class WorkflowManagementService:
         metadata: dict[str, Any] | None = None,
         template_id: str | None = None,
     ) -> WorkflowDefinition:
-        """Create a new workflow definition."""
+        """Create a new workflow definition.
+        
+        Phase 5: Now uses WorkflowValidator for comprehensive validation.
+        """
         try:
+            from chatter.core.workflow_validator import WorkflowValidator
+            from chatter.utils.problem import BadRequestProblem
+            
             # Validate the workflow definition
             definition_data = {
                 "name": name,
@@ -91,22 +97,21 @@ class WorkflowManagementService:
                 "metadata": metadata or {},
             }
 
-            validation_result = validate_workflow_definition(
-                definition_data
+            validator = WorkflowValidator()
+            validation_result = await validator.validate(
+                workflow_data=definition_data,
+                user_id=owner_id,
+                context="workflow_definition",
             )
 
-            if not _is_validation_result_valid(validation_result):
-                from chatter.utils.problem import BadRequestProblem
-
-                error_messages = _get_validation_errors_as_strings(
-                    validation_result
-                )
+            if not validation_result.is_valid:
+                error_messages = [str(e) for e in validation_result.errors]
                 raise BadRequestProblem(
                     detail=f"Workflow validation failed: {'; '.join(error_messages)}"
                 )
 
             # Log warnings if any
-            if validation_result.warnings:
+            if hasattr(validation_result, 'warnings') and validation_result.warnings:
                 logger.warning(
                     f"Workflow validation warnings: {'; '.join(validation_result.warnings)}"
                 )
@@ -486,32 +491,30 @@ class WorkflowManagementService:
         definition_data: dict[str, Any],
         owner_id: str,
     ) -> dict[str, Any]:
-        """Validate a workflow definition and return validation results.
+        """Validate a workflow definition using the unified validator.
 
-        This delegates to the authoritative validation in chatter.core.validation.
+        Phase 5: Now uses WorkflowValidator orchestrator instead of
+        scattered validation logic.
 
         Args:
             definition_data: Workflow definition data to validate
-            owner_id: Owner user ID (for logging/audit)
+            owner_id: Owner user ID (for security/capability checks)
 
         Returns:
             Validation result dictionary with valid, errors, warnings
         """
         try:
-            validation_result = validate_workflow_definition(
-                definition_data
+            from chatter.core.workflow_validator import WorkflowValidator
+            
+            validator = WorkflowValidator()
+            
+            validation_result = await validator.validate(
+                workflow_data=definition_data,
+                user_id=owner_id,
+                context="workflow_definition",
             )
 
-            return {
-                "valid": _is_validation_result_valid(validation_result),
-                "errors": _get_validation_errors_as_strings(
-                    validation_result
-                ),
-                "warnings": validation_result.warnings,
-                "requirements_met": getattr(
-                    validation_result, 'requirements_met', True
-                ),
-            }
+            return validation_result.to_api_response()
 
         except Exception as e:
             logger.error(f"Failed to validate workflow definition: {e}")
@@ -1182,7 +1185,10 @@ class WorkflowManagementService:
     async def validate_workflow_template(
         self, template_data: dict[str, Any], owner_id: str
     ) -> dict[str, Any]:
-        """Validate a workflow template.
+        """Validate a workflow template using the unified validator.
+
+        Phase 5: Now uses WorkflowValidator orchestrator with template-specific
+        validation rules.
 
         Args:
             template_data: Template data to validate
@@ -1191,48 +1197,19 @@ class WorkflowManagementService:
         Returns:
             Validation result dictionary
         """
-        errors: list[str] = []
-        warnings: list[str] = []
-        template_info: dict[str, Any] = {}
-
         try:
-            # Validate required fields
-            required_fields = ["name", "description", "category"]
-            for field in required_fields:
-                if field not in template_data:
-                    errors.append(f"Missing required field: {field}")
-                elif not template_data[field]:
-                    errors.append(f"Empty required field: {field}")
-
-            # Validate category
-            if "category" in template_data:
-                try:
-                    TemplateCategory(template_data["category"])
-                except ValueError:
-                    errors.append(
-                        f"Invalid category: {template_data['category']}"
-                    )
-
-            # Validate default_params if present
-            if "default_params" in template_data:
-                if not isinstance(template_data["default_params"], dict):
-                    errors.append(
-                        "default_params must be a dictionary"
-                    )
-
-            # Extract template info
-            if "name" in template_data:
-                template_info["name"] = template_data["name"]
-            if "description" in template_data:
-                template_info["description"] = template_data[
-                    "description"
-                ]
-            if "category" in template_data:
-                template_info["category"] = template_data["category"]
-            if "tags" in template_data:
-                template_info["tags"] = template_data["tags"]
-
+            from chatter.core.workflow_validator import WorkflowValidator
+            
+            validator = WorkflowValidator()
+            
+            # Use template-specific validation
+            validation_result = await validator.validate_template(
+                template_data=template_data,
+                user_id=owner_id,
+            )
+            
             # Check for duplicate name
+            warnings = list(validation_result.warnings) if hasattr(validation_result, 'warnings') else []
             if "name" in template_data:
                 stmt = select(WorkflowTemplate).where(
                     and_(
@@ -1246,21 +1223,34 @@ class WorkflowManagementService:
                     warnings.append(
                         f"Template with name '{template_data['name']}' already exists"
                     )
-
-            is_valid = len(errors) == 0
-
-            return {
-                "is_valid": is_valid,
-                "errors": errors,
-                "warnings": warnings,
-                "template_info": template_info if is_valid else None,
-            }
+            
+            # Build response
+            response = validation_result.to_api_response()
+            
+            # Add warnings if we found duplicate
+            if warnings:
+                response["warnings"] = warnings
+            
+            # Add template info if valid
+            if validation_result.is_valid:
+                template_info = {}
+                for field in ["name", "description", "category", "tags"]:
+                    if field in template_data:
+                        template_info[field] = template_data[field]
+                response["template_info"] = template_info
+            
+            # Ensure backward compatibility with is_valid key
+            if "valid" in response and "is_valid" not in response:
+                response["is_valid"] = response["valid"]
+            
+            return response
 
         except Exception as e:
             logger.error(f"Error during template validation: {e}")
             return {
                 "is_valid": False,
+                "valid": False,
                 "errors": [f"Validation error: {str(e)}"],
-                "warnings": warnings,
+                "warnings": [],
                 "template_info": None,
             }

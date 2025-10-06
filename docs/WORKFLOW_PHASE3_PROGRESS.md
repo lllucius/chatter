@@ -10,7 +10,7 @@
 ## Month 1: Execution Engine Redesign
 
 **Goal:** Pipeline architecture with pluggable middleware  
-**Status:** Week 1 COMPLETE ✅ | Weeks 2-4 IN PROGRESS
+**Status:** Week 1 COMPLETE ✅ | Week 2 COMPLETE ✅ | Weeks 3-4 IN PROGRESS
 
 ### Week 1: Core Pipeline Infrastructure ✅ COMPLETE
 
@@ -54,37 +54,60 @@ pipeline = (
 )
 ```
 
-### Week 2: Built-in Middleware (NEXT)
+### Week 2: Built-in Middleware ✅ COMPLETE
+
+**Completed:** January 2025
+
+**Deliverables:**
+- ✅ `chatter/core/pipeline/middleware/monitoring.py` (200 lines)
+  - Integrates with unified event system from Phase 2
+  - Publishes lifecycle events (STARTED, COMPLETED, FAILED)
+  - Tracks execution time automatically
+  - Emits resource loading events
+  
+- ✅ `chatter/core/pipeline/middleware/caching.py` (200 lines)
+  - Result caching to avoid redundant executions
+  - Generates cache keys from workflow + context
+  - Supports TTL and pluggable backends
+  
+- ✅ `chatter/core/pipeline/middleware/retry.py` (150 lines)
+  - Automatic retry logic for transient failures
+  - Configurable retry count and exponential backoff
+  - Retryable exception filtering
+  
+- ✅ `chatter/core/pipeline/middleware/validation.py` (180 lines)
+  - Input/output validation
+  - Strict mode for warnings
+  - Extensible validation rules
+  
+- ✅ `chatter/core/pipeline/middleware/rate_limiting.py` (150 lines)
+  - Request rate limiting per user or global
+  - Sliding window algorithm
+  - RateLimitExceeded exceptions
+
+**Impact:**
+- Lines added: ~880 (5 middleware implementations)
+- Modularity: Each middleware single responsibility
+- Composability: Mix and match as needed
+- Integration: Seamless with Phase 2 event system
+
+**Key Achievement:**
+Complete middleware system enabling cross-cutting concerns:
+```python
+pipeline = (
+    WorkflowPipeline(LangGraphExecutor())
+    .use(MonitoringMiddleware())
+    .use(CachingMiddleware(ttl_seconds=3600))
+    .use(RetryMiddleware(max_retries=3))
+    .use(ValidationMiddleware())
+    .use(RateLimitingMiddleware(max_requests=60))
+)
+```
+
+### Week 3: Strategy-Based Executor (NEXT)
 
 **Plan:**
-- [ ] MonitoringMiddleware - Event publishing
-- [ ] CachingMiddleware - Result caching
-- [ ] RetryMiddleware - Automatic retry logic
-- [ ] ValidationMiddleware - Input/output validation
-- [ ] RateLimitingMiddleware - Request rate limiting
-
-**Files to Create:**
-- `chatter/core/pipeline/middleware/__init__.py`
-- `chatter/core/pipeline/middleware/monitoring.py`
-- `chatter/core/pipeline/middleware/caching.py`
-- `chatter/core/pipeline/middleware/retry.py`
-- `chatter/core/pipeline/middleware/validation.py`
-- `chatter/core/pipeline/middleware/rate_limiting.py`
-- `tests/core/pipeline/middleware/test_monitoring.py`
-- `tests/core/pipeline/middleware/test_caching.py`
-- `tests/core/pipeline/middleware/test_retry.py`
-- `tests/core/pipeline/middleware/test_validation.py`
-- `tests/core/pipeline/middleware/test_rate_limiting.py`
-
-**Estimated Impact:**
-- Lines added: ~1,200 (5 middleware × 80 lines + tests)
-- Consolidation: Replace scattered monitoring/caching/retry code
-- Reusability: Middleware can be mixed and matched
-
-### Week 3: Strategy-Based Executor (PLANNED)
-
-**Plan:**
-- [ ] Enhance LangGraphExecutor
+- [ ] Enhance LangGraphExecutor implementation
 - [ ] Implement SimpleExecutor for lightweight workflows
 - [ ] Design ParallelExecutor architecture
 - [ ] Create executor factory/registry

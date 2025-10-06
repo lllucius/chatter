@@ -45,6 +45,9 @@ class ExecutionResult:
     execution_id: str | None = None
     conversation_id: str | None = None
     workflow_type: str | None = None
+    user_id: str | None = None
+    definition_id: str | None = None
+    template_id: str | None = None
 
     @classmethod
     def from_raw(
@@ -53,6 +56,9 @@ class ExecutionResult:
         execution_id: str | None = None,
         conversation_id: str | None = None,
         workflow_type: str | None = None,
+        user_id: str | None = None,
+        definition_id: str | None = None,
+        template_id: str | None = None,
     ) -> ExecutionResult:
         """Create ExecutionResult from raw workflow result.
 
@@ -61,6 +67,9 @@ class ExecutionResult:
             execution_id: Optional execution ID
             conversation_id: Optional conversation ID
             workflow_type: Optional workflow type
+            user_id: Optional user ID
+            definition_id: Optional definition ID
+            template_id: Optional template ID
 
         Returns:
             ExecutionResult instance
@@ -105,6 +114,9 @@ class ExecutionResult:
             execution_id=execution_id,
             conversation_id=conversation_id,
             workflow_type=workflow_type,
+            user_id=user_id,
+            definition_id=definition_id,
+            template_id=template_id,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -123,6 +135,9 @@ class ExecutionResult:
             "execution_id": self.execution_id,
             "conversation_id": self.conversation_id,
             "workflow_type": self.workflow_type,
+            "user_id": self.user_id,
+            "definition_id": self.definition_id,
+            "template_id": self.template_id,
         }
 
     def to_api_response(self) -> WorkflowExecutionResponse:
@@ -132,7 +147,9 @@ class ExecutionResult:
             WorkflowExecutionResponse for API
         """
         return WorkflowExecutionResponse(
-            execution_id=self.execution_id or "",
+            id=self.execution_id or "",
+            definition_id=self.definition_id or self.template_id or "",
+            owner_id=self.user_id or "",
             status="completed" if not self.errors else "failed",
             output_data={
                 "response": self.response,
@@ -141,7 +158,7 @@ class ExecutionResult:
             execution_time_ms=self.execution_time_ms,
             tokens_used=self.tokens_used,
             cost=self.cost,
-            error=self.errors[0] if self.errors else None,
+            error_message=self.errors[0] if self.errors else None,
         )
 
     def to_event_data(self) -> dict[str, Any]:

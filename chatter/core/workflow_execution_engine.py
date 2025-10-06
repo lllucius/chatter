@@ -470,6 +470,9 @@ class ExecutionEngine:
                 execution_id=context.execution_id,
                 conversation_id=context.conversation_id,
                 workflow_type=context.workflow_type.value,
+                user_id=context.user_id,
+                definition_id=context.source_definition_id,
+                template_id=context.source_template_id,
             )
             execution_result.execution_time_ms = execution_time_ms
 

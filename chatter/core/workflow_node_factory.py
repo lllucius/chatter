@@ -70,17 +70,120 @@ class WorkflowNode(ABC):
         return []
 
 
-class MemoryNode(WorkflowNode):
+class ConfigParser:
+    """Shared configuration parsing utilities for workflow nodes."""
+
+    @staticmethod
+    def parse_model_config(config: dict[str, Any]) -> dict[str, Any]:
+        """Parse and standardize model configuration."""
+        return {
+            "provider": config.get("provider", "openai"),
+            "model": config.get("model", "gpt-4"),
+            "temperature": config.get("temperature", 0.7),
+            "max_tokens": config.get("max_tokens", 1000),
+        }
+
+    @staticmethod
+    def parse_retry_config(config: dict[str, Any]) -> dict[str, int]:
+        """Parse retry configuration."""
+        return {
+            "max_retries": config.get("max_retries", 3),
+            "retry_delay": config.get("retry_delay", 1),
+        }
+
+    @staticmethod
+    def parse_timeout_config(config: dict[str, Any]) -> int:
+        """Parse timeout configuration."""
+        return config.get("timeout", 30)
+
+    @staticmethod
+    def validate_enum_value(
+        value: str, valid_values: list[str], field_name: str
+    ) -> str | None:
+        """Validate enum value and return error if invalid."""
+        if value not in valid_values:
+            return (
+                f"{field_name} must be one of {valid_values}, got: {value}"
+            )
+        return None
+
+
+class BaseWorkflowNode(WorkflowNode):
+    """Enhanced base class with shared functionality for all workflow nodes."""
+
+    def __init__(
+        self,
+        node_id: str,
+        config: dict[str, Any] | None = None,
+        node_type: str | None = None,
+    ):
+        super().__init__(node_id, config)
+        self.node_type = node_type or self.__class__.__name__
+
+    def _validate_required_fields(
+        self, fields: list[str]
+    ) -> list[str]:
+        """Validate that required fields are present in config."""
+        errors = []
+        for field in fields:
+            if field not in self.config:
+                errors.append(
+                    f"{self.node_type} requires '{field}' in config"
+                )
+        return errors
+
+    def _validate_field_types(
+        self, field_types: dict[str, type]
+    ) -> list[str]:
+        """Validate field types in config."""
+        errors = []
+        for field, expected_type in field_types.items():
+            if field in self.config:
+                value = self.config[field]
+                if not isinstance(value, expected_type):
+                    errors.append(
+                        f"{self.node_type} field '{field}' must be {expected_type.__name__}, got {type(value).__name__}"
+                    )
+        return errors
+
+    def _get_config(self, key: str, default: Any = None) -> Any:
+        """Safely get config value with default."""
+        return self.config.get(key, default)
+
+    def _get_required_config(self, key: str) -> Any:
+        """Get required config value, raises KeyError if not found."""
+        if key not in self.config:
+            raise KeyError(
+                f"{self.node_type} requires '{key}' in config"
+            )
+        return self.config[key]
+
+    def _create_error_result(self, error_msg: str) -> dict[str, Any]:
+        """Create standardized error result."""
+        return {
+            "error_state": {
+                "has_error": True,
+                "error_message": error_msg,
+                "error_node": self.node_id,
+            }
+        }
+
+
+class MemoryNode(BaseWorkflowNode):
     """Node for memory management and conversation summarization."""
 
     def __init__(
         self, node_id: str, config: dict[str, Any] | None = None
     ):
-        super().__init__(node_id, config)
-        self.memory_window = (
-            config.get("memory_window", 10) if config else 10
-        )
+        super().__init__(node_id, config, "MemoryNode")
+        self.memory_window = self._get_config("memory_window", 10)
         self.llm: BaseChatModel | None = None
+    
+    def validate_config(self) -> list[str]:
+        """Validate memory node configuration."""
+        errors = []
+        errors.extend(self._validate_field_types({"memory_window": int}))
+        return errors
 
     def set_llm(self, llm: BaseChatModel) -> None:
         """Set the LLM for summarization."""
@@ -156,17 +259,21 @@ class MemoryNode(WorkflowNode):
         return summary
 
 
-class RetrievalNode(WorkflowNode):
+class RetrievalNode(BaseWorkflowNode):
     """Node for document retrieval and context gathering."""
 
     def __init__(
         self, node_id: str, config: dict[str, Any] | None = None
     ):
-        super().__init__(node_id, config)
+        super().__init__(node_id, config, "RetrievalNode")
         self.retriever = None
-        self.max_documents = (
-            config.get("max_documents", 5) if config else 5
-        )
+        self.max_documents = self._get_config("max_documents", 5)
+    
+    def validate_config(self) -> list[str]:
+        """Validate retrieval node configuration."""
+        errors = []
+        errors.extend(self._validate_field_types({"max_documents": int}))
+        return errors
 
     def set_retriever(self, retriever: Any) -> None:
         """Set the retriever for document search."""
@@ -248,23 +355,18 @@ class RetrievalNode(WorkflowNode):
             return {"retrieval_context": ""}
 
 
-class ConditionalNode(WorkflowNode):
+class ConditionalNode(BaseWorkflowNode):
     """Node for conditional logic and branching."""
 
     def __init__(
         self, node_id: str, config: dict[str, Any] | None = None
     ):
-        super().__init__(node_id, config)
-        self.condition = config.get("condition", "") if config else ""
+        super().__init__(node_id, config, "ConditionalNode")
+        self.condition = self._get_config("condition", "")
 
     def validate_config(self) -> list[str]:
         """Validate that condition is provided."""
-        errors = []
-        if not self.condition:
-            errors.append(
-                "Conditional node must have a condition defined. Add a 'condition' field to the node configuration."
-            )
-        return errors
+        return self._validate_required_fields(["condition"])
 
     async def execute(
         self, context: WorkflowNodeContext
@@ -284,16 +386,9 @@ class ConditionalNode(WorkflowNode):
             }
         except Exception as e:
             logger.error(f"Conditional evaluation failed: {e}")
-            return {
-                "conditional_results": {
-                    **context.get("conditional_results", {}),
-                    self.node_id: False,
-                },
-                "error_state": {
-                    **context.get("error_state", {}),
-                    f"conditional_error_{self.node_id}": str(e),
-                },
-            }
+            return self._create_error_result(
+                f"Conditional evaluation failed: {str(e)}"
+            )
 
     async def _evaluate_condition(
         self, context: WorkflowNodeContext
@@ -361,19 +456,19 @@ class ConditionalNode(WorkflowNode):
         return True
 
 
-class LoopNode(WorkflowNode):
+class LoopNode(BaseWorkflowNode):
     """Node for loop iteration and repetitive execution."""
 
     def __init__(
         self, node_id: str, config: dict[str, Any] | None = None
     ):
-        super().__init__(node_id, config)
-        self.max_iterations = (
-            config.get("max_iterations", 10) if config else 10
-        )
-        self.loop_condition = (
-            config.get("condition", "") if config else ""
-        )
+        super().__init__(node_id, config, "LoopNode")
+        self.max_iterations = self._get_config("max_iterations", 10)
+        self.loop_condition = self._get_config("condition", "")
+    
+    def validate_config(self) -> list[str]:
+        """Validate loop node configuration."""
+        return self._validate_field_types({"max_iterations": int})
 
     async def execute(
         self, context: WorkflowNodeContext
@@ -419,50 +514,38 @@ class LoopNode(WorkflowNode):
         return result
 
 
-class VariableNode(WorkflowNode):
+class VariableNode(BaseWorkflowNode):
     """Node for variable manipulation and state management."""
 
     def __init__(
         self, node_id: str, config: dict[str, Any] | None = None
     ):
-        super().__init__(node_id, config)
-        self.operation = (
-            config.get("operation", "set") if config else "set"
-        )
-
+        super().__init__(node_id, config, "VariableNode")
+        self.operation = self._get_config("operation", "set")
+        
         # Support both snake_case and camelCase for backward compatibility
-        self.variable_name = ""
-        if config:
-            self.variable_name = config.get(
-                "variable_name", ""
-            ) or config.get("variableName", "")
-
-        self.value = config.get("value") if config else None
-
-        # Provide a default variable name if one isn't specified
-        if not self.variable_name:
-            self.variable_name = f"var_{node_id}"
+        self.variable_name = (
+            self._get_config("variable_name", "") or 
+            self._get_config("variableName", "") or 
+            f"var_{node_id}"
+        )
+        self.value = self._get_config("value", None)
 
     def validate_config(self) -> list[str]:
         """Validate variable node configuration."""
         errors = []
-        # Now that we provide a default variable_name, we just validate the operation
-        if self.operation not in [
-            "set",
-            "get",
-            "append",
-            "increment",
-            "decrement",
-        ]:
-            errors.append(f"Invalid operation: {self.operation}")
-
-        # Log a warning if variable_name was auto-generated
+        valid_operations = ["set", "get", "append", "increment", "decrement"]
+        if self.operation not in valid_operations:
+            errors.append(
+                f"Invalid operation: {self.operation}. Must be one of {valid_operations}"
+            )
+        
+        # Log warning if variable_name was auto-generated
         if self.variable_name.startswith(f"var_{self.node_id}"):
             logger.warning(
                 f"Variable node {self.node_id} using auto-generated variable name: {self.variable_name}. "
-                "Consider providing an explicit 'variable_name' in the node configuration to avoid this warning."
+                "Consider providing an explicit 'variable_name' in the node configuration."
             )
-
         return errors
 
     async def execute(
@@ -475,30 +558,22 @@ class VariableNode(WorkflowNode):
             if self.operation == "set":
                 variables[self.variable_name] = self.value
             elif self.operation == "get":
-                # Get operation just ensures variable exists
                 variables.setdefault(self.variable_name, None)
             elif self.operation == "append":
                 current = variables.get(self.variable_name, [])
                 if isinstance(current, list):
                     current.append(self.value)
                 else:
-                    variables[self.variable_name] = [
-                        current,
-                        self.value,
-                    ]
+                    variables[self.variable_name] = [current, self.value]
             elif self.operation == "increment":
                 current = variables.get(self.variable_name, 0)
                 variables[self.variable_name] = (
-                    (current + 1)
-                    if isinstance(current, (int, float))
-                    else 1
+                    (current + 1) if isinstance(current, (int, float)) else 1
                 )
             elif self.operation == "decrement":
                 current = variables.get(self.variable_name, 0)
                 variables[self.variable_name] = (
-                    (current - 1)
-                    if isinstance(current, (int, float))
-                    else -1
+                    (current - 1) if isinstance(current, (int, float)) else -1
                 )
 
             return {
@@ -510,27 +585,29 @@ class VariableNode(WorkflowNode):
             }
         except Exception as e:
             logger.error(f"Variable operation failed: {e}")
-            return {
-                "error_state": {
-                    **context.get("error_state", {}),
-                    f"variable_error_{self.node_id}": str(e),
-                }
-            }
+            return self._create_error_result(f"Variable operation failed: {str(e)}")
 
 
-class ErrorHandlerNode(WorkflowNode):
+class ErrorHandlerNode(BaseWorkflowNode):
     """Node for error handling and recovery."""
 
     def __init__(
         self, node_id: str, config: dict[str, Any] | None = None
     ):
-        super().__init__(node_id, config)
-        self.retry_count = config.get("retry_count", 3) if config else 3
-        self.fallback_action = (
-            config.get("fallback_action", "continue")
-            if config
-            else "continue"
-        )
+        super().__init__(node_id, config, "ErrorHandlerNode")
+        self.retry_count = self._get_config("retry_count", 3)
+        self.fallback_action = self._get_config("fallback_action", "continue")
+    
+    def validate_config(self) -> list[str]:
+        """Validate error handler node configuration."""
+        errors = []
+        errors.extend(self._validate_field_types({"retry_count": int}))
+        valid_actions = ["continue", "clear_errors", "stop"]
+        if self.fallback_action not in valid_actions:
+            errors.append(
+                f"fallback_action must be one of {valid_actions}, got: {self.fallback_action}"
+            )
+        return errors
 
     async def execute(
         self, context: WorkflowNodeContext
@@ -584,20 +661,23 @@ class ErrorHandlerNode(WorkflowNode):
         }
 
 
-class ToolsNode(WorkflowNode):
+class ToolsNode(BaseWorkflowNode):
     """Node for executing multiple tools with enhanced tracking."""
 
     def __init__(
         self, node_id: str, config: dict[str, Any] | None = None
     ):
-        super().__init__(node_id, config)
-        self.max_tool_calls = (
-            config.get("max_tool_calls", 10) if config else 10
-        )
-        self.tool_timeout_ms = (
-            config.get("tool_timeout_ms", 30000) if config else 30000
-        )
+        super().__init__(node_id, config, "ToolsNode")
+        self.max_tool_calls = self._get_config("max_tool_calls", 10)
+        self.tool_timeout_ms = self._get_config("tool_timeout_ms", 30000)
         self.tools = []
+    
+    def validate_config(self) -> list[str]:
+        """Validate tools node configuration."""
+        return self._validate_field_types({
+            "max_tool_calls": int,
+            "tool_timeout_ms": int
+        })
 
     def set_tools(self, tools: list) -> None:
         """Set the available tools for execution."""
@@ -648,22 +728,30 @@ class ToolsNode(WorkflowNode):
         return result
 
 
-class DelayNode(WorkflowNode):
+class DelayNode(BaseWorkflowNode):
     """Node for introducing delays in workflow execution."""
 
     def __init__(
         self, node_id: str, config: dict[str, Any] | None = None
     ):
-        super().__init__(node_id, config)
-        self.delay_type = (
-            config.get("delay_type", "fixed") if config else "fixed"
-        )
-        self.duration = (
-            config.get("duration", 1000) if config else 1000
-        )  # milliseconds
-        self.max_duration = (
-            config.get("max_duration") if config else None
-        )
+        super().__init__(node_id, config, "DelayNode")
+        self.delay_type = self._get_config("delay_type", "fixed")
+        self.duration = self._get_config("duration", 1000)  # milliseconds
+        self.max_duration = self._get_config("max_duration", None)
+    
+    def validate_config(self) -> list[str]:
+        """Validate delay node configuration."""
+        errors = []
+        errors.extend(self._validate_field_types({
+            "duration": int,
+            "max_duration": (int, type(None))
+        }))
+        valid_types = ["fixed", "random", "exponential"]
+        if self.delay_type not in valid_types:
+            errors.append(
+                f"delay_type must be one of {valid_types}, got: {self.delay_type}"
+            )
+        return errors
 
     async def execute(
         self, context: WorkflowNodeContext
@@ -702,13 +790,13 @@ class DelayNode(WorkflowNode):
         }
 
 
-class StartNode(WorkflowNode):
+class StartNode(BaseWorkflowNode):
     """Node for workflow entry point."""
 
     def __init__(
         self, node_id: str, config: dict[str, Any] | None = None
     ):
-        super().__init__(node_id, config)
+        super().__init__(node_id, config, "StartNode")
 
     async def execute(
         self, context: WorkflowNodeContext
@@ -723,13 +811,13 @@ class StartNode(WorkflowNode):
         }
 
 
-class EndNode(WorkflowNode):
+class EndNode(BaseWorkflowNode):
     """Node for workflow exit point."""
 
     def __init__(
         self, node_id: str, config: dict[str, Any] | None = None
     ):
-        super().__init__(node_id, config)
+        super().__init__(node_id, config, "EndNode")
 
     async def execute(
         self, context: WorkflowNodeContext
@@ -744,7 +832,7 @@ class EndNode(WorkflowNode):
         }
 
 
-class ModelNode(WorkflowNode):
+class ModelNode(BaseWorkflowNode):
     """Node for language model processing with LLM integration."""
 
     def __init__(

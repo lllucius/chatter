@@ -57,15 +57,24 @@ class ExecutionEngine:
         self,
         session: AsyncSession,
         llm_service: LLMService,
+        debug_mode: bool = False,
     ):
         """Initialize the execution engine.
 
         Args:
             session: Database session
             llm_service: LLM service for model access
+            debug_mode: Enable debug logging
         """
         self.session = session
         self.llm_service = llm_service
+        
+        # Initialize unified tracker
+        from chatter.core.workflow_tracker import WorkflowTracker
+        self.tracker = WorkflowTracker(
+            session=session,
+            debug_mode=debug_mode,
+        )
 
     async def execute(
         self,
@@ -87,14 +96,22 @@ class ExecutionEngine:
         # Create execution context
         context = await self._create_context(request, user_id)
 
-        # Build workflow graph
-        graph = await self._build_graph(context)
+        # Start unified tracking
+        await self.tracker.start(context)
 
-        # Execute based on streaming flag
-        if request.streaming:
-            return self._execute_streaming(graph, context)
-        else:
-            return await self._execute_sync(graph, context)
+        try:
+            # Build workflow graph
+            graph = await self._build_graph(context)
+
+            # Execute based on streaming flag
+            if request.streaming:
+                return self._execute_streaming(graph, context)
+            else:
+                return await self._execute_sync(graph, context)
+        except Exception as e:
+            # Track failure
+            await self.tracker.fail(context, e)
+            raise
 
     async def _create_context(
         self,
@@ -399,32 +416,39 @@ class ExecutionEngine:
         """
         start_time = time.time()
 
-        # Create initial state
-        initial_state = self._create_initial_state(context)
+        try:
+            # Create initial state
+            initial_state = self._create_initial_state(context)
 
-        # Run workflow
-        result = await workflow_manager.run_workflow(
-            workflow=graph,
-            initial_state=initial_state,
-            thread_id=context.thread_id,
-        )
+            # Run workflow
+            result = await workflow_manager.run_workflow(
+                workflow=graph,
+                initial_state=initial_state,
+                thread_id=context.thread_id,
+            )
 
-        # Calculate execution time
-        execution_time_ms = int((time.time() - start_time) * 1000)
+            # Calculate execution time
+            execution_time_ms = int((time.time() - start_time) * 1000)
 
-        # Create execution result
-        execution_result = ExecutionResult.from_raw(
-            raw_result=result,
-            execution_id=context.execution_id,
-            conversation_id=context.conversation_id,
-            workflow_type=context.workflow_type.value,
-        )
-        execution_result.execution_time_ms = execution_time_ms
+            # Create execution result
+            execution_result = ExecutionResult.from_raw(
+                raw_result=result,
+                execution_id=context.execution_id,
+                conversation_id=context.conversation_id,
+                workflow_type=context.workflow_type.value,
+            )
+            execution_result.execution_time_ms = execution_time_ms
 
-        # Update context
-        context.completed_at = datetime.now(UTC)
+            # Update context
+            context.completed_at = datetime.now(UTC)
 
-        return execution_result
+            # Track completion
+            await self.tracker.complete(context, execution_result)
+
+            return execution_result
+        except Exception as e:
+            # Tracking of failure is done in execute() method
+            raise
 
     async def _execute_streaming(
         self, graph: Any, context: ExecutionContext
@@ -443,71 +467,101 @@ class ExecutionEngine:
         # Create initial state
         initial_state = self._create_initial_state(context)
 
-        # Stream workflow execution
+        # Accumulate result data for final tracking
         content_buffer = ""
-        async for update in workflow_manager.stream_workflow(
-            workflow=graph,
-            initial_state=initial_state,
-            thread_id=context.thread_id,
-        ):
-            # Process streaming updates
-            event_name = update.get("event")
+        total_tokens = 0
+        input_tokens = 0
+        output_tokens = 0
 
-            # Handle chat model streaming events
-            if event_name in ["on_chat_model_stream", "on_llm_stream"]:
-                data = update.get("data", {})
-                chunk = data.get("chunk", {})
+        try:
+            # Stream workflow execution
+            async for update in workflow_manager.stream_workflow(
+                workflow=graph,
+                initial_state=initial_state,
+                thread_id=context.thread_id,
+            ):
+                # Process streaming updates
+                event_name = update.get("event")
 
-                # Extract content
-                content = ""
-                if hasattr(chunk, "content"):
-                    content = chunk.content
-                elif isinstance(chunk, dict):
-                    content = chunk.get("content", "")
+                # Handle chat model streaming events
+                if event_name in ["on_chat_model_stream", "on_llm_stream"]:
+                    data = update.get("data", {})
+                    chunk = data.get("chunk", {})
 
-                if content:
-                    content_buffer += content
+                    # Extract content
+                    content = ""
+                    if hasattr(chunk, "content"):
+                        content = chunk.content
+                    elif isinstance(chunk, dict):
+                        content = chunk.get("content", "")
+
+                    if content:
+                        content_buffer += content
+                        yield StreamingChatChunk(
+                            type="token",
+                            content=content,
+                            metadata={"event": event_name},
+                        )
+
+                # Handle completion event
+                elif event_name == "on_chat_model_end":
+                    data = update.get("data", {})
+                    output = data.get("output", {})
+
+                    # Extract usage metadata
+                    usage_metadata = {}
+                    if hasattr(output, "usage_metadata"):
+                        usage_metadata = output.usage_metadata or {}
+                    elif isinstance(output, dict):
+                        usage_metadata = output.get("usage_metadata", {})
+
+                    # Capture token counts
+                    total_tokens = usage_metadata.get("total_tokens", 0)
+                    input_tokens = usage_metadata.get("input_tokens", 0)
+                    output_tokens = usage_metadata.get("output_tokens", 0)
+
                     yield StreamingChatChunk(
-                        type="token",
-                        content=content,
-                        metadata={"event": event_name},
+                        type="complete",
+                        content="",
+                        metadata={
+                            "streaming_complete": True,
+                            "total_tokens": total_tokens,
+                            "input_tokens": input_tokens,
+                            "output_tokens": output_tokens,
+                        },
                     )
 
-            # Handle completion event
-            elif event_name == "on_chat_model_end":
-                data = update.get("data", {})
-                output = data.get("output", {})
+            # Calculate execution time
+            execution_time_ms = int((time.time() - start_time) * 1000)
 
-                # Extract usage metadata
-                usage_metadata = {}
-                if hasattr(output, "usage_metadata"):
-                    usage_metadata = output.usage_metadata or {}
-                elif isinstance(output, dict):
-                    usage_metadata = output.get("usage_metadata", {})
+            # Send done marker
+            yield StreamingChatChunk(
+                type="done",
+                content="",
+                metadata={"execution_time_ms": execution_time_ms},
+            )
 
-                yield StreamingChatChunk(
-                    type="complete",
-                    content="",
-                    metadata={
-                        "streaming_complete": True,
-                        "total_tokens": usage_metadata.get("total_tokens"),
-                        "input_tokens": usage_metadata.get("input_tokens"),
-                        "output_tokens": usage_metadata.get(
-                            "output_tokens"
-                        ),
-                    },
-                )
+            # Update context
+            context.completed_at = datetime.now(UTC)
 
-        # Send done marker
-        execution_time_ms = int((time.time() - start_time) * 1000)
-        yield StreamingChatChunk(
-            type="done",
-            content="",
-            metadata={"execution_time_ms": execution_time_ms},
-        )
+            # Create result for tracking
+            execution_result = ExecutionResult(
+                response=content_buffer,
+                execution_time_ms=execution_time_ms,
+                tokens_used=total_tokens,
+                prompt_tokens=input_tokens,
+                completion_tokens=output_tokens,
+                execution_id=context.execution_id,
+                conversation_id=context.conversation_id,
+                workflow_type=context.workflow_type.value,
+            )
 
-        # Update context
-        context.completed_at = datetime.now(UTC)
+            # Track completion
+            await self.tracker.complete(context, execution_result)
+
+        except Exception as e:
+            # Tracking of failure is done in execute() method
+            raise
 
     def _create_initial_state(
         self, context: ExecutionContext

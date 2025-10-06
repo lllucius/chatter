@@ -49,3 +49,45 @@ class ValidationResult:
         self.errors.extend(other.errors)
         self.warnings.extend(other.warnings)
         self.metadata.update(other.metadata)
+
+    def has_errors(self) -> bool:
+        """Check if result has any errors.
+        
+        Returns:
+            True if errors exist
+        """
+        return len(self.errors) > 0
+
+    def has_warnings(self) -> bool:
+        """Check if result has any warnings.
+        
+        Returns:
+            True if warnings exist
+        """
+        return len(self.warnings) > 0
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary format.
+        
+        Returns:
+            Dictionary representation
+        """
+        return {
+            "is_valid": self.is_valid,
+            "errors": [str(e) for e in self.errors],
+            "warnings": self.warnings,
+            "metadata": self.metadata,
+        }
+
+    def to_api_response(self) -> dict[str, Any]:
+        """Convert to API response format.
+        
+        Returns:
+            API-friendly dictionary
+        """
+        return {
+            "valid": self.is_valid,
+            "errors": [str(e) for e in self.errors],
+            "warnings": self.warnings,
+            "details": self.metadata,
+        }

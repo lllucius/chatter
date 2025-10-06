@@ -92,6 +92,39 @@ async def get_workflow_execution_service(
     )
 
 
+async def get_execution_engine(
+    session: AsyncSession = Depends(get_session_generator),
+):
+    """Get shared execution engine instance.
+    
+    This is the unified execution engine for all workflow types,
+    replacing multiple execution methods with a single execution pipeline.
+    """
+    from chatter.core.workflow_execution_engine import ExecutionEngine
+    from chatter.services.llm import LLMService
+
+    llm_service = LLMService()
+    return ExecutionEngine(
+        session=session,
+        llm_service=llm_service,
+        debug_mode=False,
+    )
+
+
+async def get_workflow_validator():
+    """Get shared workflow validator instance.
+    
+    This is the unified validator orchestrating all validation layers:
+    - Structure validation
+    - Security validation
+    - Capability validation
+    - Resource validation
+    """
+    from chatter.core.workflow_validator import WorkflowValidator
+
+    return WorkflowValidator()
+
+
 # Workflow Definitions CRUD
 @router.post("/definitions", response_model=WorkflowDefinitionResponse)
 async def create_workflow_definition(
@@ -514,20 +547,26 @@ async def load_workflow_template(
 async def validate_workflow_template(
     validation_request: WorkflowTemplateValidationRequest,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(
-        get_workflow_management_service
-    ),
+    validator = Depends(get_workflow_validator),
 ) -> WorkflowTemplateValidationResponse:
-    """Validate a workflow template."""
+    """Validate a workflow template using the unified validation orchestrator."""
     try:
-        validation_result = (
-            await workflow_service.validate_workflow_template(
-                template_data=validation_request.template,
-                owner_id=current_user.id,
-            )
+        # Use unified validator
+        validation_result = await validator.validate(
+            workflow_data=validation_request.template,
+            user_id=current_user.id,
+            context="template_validation",
         )
         
-        return WorkflowTemplateValidationResponse(**validation_result)
+        # Convert to API response
+        response_data = validation_result.to_api_response()
+        
+        return WorkflowTemplateValidationResponse(
+            is_valid=response_data["valid"],
+            errors=response_data["errors"],
+            warnings=response_data["warnings"],
+            template_info=response_data.get("details"),
+        )
     except Exception as e:
         logger.error(f"Failed to validate workflow template: {e}")
         return WorkflowTemplateValidationResponse(
@@ -549,30 +588,36 @@ async def execute_workflow_template(
     workflow_service: WorkflowManagementService = Depends(
         get_workflow_management_service
     ),
-    execution_service: WorkflowExecutionService = Depends(
-        get_workflow_execution_service
-    ),
+    execution_engine = Depends(get_execution_engine),
 ) -> WorkflowExecutionResponse:
-    """Execute a workflow template directly."""
+    """Execute a workflow template directly using the unified execution engine."""
     try:
-        # Create a temporary workflow definition from the template
-        definition = await workflow_service.create_workflow_definition_from_template(
-            template_id=template_id,
-            owner_id=current_user.id,
-            name_suffix="",
-            user_input=execution_request.input_data,
-            is_temporary=True,
+        # Verify template exists and user has access
+        template = await workflow_service.get_workflow_template(
+            template_id=template_id
         )
+        if not template:
+            raise NotFoundProblem(
+                detail=f"Workflow template not found: {template_id}"
+            )
         
-        # Execute the workflow definition
-        result = await execution_service.execute_workflow_definition(
-            definition=definition,
-            input_data=execution_request.input_data,
-            user_id=current_user.id,
+        # Create unified execution request
+        from chatter.schemas.execution import ExecutionRequest
+        
+        exec_request = ExecutionRequest(
+            template_id=template_id,
+            input_data=execution_request.input_data or {},
             debug_mode=execution_request.debug_mode,
         )
+
+        # Execute using unified engine
+        result = await execution_engine.execute(
+            request=exec_request,
+            user_id=current_user.id,
+        )
         
-        return WorkflowExecutionResponse(**result)
+        # Convert to API response
+        return result.to_api_response()
     except HTTPException:
         raise
     except Exception as e:
@@ -589,36 +634,37 @@ async def execute_workflow_template(
 async def execute_temporary_workflow_template(
     execution_request: WorkflowTemplateDirectExecutionRequest,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(
-        get_workflow_management_service
-    ),
-    execution_service: WorkflowExecutionService = Depends(
-        get_workflow_execution_service
-    ),
+    execution_engine = Depends(get_execution_engine),
 ) -> WorkflowExecutionResponse:
     """Execute a temporary workflow template directly without storing it.
     
-    This endpoint allows you to pass template data directly and execute it
+    This endpoint allows you to pass template data (nodes/edges) directly and execute it
     without persisting the template to the database first.
     """
     try:
-        # Create a temporary workflow definition from the template data
-        definition = await workflow_service.create_workflow_definition_from_template_data(
-            template_data=execution_request.template,
-            owner_id=current_user.id,
-            user_input=execution_request.input_data,
-            is_temporary=True,
-        )
+        # Create unified execution request from template data
+        from chatter.schemas.execution import ExecutionRequest
         
-        # Execute the workflow definition
-        result = await execution_service.execute_workflow_definition(
-            definition=definition,
-            input_data=execution_request.input_data,
-            user_id=current_user.id,
+        # Extract nodes and edges from template data
+        template_data = execution_request.template
+        nodes = template_data.get("nodes", [])
+        edges = template_data.get("edges", [])
+        
+        exec_request = ExecutionRequest(
+            nodes=nodes,
+            edges=edges,
+            input_data=execution_request.input_data or {},
             debug_mode=execution_request.debug_mode,
         )
+
+        # Execute using unified engine
+        result = await execution_engine.execute(
+            request=exec_request,
+            user_id=current_user.id,
+        )
         
-        return WorkflowExecutionResponse(**result)
+        # Convert to API response
+        return result.to_api_response()
     except HTTPException:
         raise
     except Exception as e:
@@ -681,11 +727,9 @@ async def execute_workflow(
     workflow_service: WorkflowManagementService = Depends(
         get_workflow_management_service
     ),
-    execution_service: WorkflowExecutionService = Depends(
-        get_workflow_execution_service
-    ),
+    execution_engine = Depends(get_execution_engine),
 ) -> WorkflowExecutionResponse:
-    """Execute a workflow definition."""
+    """Execute a workflow definition using the unified execution engine."""
     try:
         # Verify workflow exists and user has access
         definition = await workflow_service.get_workflow_definition(
@@ -702,14 +746,23 @@ async def execute_workflow(
                 detail=f"Workflow definition not found: {workflow_id}"
             )
 
-        # Execute the workflow using the new workflow definition execution method
-        result = await execution_service.execute_workflow_definition(
-            definition=definition,
-            input_data=execution_request.input_data,
-            user_id=current_user.id,
+        # Create unified execution request
+        from chatter.schemas.execution import ExecutionRequest
+        
+        exec_request = ExecutionRequest(
+            definition_id=workflow_id,
+            input_data=execution_request.input_data or {},
             debug_mode=execution_request.debug_mode,
         )
-        return WorkflowExecutionResponse(**result)
+
+        # Execute using unified engine
+        result = await execution_engine.execute(
+            request=exec_request,
+            user_id=current_user.id,
+        )
+        
+        # Convert to API response
+        return result.to_api_response()
     except HTTPException:
         raise
     except Exception as e:
@@ -726,49 +779,42 @@ async def execute_workflow(
 async def validate_workflow_definition(
     request: WorkflowDefinitionCreate | dict,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(
-        get_workflow_management_service
-    ),
+    validator = Depends(get_workflow_validator),
 ) -> WorkflowValidationResponse:
-    """Validate a workflow definition - supports both legacy and modern formats."""
+    """Validate a workflow definition using the unified validation orchestrator.
+    
+    Validates through all 4 layers:
+    - Structure validation (nodes, edges, connectivity)
+    - Security validation (policies, permissions)
+    - Capability validation (features, limits)
+    - Resource validation (quotas, limits)
+    """
     try:
-        # Handle both legacy (WorkflowDefinitionCreate) and modern (dict with nodes/edges) formats
+        # Convert request to dict format
         if isinstance(request, WorkflowDefinitionCreate):
-            # Legacy format
-            validation_result = (
-                await workflow_service.validate_workflow_definition(
-                    definition_data=request.model_dump(),
-                    owner_id=current_user.id,
-                )
-            )
-            return WorkflowValidationResponse(**validation_result)
+            workflow_data = request.model_dump()
         else:
-            # Modern format - assume it's a dict with nodes and edges
-            from chatter.core.langgraph import workflow_manager
+            workflow_data = request
 
-            nodes = request.get("nodes", [])
-            edges = request.get("edges", [])
+        # Use unified validator
+        validation_result = await validator.validate(
+            workflow_data=workflow_data,
+            user_id=current_user.id,
+            context="api_validation",
+        )
 
-            validation_result = (
-                workflow_manager.validate_workflow_definition(
-                    nodes, edges
-                )
-            )
-
-            return WorkflowValidationResponse(
-                is_valid=validation_result["valid"],
-                errors=[
-                    {"message": error}
-                    for error in validation_result["errors"]
-                ],
-                warnings=validation_result["warnings"],
-                metadata={
-                    "supported_node_types": validation_result[
-                        "supported_node_types"
-                    ],
-                    "validation_timestamp": time.time(),
-                },
-            )
+        # Convert to API response using built-in conversion
+        response_data = validation_result.to_api_response()
+        
+        # Map to WorkflowValidationResponse format
+        return WorkflowValidationResponse(
+            is_valid=response_data["valid"],
+            errors=[
+                {"message": error} for error in response_data["errors"]
+            ],
+            warnings=response_data["warnings"],
+            metadata=response_data.get("details", {}),
+        )
     except Exception as e:
         logger.error(f"Failed to validate workflow definition: {e}")
         # Return validation error response instead of raising exception
@@ -1078,96 +1124,40 @@ async def execute_custom_workflow(
     model: str = "gpt-4",
     conversation_id: str | None = None,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowExecutionService = Depends(
-        get_workflow_execution_service
-    ),
+    execution_engine = Depends(get_execution_engine),
 ) -> dict:
-    """Execute a custom workflow definition using the modern system."""
+    """Execute a custom workflow definition using the modern unified execution engine."""
     try:
-        from langchain_core.messages import HumanMessage
-
-        from chatter.core.langgraph import workflow_manager
-        from chatter.services.llm import LLMService
-
-        # Validate the workflow first
-        validation = workflow_manager.validate_workflow_definition(
-            nodes, edges
-        )
-        if not validation["valid"]:
-            raise ValueError(
-                f"Invalid workflow: {', '.join(validation['errors'])}"
-            )
-
-        # Get LLM
-        llm_service = LLMService()
-        llm = await llm_service.get_llm(provider=provider, model=model)
-
-        # Create workflow
-        # Get tools and retriever if needed
-        tools = None
-        retriever = None
-
-        workflow = await workflow_manager.create_custom_workflow(
+        # Create unified execution request
+        from chatter.schemas.execution import ExecutionRequest
+        
+        exec_request = ExecutionRequest(
             nodes=nodes,
             edges=edges,
-            llm=llm,
-            entry_point=entry_point,
-            tools=tools,
-            retriever=retriever,
+            message=message,
+            provider=provider,
+            model=model,
+            conversation_id=conversation_id,
         )
 
-        # Create initial state
-        from chatter.core.workflow_node_factory import (
-            WorkflowNodeContext,
+        # Execute using unified engine
+        result = await execution_engine.execute(
+            request=exec_request,
+            user_id=current_user.id,
         )
 
-        initial_state: WorkflowNodeContext = {
-            "messages": [HumanMessage(content=message)],
-            "user_id": current_user.id,
-            "conversation_id": conversation_id or generate_ulid(),
-            "retrieval_context": None,
-            "conversation_summary": None,
-            "tool_call_count": 0,
-            "metadata": {},
-            "variables": {},
-            "loop_state": {},
-            "error_state": {},
-            "conditional_results": {},
-            "execution_history": [],
-            "usage_metadata": {},
-        }
-
-        # Execute workflow
-        result = await workflow_manager.run_workflow(
-            workflow=workflow,
-            initial_state=initial_state,
-        )
-
-        # Extract response
-        messages = result.get("messages", [])
-        last_message = messages[-1] if messages else None
-        response_content = getattr(
-            last_message, "content", "No response generated"
-        )
-
+        # Return simplified response format
         return {
-            "response": response_content,
-            "metadata": result.get("metadata", {}),
+            "response": result.response,
+            "metadata": result.metadata,
             "execution_summary": {
-                "nodes_executed": len(
-                    result.get("execution_history", [])
-                ),
-                "tool_calls": result.get("tool_call_count", 0),
-                "variables": result.get("variables", {}),
-                "conditional_results": result.get(
-                    "conditional_results", {}
-                ),
+                "execution_id": result.execution_id,
+                "tool_calls": result.tool_calls,
             },
-            # Include usage information from run_workflow() result
-            "tokens_used": result.get("tokens_used", 0),
-            "prompt_tokens": result.get("prompt_tokens", 0),
-            "completion_tokens": result.get("completion_tokens", 0),
-            "cost": result.get("cost", 0.0),
+            "tokens_used": result.tokens_used,
+            "prompt_tokens": result.prompt_tokens,
+            "completion_tokens": result.completion_tokens,
+            "cost": result.cost,
         }
 
     except Exception as e:

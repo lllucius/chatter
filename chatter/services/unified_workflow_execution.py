@@ -201,29 +201,17 @@ class UnifiedWorkflowExecutionService:
             if workflow_input.message:
                 messages.append(HumanMessage(content=workflow_input.message))
 
-            # Create initial state
-            initial_state: WorkflowNodeContext = {
-                "messages": messages,
-                "user_id": user_id,
-                "conversation_id": conversation.id,
-                "retrieval_context": None,
-                "conversation_summary": None,
-                "tool_call_count": 0,
-                "metadata": {
-                    "provider": workflow_config.provider,
-                    "model": workflow_config.model,
-                    "temperature": workflow_config.temperature,
-                    "max_tokens": workflow_config.max_tokens,
-                    "source_type": workflow_source.source_type.value,
-                    "source_id": workflow_source.source_id,
-                },
-                "variables": {},
-                "loop_state": {},
-                "error_state": {},
-                "conditional_results": {},
-                "execution_history": [],
-                "usage_metadata": {},
-            }
+            # Create initial state using state builder (replaces duplicated code)
+            from chatter.services.workflow_state import create_workflow_state
+            
+            initial_state = create_workflow_state(
+                messages=messages,
+                user_id=user_id,
+                conversation_id=conversation.id,
+                config=workflow_config,
+                source_type=workflow_source.source_type.value,
+                source_id=workflow_source.source_id,
+            )
 
             # Execute workflow
             await event_bus.publish(
@@ -362,29 +350,17 @@ class UnifiedWorkflowExecutionService:
             if workflow_input.message:
                 messages.append(HumanMessage(content=workflow_input.message))
 
-            # Create initial state
-            initial_state: WorkflowNodeContext = {
-                "messages": messages,
-                "user_id": user_id,
-                "conversation_id": conversation.id,
-                "retrieval_context": None,
-                "conversation_summary": None,
-                "tool_call_count": 0,
-                "metadata": {
-                    "provider": workflow_config.provider,
-                    "model": workflow_config.model,
-                    "temperature": workflow_config.temperature,
-                    "max_tokens": workflow_config.max_tokens,
-                    "source_type": workflow_source.source_type.value,
-                    "source_id": workflow_source.source_id,
-                },
-                "variables": {},
-                "loop_state": {},
-                "error_state": {},
-                "conditional_results": {},
-                "execution_history": [],
-                "usage_metadata": {},
-            }
+            # Create initial state using state builder (replaces duplicated code)
+            from chatter.services.workflow_state import create_workflow_state
+            
+            initial_state = create_workflow_state(
+                messages=messages,
+                user_id=user_id,
+                conversation_id=conversation.id,
+                config=workflow_config,
+                source_type=workflow_source.source_type.value,
+                source_id=workflow_source.source_id,
+            )
 
             # Stream workflow execution
             async for event in workflow_manager.stream_workflow(

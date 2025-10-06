@@ -94,9 +94,7 @@ class UnifiedWorkflowExecutionService:
         self.preparation_service = WorkflowPreparationService(
             llm_service, session
         )
-        self.result_processor = WorkflowResultProcessor(
-            message_service, session
-        )
+        self.result_processor = WorkflowResultProcessor(session)
 
     async def execute_workflow(
         self,

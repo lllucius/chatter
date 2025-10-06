@@ -210,6 +210,9 @@ class WorkflowTemplate(Base):
     workflow_definitions: Mapped[list["WorkflowDefinition"]] = (
         relationship("WorkflowDefinition", back_populates="template")
     )
+    executions: Mapped[list["WorkflowExecution"]] = relationship(
+        "WorkflowExecution", back_populates="template"
+    )
 
     @validates("default_params")
     def _set_config_hash(
@@ -463,7 +466,11 @@ class WorkflowDefinition(Base):
 
 
 class WorkflowExecution(Base):
-    """Workflow execution model for tracking workflow runs."""
+    """Workflow execution model for tracking workflow runs.
+    
+    Updated in Phase 4 to support optional definition_id and track
+    template-based executions directly.
+    """
 
     __table_args__ = (
         CheckConstraint(
@@ -482,17 +489,37 @@ class WorkflowExecution(Base):
             "cost >= 0.0",
             name="check_cost_non_negative",
         ),
+        CheckConstraint(
+            "workflow_type IN ('template', 'definition', 'custom', 'chat')",
+            name="check_workflow_type_valid",
+        ),
     )
 
-    # Foreign keys
-    definition_id: Mapped[str] = mapped_column(
+    # Foreign keys (definition_id is now optional)
+    definition_id: Mapped[str | None] = mapped_column(
         String(26),
         ForeignKey("workflow_definitions.id"),
-        nullable=False,
+        nullable=True,
         index=True,
     )
-    owner_id: Mapped[str] = mapped_column(
-        String(26), ForeignKey(Keys.USERS), nullable=False, index=True
+    # New: direct template reference (optional)
+    template_id: Mapped[str | None] = mapped_column(
+        String(26),
+        ForeignKey("workflow_templates.id"),
+        nullable=True,
+        index=True,
+    )
+    owner_id: Mapped[str | None] = mapped_column(
+        String(26), ForeignKey(Keys.USERS), nullable=True, index=True
+    )
+    
+    # New: workflow type field
+    workflow_type: Mapped[str] = mapped_column(
+        String(20), nullable=False, index=True, default="chat"
+    )
+    # New: workflow configuration used for execution
+    workflow_config: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON, nullable=True
     )
 
     # Execution metadata
@@ -532,22 +559,28 @@ class WorkflowExecution(Base):
     )
 
     # Relationships
-    definition: Mapped["WorkflowDefinition"] = relationship(
+    definition: Mapped[Optional["WorkflowDefinition"]] = relationship(
         "WorkflowDefinition", back_populates="executions"
     )
-    owner: Mapped["User"] = relationship(
+    template: Mapped[Optional["WorkflowTemplate"]] = relationship(
+        "WorkflowTemplate", back_populates="executions"
+    )
+    owner: Mapped[Optional["User"]] = relationship(
         "User", back_populates="workflow_executions"
     )
 
     def __repr__(self) -> str:
         """String representation of workflow execution."""
-        return f"<WorkflowExecution(id={self.id}, definition_id={self.definition_id}, status={self.status})>"
+        return f"<WorkflowExecution(id={self.id}, workflow_type={self.workflow_type}, status={self.status})>"
 
     def to_dict(self) -> dict[str, Any]:
         """Convert workflow execution to dictionary."""
         return {
             "id": self.id,
             "definition_id": self.definition_id,
+            "template_id": self.template_id,
+            "workflow_type": self.workflow_type,
+            "workflow_config": self.workflow_config,
             "owner_id": self.owner_id,
             "status": self.status,
             "started_at": (
@@ -565,6 +598,143 @@ class WorkflowExecution(Base):
             "execution_log": self.execution_log,
             "tokens_used": self.tokens_used,
             "cost": self.cost,
+            "created_at": (
+                self.created_at.isoformat() if self.created_at else None
+            ),
+            "updated_at": (
+                self.updated_at.isoformat() if self.updated_at else None
+            ),
+        }
+
+
+class TemplateAnalytics(Base):
+    """Template analytics model for tracking template usage metrics.
+    
+    Created in Phase 4 to separate analytics from WorkflowTemplate,
+    allowing templates to be lightweight and analytics to be computed
+    from execution data.
+    """
+
+    __table_args__ = (
+        CheckConstraint(
+            "usage_count >= 0",
+            name="check_template_analytics_usage_count_non_negative",
+        ),
+        CheckConstraint(
+            "success_count >= 0",
+            name="check_template_analytics_success_count_non_negative",
+        ),
+        CheckConstraint(
+            "failure_count >= 0",
+            name="check_template_analytics_failure_count_non_negative",
+        ),
+        CheckConstraint(
+            "total_tokens_used >= 0",
+            name="check_template_analytics_total_tokens_used_non_negative",
+        ),
+        CheckConstraint(
+            "total_cost >= 0.0",
+            name="check_template_analytics_total_cost_non_negative",
+        ),
+        CheckConstraint(
+            "avg_execution_time_ms IS NULL OR avg_execution_time_ms > 0",
+            name="check_template_analytics_avg_execution_time_positive",
+        ),
+        CheckConstraint(
+            "avg_tokens_per_execution IS NULL OR avg_tokens_per_execution > 0",
+            name="check_template_analytics_avg_tokens_positive",
+        ),
+    )
+
+    # Foreign key to template
+    template_id: Mapped[str] = mapped_column(
+        String(26),
+        ForeignKey("workflow_templates.id"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+
+    # Usage metrics
+    usage_count: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False
+    )
+    success_count: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False
+    )
+    failure_count: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False
+    )
+
+    # Performance metrics
+    total_tokens_used: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False
+    )
+    total_cost: Mapped[float] = mapped_column(
+        Float, default=0.0, nullable=False
+    )
+    avg_execution_time_ms: Mapped[int | None] = mapped_column(
+        Integer, nullable=True
+    )
+    avg_tokens_per_execution: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
+
+    # Timestamps
+    last_used_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    last_success_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    last_failure_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    # Relationship
+    template: Mapped["WorkflowTemplate"] = relationship(
+        "WorkflowTemplate"
+    )
+
+    @property
+    def success_rate(self) -> float | None:
+        """Calculate success rate."""
+        if self.usage_count == 0:
+            return None
+        return self.success_count / self.usage_count
+
+    def __repr__(self) -> str:
+        """String representation of template analytics."""
+        return f"<TemplateAnalytics(template_id={self.template_id}, usage_count={self.usage_count})>"
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert template analytics to dictionary."""
+        return {
+            "id": self.id,
+            "template_id": self.template_id,
+            "usage_count": self.usage_count,
+            "success_count": self.success_count,
+            "failure_count": self.failure_count,
+            "success_rate": self.success_rate,
+            "total_tokens_used": self.total_tokens_used,
+            "total_cost": self.total_cost,
+            "avg_execution_time_ms": self.avg_execution_time_ms,
+            "avg_tokens_per_execution": self.avg_tokens_per_execution,
+            "last_used_at": (
+                self.last_used_at.isoformat()
+                if self.last_used_at
+                else None
+            ),
+            "last_success_at": (
+                self.last_success_at.isoformat()
+                if self.last_success_at
+                else None
+            ),
+            "last_failure_at": (
+                self.last_failure_at.isoformat()
+                if self.last_failure_at
+                else None
+            ),
             "created_at": (
                 self.created_at.isoformat() if self.created_at else None
             ),

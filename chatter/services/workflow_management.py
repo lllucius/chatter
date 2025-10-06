@@ -334,15 +334,37 @@ class WorkflowManagementService:
     # Workflow Execution CRUD
     async def create_workflow_execution(
         self,
-        definition_id: str,
-        owner_id: str,
+        owner_id: str | None = None,
+        definition_id: str | None = None,
+        template_id: str | None = None,
+        workflow_type: str = "chat",
+        workflow_config: dict[str, Any] | None = None,
         input_data: dict[str, Any] | None = None,
     ) -> WorkflowExecution:
-        """Create a new workflow execution."""
+        """Create a new workflow execution.
+        
+        Updated in Phase 4 to support optional definition_id and direct
+        template tracking. At least one of definition_id or template_id
+        should be provided for non-chat workflows.
+        
+        Args:
+            owner_id: User ID (optional for system executions)
+            definition_id: Optional workflow definition ID
+            template_id: Optional template ID
+            workflow_type: Type of workflow (template/definition/custom/chat)
+            workflow_config: Execution configuration
+            input_data: Input data for execution
+            
+        Returns:
+            Created WorkflowExecution instance
+        """
         try:
             execution = WorkflowExecution(
                 definition_id=definition_id,
+                template_id=template_id,
                 owner_id=owner_id,
+                workflow_type=workflow_type,
+                workflow_config=workflow_config,
                 input_data=input_data or {},
                 status="pending",
             )
@@ -352,7 +374,10 @@ class WorkflowManagementService:
             await self.session.refresh(execution)
 
             logger.info(
-                f"Created workflow execution {execution.id} for definition {definition_id}"
+                f"Created workflow execution {execution.id}",
+                workflow_type=workflow_type,
+                definition_id=definition_id,
+                template_id=template_id,
             )
             return execution
 

@@ -350,13 +350,14 @@ class WorkflowTracker:
                 self.session
             )
 
-            # Create execution record
+            # Create execution record with new Phase 4 signature
             await workflow_service.create_workflow_execution(
-                definition_id=context.source_definition_id,
                 owner_id=context.user_id,
+                definition_id=context.source_definition_id,
+                template_id=context.source_template_id,
+                workflow_type=context.workflow_type.value,
+                workflow_config=context.config.workflow_config,
                 input_data=context.config.input_data,
-                # Store execution_id if we want to use it
-                # For now, let the service generate its own
             )
 
             logger.debug(

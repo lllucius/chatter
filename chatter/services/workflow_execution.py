@@ -1,7 +1,11 @@
 """Modern workflow execution service.
 
-This service provides the modern workflow execution system using the
-new flexible architecture with support for all node types.
+This service provides backward-compatible wrappers around the new
+UnifiedWorkflowExecutionService. All execution methods now delegate
+to the unified service for consolidated, maintainable code.
+
+DEPRECATED: This module provides backward compatibility.
+New code should use UnifiedWorkflowExecutionService directly.
 """
 
 from __future__ import annotations
@@ -13,31 +17,28 @@ from typing import Any
 
 from langchain_core.messages import BaseMessage, HumanMessage
 
-from chatter.core.enhanced_memory_manager import EnhancedMemoryManager
-from chatter.core.enhanced_tool_executor import EnhancedToolExecutor
 from chatter.core.events import (
     EventCategory,
     EventPriority,
     UnifiedEvent,
 )
-from chatter.core.langgraph import workflow_manager
-from chatter.core.monitoring import get_monitoring_service
-from chatter.core.workflow_graph_builder import (
-    create_simple_workflow_definition,
-    create_workflow_definition_from_model,
-)
-from chatter.core.workflow_node_factory import WorkflowNodeContext
-from chatter.core.workflow_performance import PerformanceMonitor
 from chatter.models.base import generate_ulid
 from chatter.models.conversation import (
     Conversation,
-    ConversationStatus,
     Message,
-    MessageRole,
 )
 from chatter.schemas.chat import ChatRequest, StreamingChatChunk
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
+from chatter.services.unified_workflow_execution import (
+    UnifiedWorkflowExecutionService,
+)
+from chatter.services.workflow_types import (
+    WorkflowConfig,
+    WorkflowInput,
+    WorkflowSource,
+    WorkflowSourceType,
+)
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -157,7 +158,13 @@ def _log_workflow_debug_info(
 
 
 class WorkflowExecutionService:
-    """Modern workflow execution service."""
+    """Modern workflow execution service - backward compatibility wrapper.
+    
+    This service wraps UnifiedWorkflowExecutionService to provide
+    backward compatibility with existing API endpoints.
+    
+    DEPRECATED: New code should use UnifiedWorkflowExecutionService directly.
+    """
 
     def __init__(
         self,
@@ -170,9 +177,10 @@ class WorkflowExecutionService:
         self.message_service = message_service
         self.session = session
 
-        # Initialize enhanced components
-        self.memory_manager = EnhancedMemoryManager()
-        self.tool_executor = EnhancedToolExecutor()
+        # Use the new unified service
+        self.unified_service = UnifiedWorkflowExecutionService(
+            llm_service, message_service, session
+        )
 
     def _extract_workflow_config_settings(
         self, chat_request: ChatRequest
@@ -232,20 +240,104 @@ class WorkflowExecutionService:
         user_id: str,
         request: ChatRequest,
     ) -> tuple[Conversation, Message]:
-        """Execute chat workflow - API wrapper method."""
-        # Get or create conversation
-        conversation = await self._get_or_create_conversation(
-            user_id, request
+        """Execute chat workflow - backward compatibility wrapper.
+        
+        Converts ChatRequest to WorkflowInput and delegates to unified service.
+        """
+        # Convert ChatRequest to WorkflowInput
+        workflow_input = WorkflowInput(
+            message=request.message,
+            conversation_id=request.conversation_id,
         )
-
-        # Execute the actual workflow directly with ChatRequest
-        message, result = await self._execute_chat_workflow_internal(
-            conversation=conversation,
-            chat_request=request,
+        
+        # Determine workflow source (template or dynamic)
+        workflow_source = WorkflowSource(
+            source_type=WorkflowSourceType.DYNAMIC,  # Will try template fallback to dynamic
+        )
+        
+        # Create workflow config from ChatRequest
+        workflow_config = WorkflowConfig(
+            provider=request.provider,
+            model=request.model,
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            enable_tools=request.enable_tools,
+            enable_retrieval=request.enable_retrieval,
+            enable_memory=request.enable_memory,
+            memory_window=getattr(request, 'memory_window', 10),
+            max_tool_calls=getattr(request, 'max_tool_calls', 10),
+            debug_mode=False,
+        )
+        
+        # Execute using unified service
+        result = await self.unified_service.execute_workflow(
+            workflow_input=workflow_input,
+            workflow_source=workflow_source,
+            workflow_config=workflow_config,
             user_id=user_id,
         )
+        
+        # Return in expected format
+        return result.conversation, result.message
 
-        return conversation, message
+    async def execute_chat_workflow_streaming(
+        self,
+        user_id: str,
+        request: ChatRequest,
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Execute a chat workflow with streaming - backward compatibility wrapper."""
+        # Convert ChatRequest to WorkflowInput
+        workflow_input = WorkflowInput(
+            message=request.message,
+            conversation_id=request.conversation_id,
+        )
+        
+        # Determine workflow source
+        workflow_source = WorkflowSource(
+            source_type=WorkflowSourceType.DYNAMIC,
+        )
+        
+        # Create workflow config
+        workflow_config = WorkflowConfig(
+            provider=request.provider,
+            model=request.model,
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            enable_tools=request.enable_tools,
+            enable_retrieval=request.enable_retrieval,
+            enable_memory=request.enable_memory,
+            memory_window=getattr(request, 'memory_window', 10),
+            max_tool_calls=getattr(request, 'max_tool_calls', 10),
+            debug_mode=False,
+        )
+        
+        # Execute using unified streaming service
+        async for chunk in self.unified_service.execute_workflow_streaming(
+            workflow_input=workflow_input,
+            workflow_source=workflow_source,
+            workflow_config=workflow_config,
+            user_id=user_id,
+        ):
+            yield chunk
+
+    async def execute_workflow_definition(
+        self,
+        definition: Any,
+        input_data: dict[str, Any],
+        user_id: str,
+        debug_mode: bool = False,
+    ) -> dict[str, Any]:
+        """Execute a workflow from a stored definition - backward compatibility wrapper."""
+        # Delegate directly to unified service
+        return await self.unified_service.execute_workflow_definition(
+            definition=definition,
+            input_data=input_data,
+            user_id=user_id,
+            debug_mode=debug_mode,
+        )
+
+    # Legacy methods below - kept for backward compatibility but now deprecated
+    # These should not be called directly
 
     async def _execute_chat_workflow_internal(
         self,

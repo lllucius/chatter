@@ -205,7 +205,6 @@ class WorkflowPreparationService:
             allowed_tools=config.allowed_tools,
             memory_window=config.memory_window,
             max_tool_calls=config.max_tool_calls,
-            user_id=user_id,
             conversation_id=conversation_id,
         )
         

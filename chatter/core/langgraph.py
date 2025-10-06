@@ -241,7 +241,24 @@ class LangGraphWorkflowManager:
         initial_state: dict[str, Any],
         thread_id: str | None = None,
     ) -> dict[str, Any]:
-        """Run a workflow with enhanced state management and token aggregation."""
+        """Run a workflow with enhanced state management and token aggregation.
+        
+        Usage Metadata Flow:
+        1. Each ModelNode execution extracts usage_metadata from LLM response
+        2. ModelNode returns usage_metadata in its state update
+        3. This method collects all usage_metadata from workflow state iterations
+        4. Tokens are aggregated across all nodes (avoiding duplicates)
+        5. Aggregated values are returned as top-level fields in result:
+           - tokens_used: total tokens across all nodes
+           - prompt_tokens: total input/prompt tokens
+           - completion_tokens: total output/completion tokens
+           - cost: estimated cost based on token usage
+        
+        Returns:
+            Final workflow state dict with aggregated token fields added.
+            Consumer code should use the aggregated fields (tokens_used, etc.)
+            rather than the raw usage_metadata field from the last node.
+        """
         if not thread_id:
             thread_id = generate_ulid()
 

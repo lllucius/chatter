@@ -1163,6 +1163,11 @@ async def execute_custom_workflow(
                     "conditional_results", {}
                 ),
             },
+            # Include usage information from run_workflow() result
+            "tokens_used": result.get("tokens_used", 0),
+            "prompt_tokens": result.get("prompt_tokens", 0),
+            "completion_tokens": result.get("completion_tokens", 0),
+            "cost": result.get("cost", 0.0),
         }
 
     except Exception as e:

@@ -70,16 +70,113 @@ class WorkflowNode(ABC):
         return []
 
 
-class MemoryNode(WorkflowNode):
+class ConfigParser:
+    """Shared configuration parsing utilities for workflow nodes."""
+
+    @staticmethod
+    def parse_model_config(config: dict[str, Any]) -> dict[str, Any]:
+        """Parse and standardize model configuration."""
+        return {
+            "provider": config.get("provider", "openai"),
+            "model": config.get("model", "gpt-4"),
+            "temperature": config.get("temperature", 0.7),
+            "max_tokens": config.get("max_tokens", 1000),
+        }
+
+    @staticmethod
+    def parse_retry_config(config: dict[str, Any]) -> dict[str, int]:
+        """Parse retry configuration."""
+        return {
+            "max_retries": config.get("max_retries", 3),
+            "retry_delay": config.get("retry_delay", 1),
+        }
+
+    @staticmethod
+    def parse_timeout_config(config: dict[str, Any]) -> int:
+        """Parse timeout configuration."""
+        return config.get("timeout", 30)
+
+    @staticmethod
+    def validate_enum_value(
+        value: str, valid_values: list[str], field_name: str
+    ) -> str | None:
+        """Validate enum value and return error if invalid."""
+        if value not in valid_values:
+            return (
+                f"{field_name} must be one of {valid_values}, got: {value}"
+            )
+        return None
+
+
+class BaseWorkflowNode(WorkflowNode):
+    """Enhanced base class with shared functionality for all workflow nodes."""
+
+    def __init__(
+        self,
+        node_id: str,
+        config: dict[str, Any] | None = None,
+        node_type: str | None = None,
+    ):
+        super().__init__(node_id, config)
+        self.node_type = node_type or self.__class__.__name__
+
+    def _validate_required_fields(
+        self, fields: list[str]
+    ) -> list[str]:
+        """Validate that required fields are present in config."""
+        errors = []
+        for field in fields:
+            if field not in self.config:
+                errors.append(
+                    f"{self.node_type} requires '{field}' in config"
+                )
+        return errors
+
+    def _validate_field_types(
+        self, field_types: dict[str, type]
+    ) -> list[str]:
+        """Validate field types in config."""
+        errors = []
+        for field, expected_type in field_types.items():
+            if field in self.config:
+                value = self.config[field]
+                if not isinstance(value, expected_type):
+                    errors.append(
+                        f"{self.node_type} field '{field}' must be {expected_type.__name__}, got {type(value).__name__}"
+                    )
+        return errors
+
+    def _get_config(self, key: str, default: Any = None) -> Any:
+        """Safely get config value with default."""
+        return self.config.get(key, default)
+
+    def _get_required_config(self, key: str) -> Any:
+        """Get required config value, raises KeyError if not found."""
+        if key not in self.config:
+            raise KeyError(
+                f"{self.node_type} requires '{key}' in config"
+            )
+        return self.config[key]
+
+    def _create_error_result(self, error_msg: str) -> dict[str, Any]:
+        """Create standardized error result."""
+        return {
+            "error_state": {
+                "has_error": True,
+                "error_message": error_msg,
+                "error_node": self.node_id,
+            }
+        }
+
+
+class MemoryNode(BaseWorkflowNode):
     """Node for memory management and conversation summarization."""
 
     def __init__(
         self, node_id: str, config: dict[str, Any] | None = None
     ):
-        super().__init__(node_id, config)
-        self.memory_window = (
-            config.get("memory_window", 10) if config else 10
-        )
+        super().__init__(node_id, config, "MemoryNode")
+        self.memory_window = self._get_config("memory_window", 10)
         self.llm: BaseChatModel | None = None
 
     def set_llm(self, llm: BaseChatModel) -> None:
@@ -156,7 +253,7 @@ class MemoryNode(WorkflowNode):
         return summary
 
 
-class RetrievalNode(WorkflowNode):
+class RetrievalNode(BaseWorkflowNode):
     """Node for document retrieval and context gathering."""
 
     def __init__(
@@ -248,7 +345,7 @@ class RetrievalNode(WorkflowNode):
             return {"retrieval_context": ""}
 
 
-class ConditionalNode(WorkflowNode):
+class ConditionalNode(BaseWorkflowNode):
     """Node for conditional logic and branching."""
 
     def __init__(
@@ -361,7 +458,7 @@ class ConditionalNode(WorkflowNode):
         return True
 
 
-class LoopNode(WorkflowNode):
+class LoopNode(BaseWorkflowNode):
     """Node for loop iteration and repetitive execution."""
 
     def __init__(
@@ -419,7 +516,7 @@ class LoopNode(WorkflowNode):
         return result
 
 
-class VariableNode(WorkflowNode):
+class VariableNode(BaseWorkflowNode):
     """Node for variable manipulation and state management."""
 
     def __init__(
@@ -518,7 +615,7 @@ class VariableNode(WorkflowNode):
             }
 
 
-class ErrorHandlerNode(WorkflowNode):
+class ErrorHandlerNode(BaseWorkflowNode):
     """Node for error handling and recovery."""
 
     def __init__(
@@ -584,7 +681,7 @@ class ErrorHandlerNode(WorkflowNode):
         }
 
 
-class ToolsNode(WorkflowNode):
+class ToolsNode(BaseWorkflowNode):
     """Node for executing multiple tools with enhanced tracking."""
 
     def __init__(
@@ -648,7 +745,7 @@ class ToolsNode(WorkflowNode):
         return result
 
 
-class DelayNode(WorkflowNode):
+class DelayNode(BaseWorkflowNode):
     """Node for introducing delays in workflow execution."""
 
     def __init__(
@@ -702,7 +799,7 @@ class DelayNode(WorkflowNode):
         }
 
 
-class StartNode(WorkflowNode):
+class StartNode(BaseWorkflowNode):
     """Node for workflow entry point."""
 
     def __init__(
@@ -723,7 +820,7 @@ class StartNode(WorkflowNode):
         }
 
 
-class EndNode(WorkflowNode):
+class EndNode(BaseWorkflowNode):
     """Node for workflow exit point."""
 
     def __init__(
@@ -744,7 +841,7 @@ class EndNode(WorkflowNode):
         }
 
 
-class ModelNode(WorkflowNode):
+class ModelNode(BaseWorkflowNode):
     """Node for language model processing with LLM integration."""
 
     def __init__(

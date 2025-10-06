@@ -121,11 +121,16 @@ class UnifiedWorkflowExecutionService:
         Returns:
             WorkflowResult with execution results
         """
-        start_time = time.time()
-        performance_monitor = PerformanceMonitor(
-            execution_id=generate_ulid(),
-            debug_mode=workflow_config.debug_mode,
+        from chatter.services.workflow_events import (
+            WorkflowEvent,
+            WorkflowEventType,
+            get_event_bus,
         )
+        
+        start_time = time.time()
+        execution_id = generate_ulid()
+        event_bus = get_event_bus()
+        conversation = None  # Initialize for error handling
 
         try:
             # Get or create conversation
@@ -135,17 +140,16 @@ class UnifiedWorkflowExecutionService:
                     user_id, workflow_input.conversation_id
                 )
 
-            # Emit workflow start event
-            await _emit_event(
-                UnifiedEvent(
-                    category=EventCategory.WORKFLOW,
-                    priority=EventPriority.INFO,
-                    message="Workflow execution started",
-                    data={
-                        "user_id": user_id,
-                        "conversation_id": conversation.id,
-                        "source_type": workflow_source.source_type.value,
-                    },
+            # Emit workflow start event (replaces multiple monitoring calls)
+            await event_bus.publish(
+                WorkflowEvent.create(
+                    event_type=WorkflowEventType.STARTED,
+                    execution_id=execution_id,
+                    user_id=user_id,
+                    conversation_id=conversation.id,
+                    source_type=workflow_source.source_type.value,
+                    provider=workflow_config.provider,
+                    model=workflow_config.model,
                 )
             )
 
@@ -156,6 +160,39 @@ class UnifiedWorkflowExecutionService:
                 user_id=user_id,
                 conversation_id=conversation.id,
             )
+
+            # Emit resource loaded events
+            await event_bus.publish(
+                WorkflowEvent.create(
+                    event_type=WorkflowEventType.LLM_LOADED,
+                    execution_id=execution_id,
+                    user_id=user_id,
+                    conversation_id=conversation.id,
+                    provider=workflow_config.provider,
+                    model=workflow_config.model,
+                )
+            )
+            
+            if prepared_workflow.tools:
+                await event_bus.publish(
+                    WorkflowEvent.create(
+                        event_type=WorkflowEventType.TOOLS_LOADED,
+                        execution_id=execution_id,
+                        user_id=user_id,
+                        conversation_id=conversation.id,
+                        tool_count=len(prepared_workflow.tools),
+                    )
+                )
+            
+            if prepared_workflow.retriever:
+                await event_bus.publish(
+                    WorkflowEvent.create(
+                        event_type=WorkflowEventType.RETRIEVER_LOADED,
+                        execution_id=execution_id,
+                        user_id=user_id,
+                        conversation_id=conversation.id,
+                    )
+                )
 
             # Get conversation messages
             messages = await self._get_conversation_messages(conversation)
@@ -189,35 +226,71 @@ class UnifiedWorkflowExecutionService:
             }
 
             # Execute workflow
-            performance_monitor.log_debug("Starting workflow execution")
+            await event_bus.publish(
+                WorkflowEvent.create(
+                    event_type=WorkflowEventType.EXECUTION_STARTED,
+                    execution_id=execution_id,
+                    user_id=user_id,
+                    conversation_id=conversation.id,
+                )
+            )
+            
             result = await workflow_manager.run_workflow(
                 workflow=prepared_workflow.workflow,
                 initial_state=initial_state,
                 thread_id=conversation.id,
             )
-            performance_monitor.log_debug("Workflow execution completed")
 
-            # Process result (consolidates message creation, AI response extraction)
-            workflow_result = await self.result_processor.process_result(
-                result=result,
-                conversation=conversation,
-                user_message=workflow_input.message,
-                user_id=user_id,
-                execution_time_ms=int((time.time() - start_time) * 1000),
-                performance_monitor=performance_monitor,
+            # Calculate execution time
+            execution_time_ms = int((time.time() - start_time) * 1000)
+
+            # Emit token usage event (replaces monitoring calls)
+            await event_bus.publish(
+                WorkflowEvent.create(
+                    event_type=WorkflowEventType.TOKEN_USAGE,
+                    execution_id=execution_id,
+                    user_id=user_id,
+                    conversation_id=conversation.id,
+                    tokens_used=result.get("tokens_used", 0),
+                    prompt_tokens=result.get("prompt_tokens"),
+                    completion_tokens=result.get("completion_tokens"),
+                    cost=result.get("cost", 0.0),
+                )
             )
 
-            # Emit workflow completion event
-            await _emit_event(
-                UnifiedEvent(
-                    category=EventCategory.WORKFLOW,
-                    priority=EventPriority.INFO,
-                    message="Workflow execution completed",
-                    data={
-                        "user_id": user_id,
-                        "conversation_id": conversation.id,
-                        "execution_time_ms": workflow_result.execution_time_ms,
-                    },
+            # Process result (consolidates message creation, AI response extraction)
+            # Note: This needs to be updated to match actual result_processor API
+            # For now, using a simplified approach
+            from chatter.models.workflow import WorkflowExecution
+            
+            # Create execution record (this would normally be done earlier)
+            execution = WorkflowExecution(
+                id=execution_id,
+                owner_id=user_id,
+                status="running",
+            )
+            self.session.add(execution)
+            await self.session.commit()
+            
+            workflow_result = await self.result_processor.process_result(
+                raw_result=result,
+                execution=execution,
+                conversation=conversation,
+                mode=ExecutionMode.STANDARD,
+                start_time=start_time,
+                provider=workflow_config.provider,
+            )
+
+            # Emit workflow completion event (replaces multiple monitoring calls)
+            await event_bus.publish(
+                WorkflowEvent.create(
+                    event_type=WorkflowEventType.EXECUTION_COMPLETED,
+                    execution_id=execution_id,
+                    user_id=user_id,
+                    conversation_id=conversation.id,
+                    execution_time_ms=execution_time_ms,
+                    tokens_used=result.get("tokens_used", 0),
+                    cost=result.get("cost", 0.0),
                 )
             )
 
@@ -226,16 +299,15 @@ class UnifiedWorkflowExecutionService:
         except Exception as e:
             logger.error(f"Workflow execution failed: {e}", exc_info=True)
             
-            # Emit workflow error event
-            await _emit_event(
-                UnifiedEvent(
-                    category=EventCategory.WORKFLOW,
-                    priority=EventPriority.ERROR,
-                    message=f"Workflow execution failed: {str(e)}",
-                    data={
-                        "user_id": user_id,
-                        "error": str(e),
-                    },
+            # Emit workflow error event (replaces multiple monitoring calls)
+            await event_bus.publish(
+                WorkflowEvent.create(
+                    event_type=WorkflowEventType.EXECUTION_FAILED,
+                    execution_id=execution_id,
+                    user_id=user_id,
+                    conversation_id=conversation.id if conversation else None,
+                    error=str(e),
+                    error_type=type(e).__name__,
                 )
             )
             

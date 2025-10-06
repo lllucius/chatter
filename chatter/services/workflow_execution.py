@@ -27,7 +27,6 @@ from chatter.core.workflow_graph_builder import (
     create_workflow_definition_from_model,
 )
 from chatter.core.workflow_node_factory import WorkflowNodeContext
-from chatter.core.workflow_performance import PerformanceMonitor
 from chatter.models.base import generate_ulid
 from chatter.models.conversation import (
     Conversation,
@@ -41,28 +40,6 @@ from chatter.services.message import MessageService
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
-
-
-# Global event emitter (will be initialized on first use)
-_event_emitter = None
-
-
-async def _emit_event(event: UnifiedEvent) -> None:
-    """Emit an event to the unified event system."""
-    global _event_emitter
-    if _event_emitter is None:
-        try:
-            from chatter.core.events import get_event_emitter
-
-            _event_emitter = await get_event_emitter()
-        except Exception as e:
-            logger.warning(f"Could not initialize event emitter: {e}")
-            return
-
-    try:
-        await _event_emitter.emit(event)
-    except Exception as e:
-        logger.warning(f"Could not emit event: {e}")
 
 
 def _log_workflow_debug_info(
@@ -547,11 +524,10 @@ class WorkflowExecutionService:
             input_data=input_data,
         )
 
-        # Initialize performance monitor with debug logging
-        performance_monitor = PerformanceMonitor(debug_mode=debug_mode)
-        performance_monitor.log_debug(
+        # Log execution start
+        logger.info(
             f"Started workflow execution for definition {definition_id}",
-            data={"execution_id": execution.id, "user_id": user_id},
+            extra={"execution_id": execution.id, "user_id": user_id},
         )
 
         try:

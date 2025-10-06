@@ -38,6 +38,7 @@ from chatter.services.workflow_preparation import (
 from chatter.services.workflow_result_processor import (
     WorkflowResultProcessor,
 )
+from chatter.services.workflow_errors import handle_workflow_errors
 from chatter.services.workflow_types import (
     ExecutionMode,
     WorkflowConfig,
@@ -96,6 +97,7 @@ class UnifiedWorkflowExecutionService:
         )
         self.result_processor = WorkflowResultProcessor(session)
 
+    @handle_workflow_errors(error_stage="execution")
     async def execute_workflow(
         self,
         workflow_input: WorkflowInput,
@@ -301,6 +303,7 @@ class UnifiedWorkflowExecutionService:
             
             raise
 
+    @handle_workflow_errors(error_stage="streaming_execution")
     async def execute_workflow_streaming(
         self,
         workflow_input: WorkflowInput,
@@ -412,6 +415,7 @@ class UnifiedWorkflowExecutionService:
                 metadata={"error": str(e)},
             )
 
+    @handle_workflow_errors(error_stage="definition_execution")
     async def execute_workflow_definition(
         self,
         definition: Any,

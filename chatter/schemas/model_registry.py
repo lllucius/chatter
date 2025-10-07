@@ -293,8 +293,8 @@ class ProviderList(BaseModel):
 
     providers: Sequence[Provider]
     total: int
-    page: int
-    per_page: int
+    limit: int
+    offset: int
 
 
 class ModelDefList(BaseModel):
@@ -302,8 +302,8 @@ class ModelDefList(BaseModel):
 
     models: Sequence[ModelDefWithProvider]
     total: int
-    page: int
-    per_page: int
+    limit: int
+    offset: int
 
 
 class EmbeddingSpaceList(BaseModel):
@@ -311,8 +311,8 @@ class EmbeddingSpaceList(BaseModel):
 
     spaces: Sequence[EmbeddingSpaceWithModel]
     total: int
-    page: int
-    per_page: int
+    limit: int
+    offset: int
 
 
 # Default selection schemas

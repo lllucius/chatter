@@ -30,9 +30,9 @@ class EmbeddingSpaceList(BaseModel):
     """ # noqa: E501
     spaces: List[EmbeddingSpaceWithModel]
     total: StrictInt
-    page: StrictInt
-    per_page: StrictInt
-    __properties: ClassVar[List[str]] = ["spaces", "total", "page", "per_page"]
+    limit: StrictInt
+    offset: StrictInt
+    __properties: ClassVar[List[str]] = ["spaces", "total", "limit", "offset"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -94,8 +94,8 @@ class EmbeddingSpaceList(BaseModel):
         _obj = cls.model_validate({
             "spaces": [EmbeddingSpaceWithModel.from_dict(_item) for _item in obj["spaces"]] if obj.get("spaces") is not None else None,
             "total": obj.get("total"),
-            "page": obj.get("page"),
-            "per_page": obj.get("per_page")
+            "limit": obj.get("limit"),
+            "offset": obj.get("offset")
         })
         return _obj
 

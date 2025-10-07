@@ -12,7 +12,7 @@ export class ModelRegistryApi extends BaseAPI {
   /**List Providers
    * List all providers.
    */
-  public async listProvidersApiV1ModelsProviders(options?: { page?: number; perPage?: number; activeOnly?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ProviderList> {
+  public async listProvidersApiV1ModelsProviders(options?: { limit?: number; offset?: number; activeOnly?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ProviderList> {
     const requestContext: RequestOpts = {
       path: `/api/v1/models/providers`,
       method: 'GET' as HTTPMethod,
@@ -20,8 +20,8 @@ export class ModelRegistryApi extends BaseAPI {
         ...options?.headers,
       },
       query: {
-        'page': options?.page,
-        'per_page': options?.perPage,
+        'limit': options?.limit,
+        'offset': options?.offset,
         'active_only': options?.activeOnly,
         ...options?.query
       },
@@ -109,7 +109,7 @@ export class ModelRegistryApi extends BaseAPI {
   /**List Models
    * List all model definitions.
    */
-  public async listModelsApiV1ModelsModels(options?: { providerId?: string; modelType?: ModelType; page?: number; perPage?: number; activeOnly?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ModelDefList> {
+  public async listModelsApiV1ModelsModels(options?: { providerId?: string; modelType?: ModelType; limit?: number; offset?: number; activeOnly?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ModelDefList> {
     const requestContext: RequestOpts = {
       path: `/api/v1/models/models`,
       method: 'GET' as HTTPMethod,
@@ -119,8 +119,8 @@ export class ModelRegistryApi extends BaseAPI {
       query: {
         'provider_id': options?.providerId,
         'model_type': options?.modelType,
-        'page': options?.page,
-        'per_page': options?.perPage,
+        'limit': options?.limit,
+        'offset': options?.offset,
         'active_only': options?.activeOnly,
         ...options?.query
       },
@@ -206,7 +206,7 @@ export class ModelRegistryApi extends BaseAPI {
   /**List Embedding Spaces
    * List all embedding spaces.
    */
-  public async listEmbeddingSpacesApiV1ModelsEmbeddingSpaces(options?: { modelId?: string; page?: number; perPage?: number; activeOnly?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<EmbeddingSpaceList> {
+  public async listEmbeddingSpacesApiV1ModelsEmbeddingSpaces(options?: { modelId?: string; limit?: number; offset?: number; activeOnly?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<EmbeddingSpaceList> {
     const requestContext: RequestOpts = {
       path: `/api/v1/models/embedding-spaces`,
       method: 'GET' as HTTPMethod,
@@ -215,8 +215,8 @@ export class ModelRegistryApi extends BaseAPI {
       },
       query: {
         'model_id': options?.modelId,
-        'page': options?.page,
-        'per_page': options?.perPage,
+        'limit': options?.limit,
+        'offset': options?.offset,
         'active_only': options?.activeOnly,
         ...options?.query
       },

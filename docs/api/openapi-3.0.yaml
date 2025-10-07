@@ -3718,11 +3718,11 @@ components:
     EmbeddingSpaceList:
       description: List of embedding spaces with pagination.
       properties:
-        page:
-          title: Page
+        limit:
+          title: Limit
           type: integer
-        per_page:
-          title: Per Page
+        offset:
+          title: Offset
           type: integer
         spaces:
           items:
@@ -3735,8 +3735,8 @@ components:
       required:
       - spaces
       - total
-      - page
-      - per_page
+      - limit
+      - offset
       title: EmbeddingSpaceList
       type: object
     EmbeddingSpaceUpdate:
@@ -4778,16 +4778,16 @@ components:
     ModelDefList:
       description: List of model definitions with pagination.
       properties:
+        limit:
+          title: Limit
+          type: integer
         models:
           items:
             $ref: '#/components/schemas/ModelDefWithProvider'
           title: Models
           type: array
-        page:
-          title: Page
-          type: integer
-        per_page:
-          title: Per Page
+        offset:
+          title: Offset
           type: integer
         total:
           title: Total
@@ -4795,8 +4795,8 @@ components:
       required:
       - models
       - total
-      - page
-      - per_page
+      - limit
+      - offset
       title: ModelDefList
       type: object
     ModelDefUpdate:
@@ -7407,11 +7407,11 @@ components:
     ProviderList:
       description: List of providers with pagination.
       properties:
-        page:
-          title: Page
+        limit:
+          title: Limit
           type: integer
-        per_page:
-          title: Per Page
+        offset:
+          title: Offset
           type: integer
         providers:
           items:
@@ -7424,8 +7424,8 @@ components:
       required:
       - providers
       - total
-      - page
-      - per_page
+      - limit
+      - offset
       title: ProviderList
       type: object
     ProviderType:
@@ -16373,25 +16373,25 @@ paths:
           description: Filter by model ID
           title: Model Id
           type: string
-      - description: Page number
+      - description: Maximum number of results
         in: query
-        name: page
-        required: false
-        schema:
-          default: 1
-          description: Page number
-          minimum: 1
-          title: Page
-          type: integer
-      - description: Items per page
-        in: query
-        name: per_page
+        name: limit
         required: false
         schema:
           default: 20
-          description: Items per page
+          description: Maximum number of results
           minimum: 1
-          title: Per Page
+          title: Limit
+          type: integer
+      - description: Number of results to skip
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          description: Number of results to skip
+          minimum: 0
+          title: Offset
           type: integer
       - description: Show only active spaces
         in: query
@@ -16659,25 +16659,25 @@ paths:
         schema:
           $ref: '#/components/schemas/ModelType'
           description: Filter by model type
-      - description: Page number
+      - description: Maximum number of results
         in: query
-        name: page
-        required: false
-        schema:
-          default: 1
-          description: Page number
-          minimum: 1
-          title: Page
-          type: integer
-      - description: Items per page
-        in: query
-        name: per_page
+        name: limit
         required: false
         schema:
           default: 20
-          description: Items per page
+          description: Maximum number of results
           minimum: 1
-          title: Per Page
+          title: Limit
+          type: integer
+      - description: Number of results to skip
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          description: Number of results to skip
+          minimum: 0
+          title: Offset
           type: integer
       - description: Show only active models
         in: query
@@ -16930,25 +16930,25 @@ paths:
       description: List all providers.
       operationId: list_providers_api_v1_models_providers_get
       parameters:
-      - description: Page number
+      - description: Maximum number of results
         in: query
-        name: page
-        required: false
-        schema:
-          default: 1
-          description: Page number
-          minimum: 1
-          title: Page
-          type: integer
-      - description: Items per page
-        in: query
-        name: per_page
+        name: limit
         required: false
         schema:
           default: 20
-          description: Items per page
+          description: Maximum number of results
           minimum: 1
-          title: Per Page
+          title: Limit
+          type: integer
+      - description: Number of results to skip
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          description: Number of results to skip
+          minimum: 0
+          title: Offset
           type: integer
       - description: Show only active providers
         in: query
@@ -19837,7 +19837,8 @@ paths:
       - Workflows
   /api/v1/workflows/definitions/custom/execute:
     post:
-      description: Execute a custom workflow definition using the modern system.
+      description: Execute a custom workflow definition using the modern unified execution
+        engine.
       operationId: execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post
       parameters:
       - in: query
@@ -19957,8 +19958,21 @@ paths:
       - Workflows
   /api/v1/workflows/definitions/validate:
     post:
-      description: Validate a workflow definition - supports both legacy and modern
-        formats.
+      description: "Validate a workflow definition using the unified validation orchestrator.\n\
+        \n**New in Phase 7**: All validation now goes through the unified WorkflowValidator,\n\
+        ensuring consistent validation across all 4 validation layers.\n\n**Validation\
+        \ Layers**:\n1. **Structure Validation**: Nodes, edges, connectivity, graph\
+        \ validity\n2. **Security Validation**: Security policies, permissions, data\
+        \ access\n3. **Capability Validation**: Feature support, capability limits\n\
+        4. **Resource Validation**: Resource quotas, usage limits\n\n**Request Body**:\n\
+        - Can be WorkflowDefinitionCreate schema OR raw dict with nodes/edges\n- Supports\
+        \ both legacy and modern formats\n\n**Response**:\n- `is_valid`: Overall validation\
+        \ result\n- `errors`: List of validation errors from all layers\n- `warnings`:\
+        \ Non-blocking warnings\n- `metadata`: Additional validation details\n\n**Example**:\n\
+        ```python\n# Using Python SDK\nresult = client.workflows.validate_definition({\n\
+        \    \"nodes\": [...],\n    \"edges\": [...]\n})\n\nif result.is_valid:\n\
+        \    print(\"Workflow is valid!\")\nelse:\n    for error in result.errors:\n\
+        \        print(f\"Error: {error['message']}\")\n```"
       operationId: validate_workflow_definition_api_v1_workflows_definitions_validate_post
       requestBody:
         content:
@@ -20182,7 +20196,22 @@ paths:
       - Workflows
   /api/v1/workflows/definitions/{workflow_id}/execute:
     post:
-      description: Execute a workflow definition.
+      description: "Execute a workflow definition using the unified execution engine.\n\
+        \n**New in Phase 7**: This endpoint now uses the unified ExecutionEngine for\
+        \ all workflow\nexecution, providing consistent behavior and better performance.\n\
+        \n**Execution Flow**:\n1. Verifies workflow definition exists and user has\
+        \ access\n2. Creates ExecutionRequest with definition_id and input_data\n\
+        3. Executes through unified ExecutionEngine\n4. Returns standardized WorkflowExecutionResponse\n\
+        \n**Request Body**:\n- `input_data`: Input parameters for the workflow\n-\
+        \ `debug_mode`: Enable detailed logging (default: false)\n\n**Response**:\n\
+        - `id`: Execution ID for tracking\n- `definition_id`: ID of the executed workflow\
+        \ definition\n- `status`: Execution status (completed/failed)\n- `output_data`:\
+        \ Workflow execution results\n- `execution_time_ms`: Execution duration in\
+        \ milliseconds\n- `tokens_used`: Total LLM tokens consumed\n- `cost`: Execution\
+        \ cost in USD\n\n**Example**:\n```python\n# Using Python SDK\nresult = client.workflows.execute_definition(\n\
+        \    workflow_id=\"def_123\",\n    input_data={\"query\": \"Hello\"},\n  \
+        \  debug_mode=False\n)\nprint(f\"Execution {result.id} completed in {result.execution_time_ms}ms\"\
+        )\n```"
       operationId: execute_workflow_api_v1_workflows_definitions__workflow_id__execute_post
       parameters:
       - description: Workflow ID
@@ -20768,7 +20797,8 @@ paths:
         it.
 
 
-        This endpoint allows you to pass template data directly and execute it
+        This endpoint allows you to pass template data (nodes/edges) directly and
+        execute it
 
         without persisting the template to the database first.'
       operationId: execute_temporary_workflow_template_api_v1_workflows_templates_execute_post
@@ -20850,7 +20880,7 @@ paths:
       - Workflows
   /api/v1/workflows/templates/validate:
     post:
-      description: Validate a workflow template.
+      description: Validate a workflow template using the unified validation orchestrator.
       operationId: validate_workflow_template_api_v1_workflows_templates_validate_post
       requestBody:
         content:
@@ -20977,7 +21007,20 @@ paths:
       - Workflows
   /api/v1/workflows/templates/{template_id}/execute:
     post:
-      description: Execute a workflow template directly.
+      description: "Execute a workflow template directly using the unified execution\
+        \ engine.\n\n**New in Phase 7**: Templates now execute directly without creating\
+        \ temporary\nworkflow definitions, reducing database writes by 30%.\n\n**Execution\
+        \ Flow**:\n1. Verifies template exists\n2. Creates ExecutionRequest with template_id\
+        \ (no temporary definition!)\n3. Executes through unified ExecutionEngine\n\
+        4. Returns standardized WorkflowExecutionResponse\n\n**Key Improvement**:\
+        \ No temporary definitions are created. Templates execute\ndirectly through\
+        \ the ExecutionEngine, completing the Phase 4 optimization.\n\n**Request Body**:\n\
+        - `input_data`: Input parameters for the template\n- `debug_mode`: Enable\
+        \ detailed logging (default: false)\n\n**Response**: Same as workflow definition\
+        \ execution\n\n**Example**:\n```python\n# Using Python SDK\nresult = client.workflows.execute_template(\n\
+        \    template_id=\"template_123\",\n    input_data={\"query\": \"What is AI?\"\
+        },\n    debug_mode=False\n)\nprint(f\"Template executed successfully: {result.id}\"\
+        )\n```"
       operationId: execute_workflow_template_api_v1_workflows_templates__template_id__execute_post
       parameters:
       - in: path

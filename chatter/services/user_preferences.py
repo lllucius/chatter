@@ -1,12 +1,15 @@
 """User preferences service for storing workflow and tool configurations.
 
-This is a minimal implementation that stores preferences in memory.
-TODO: Replace with proper database persistence using a UserPreferences table.
+Database-backed implementation for persistent user preferences storage.
 """
 
 from datetime import datetime
 from typing import Any
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from chatter.models.user_preference import UserPreference
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -15,14 +18,16 @@ logger = get_logger(__name__)
 class UserPreferencesService:
     """Service for managing user preferences.
 
-    This is a temporary in-memory implementation.
-    TODO: Replace with database-backed implementation.
+    Database-backed implementation with support for memory and tool configurations.
     """
 
-    def __init__(self):
-        # In-memory storage - should be replaced with database
-        self._memory_preferences: dict[str, dict[str, Any]] = {}
-        self._tool_preferences: dict[str, dict[str, Any]] = {}
+    def __init__(self, session: AsyncSession):
+        """Initialize service with database session.
+        
+        Args:
+            session: Async database session
+        """
+        self.session = session
 
     async def save_memory_config(
         self, user_id: str, config: dict[str, Any]
@@ -37,15 +42,29 @@ class UserPreferencesService:
             Saved configuration with metadata
         """
         try:
-            # Add metadata
-            config_with_meta = {
-                **config,
-                "saved_at": datetime.now().isoformat(),
-                "user_id": user_id,
-            }
+            # Check if preference already exists
+            stmt = select(UserPreference).where(
+                UserPreference.user_id == user_id,
+                UserPreference.preference_type == "memory",
+            )
+            result = await self.session.execute(stmt)
+            preference = result.scalar_one_or_none()
 
-            # Store in memory (TODO: Replace with database)
-            self._memory_preferences[user_id] = config_with_meta
+            if preference:
+                # Update existing preference
+                preference.config = config
+                preference.updated_at = datetime.now()
+            else:
+                # Create new preference
+                preference = UserPreference(
+                    user_id=user_id,
+                    preference_type="memory",
+                    config=config,
+                )
+                self.session.add(preference)
+
+            await self.session.commit()
+            await self.session.refresh(preference)
 
             logger.info(
                 f"Saved memory configuration for user {user_id}"
@@ -53,10 +72,12 @@ class UserPreferencesService:
             return {
                 "status": "success",
                 "message": "Memory configuration saved",
-                "config": config_with_meta,
+                "config": preference.config,
+                "saved_at": preference.updated_at.isoformat(),
             }
 
         except Exception as e:
+            await self.session.rollback()
             logger.error(
                 f"Failed to save memory config for user {user_id}: {e}"
             )
@@ -79,24 +100,40 @@ class UserPreferencesService:
             Saved configuration with metadata
         """
         try:
-            # Add metadata
-            config_with_meta = {
-                **config,
-                "saved_at": datetime.now().isoformat(),
-                "user_id": user_id,
-            }
+            # Check if preference already exists
+            stmt = select(UserPreference).where(
+                UserPreference.user_id == user_id,
+                UserPreference.preference_type == "tool",
+            )
+            result = await self.session.execute(stmt)
+            preference = result.scalar_one_or_none()
 
-            # Store in memory (TODO: Replace with database)
-            self._tool_preferences[user_id] = config_with_meta
+            if preference:
+                # Update existing preference
+                preference.config = config
+                preference.updated_at = datetime.now()
+            else:
+                # Create new preference
+                preference = UserPreference(
+                    user_id=user_id,
+                    preference_type="tool",
+                    config=config,
+                )
+                self.session.add(preference)
+
+            await self.session.commit()
+            await self.session.refresh(preference)
 
             logger.info(f"Saved tool configuration for user {user_id}")
             return {
                 "status": "success",
                 "message": "Tool configuration saved",
-                "config": config_with_meta,
+                "config": preference.config,
+                "saved_at": preference.updated_at.isoformat(),
             }
 
         except Exception as e:
+            await self.session.rollback()
             logger.error(
                 f"Failed to save tool config for user {user_id}: {e}"
             )
@@ -117,7 +154,23 @@ class UserPreferencesService:
         Returns:
             Memory configuration or None if not found
         """
-        return self._memory_preferences.get(user_id)
+        try:
+            stmt = select(UserPreference).where(
+                UserPreference.user_id == user_id,
+                UserPreference.preference_type == "memory",
+            )
+            result = await self.session.execute(stmt)
+            preference = result.scalar_one_or_none()
+            
+            if preference:
+                return preference.config
+            return None
+            
+        except Exception as e:
+            logger.error(
+                f"Failed to get memory config for user {user_id}: {e}"
+            )
+            return None
 
     async def get_tool_config(
         self, user_id: str
@@ -130,16 +183,20 @@ class UserPreferencesService:
         Returns:
             Tool configuration or None if not found
         """
-        return self._tool_preferences.get(user_id)
-
-
-# Global service instance
-_user_preferences_service: UserPreferencesService | None = None
-
-
-def get_user_preferences_service() -> UserPreferencesService:
-    """Get user preferences service instance."""
-    global _user_preferences_service
-    if _user_preferences_service is None:
-        _user_preferences_service = UserPreferencesService()
-    return _user_preferences_service
+        try:
+            stmt = select(UserPreference).where(
+                UserPreference.user_id == user_id,
+                UserPreference.preference_type == "tool",
+            )
+            result = await self.session.execute(stmt)
+            preference = result.scalar_one_or_none()
+            
+            if preference:
+                return preference.config
+            return None
+            
+        except Exception as e:
+            logger.error(
+                f"Failed to get tool config for user {user_id}: {e}"
+            )
+            return None

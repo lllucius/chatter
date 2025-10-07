@@ -58,6 +58,7 @@ class ExecutionEngine:
         session: AsyncSession,
         llm_service: LLMService,
         debug_mode: bool = False,
+        owner_id: str | None = None,
     ):
         """Initialize the execution engine.
 
@@ -65,9 +66,11 @@ class ExecutionEngine:
             session: Database session
             llm_service: LLM service for model access
             debug_mode: Enable debug logging
+            owner_id: Optional owner ID for workflow executions (from auth context)
         """
         self.session = session
         self.llm_service = llm_service
+        self.owner_id = owner_id
         
         # Initialize unified tracker
         from chatter.core.workflow_tracker import WorkflowTracker
@@ -369,11 +372,11 @@ class ExecutionEngine:
         )
 
         workflow_service = WorkflowManagementService(self.session)
-        # We'll need to get the owner_id - for now use a placeholder
-        # This will be properly handled when integrating with the service
+        # Use owner_id from engine initialization (extracted from auth context)
+        # Falls back to None if not provided
         definition = await workflow_service.get_workflow_definition(
             workflow_id=definition_id,
-            owner_id=None,  # TODO: Get from context
+            owner_id=self.owner_id,
         )
         return definition
 

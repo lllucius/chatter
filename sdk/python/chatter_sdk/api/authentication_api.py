@@ -17,8 +17,9 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import StrictInt, StrictStr
+from pydantic import Field, StrictStr
 from typing import List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.api_key_create import APIKeyCreate
 from chatter_sdk.models.api_key_response import APIKeyResponse
 from chatter_sdk.models.api_key_revoke_response import APIKeyRevokeResponse
@@ -1631,8 +1632,8 @@ class AuthenticationApi:
     @validate_call
     async def list_users_api_v1_auth_users_get(
         self,
-        page: Optional[StrictInt] = None,
-        page_size: Optional[StrictInt] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1648,12 +1649,12 @@ class AuthenticationApi:
     ) -> UserListResponse:
         """List Users
 
-        List all users (admin only).  Args:     page: Page number (1-indexed)     page_size: Number of users per page     current_user: Current authenticated admin user     session: Database session  Returns:     List of users with pagination info
+        List all users (admin only).  Args:     limit: Number of users to return     offset: Number of users to skip     current_user: Current authenticated admin user     session: Database session  Returns:     List of users with pagination info
 
-        :param page:
-        :type page: int
-        :param page_size:
-        :type page_size: int
+        :param limit: Number of results per page
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1677,8 +1678,8 @@ class AuthenticationApi:
         """ # noqa: E501
 
         _param = self._list_users_api_v1_auth_users_get_serialize(
-            page=page,
-            page_size=page_size,
+            limit=limit,
+            offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1703,8 +1704,8 @@ class AuthenticationApi:
     @validate_call
     async def list_users_api_v1_auth_users_get_with_http_info(
         self,
-        page: Optional[StrictInt] = None,
-        page_size: Optional[StrictInt] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1720,12 +1721,12 @@ class AuthenticationApi:
     ) -> ApiResponse[UserListResponse]:
         """List Users
 
-        List all users (admin only).  Args:     page: Page number (1-indexed)     page_size: Number of users per page     current_user: Current authenticated admin user     session: Database session  Returns:     List of users with pagination info
+        List all users (admin only).  Args:     limit: Number of users to return     offset: Number of users to skip     current_user: Current authenticated admin user     session: Database session  Returns:     List of users with pagination info
 
-        :param page:
-        :type page: int
-        :param page_size:
-        :type page_size: int
+        :param limit: Number of results per page
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1749,8 +1750,8 @@ class AuthenticationApi:
         """ # noqa: E501
 
         _param = self._list_users_api_v1_auth_users_get_serialize(
-            page=page,
-            page_size=page_size,
+            limit=limit,
+            offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1775,8 +1776,8 @@ class AuthenticationApi:
     @validate_call
     async def list_users_api_v1_auth_users_get_without_preload_content(
         self,
-        page: Optional[StrictInt] = None,
-        page_size: Optional[StrictInt] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1792,12 +1793,12 @@ class AuthenticationApi:
     ) -> RESTResponseType:
         """List Users
 
-        List all users (admin only).  Args:     page: Page number (1-indexed)     page_size: Number of users per page     current_user: Current authenticated admin user     session: Database session  Returns:     List of users with pagination info
+        List all users (admin only).  Args:     limit: Number of users to return     offset: Number of users to skip     current_user: Current authenticated admin user     session: Database session  Returns:     List of users with pagination info
 
-        :param page:
-        :type page: int
-        :param page_size:
-        :type page_size: int
+        :param limit: Number of results per page
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1821,8 +1822,8 @@ class AuthenticationApi:
         """ # noqa: E501
 
         _param = self._list_users_api_v1_auth_users_get_serialize(
-            page=page,
-            page_size=page_size,
+            limit=limit,
+            offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1842,8 +1843,8 @@ class AuthenticationApi:
 
     def _list_users_api_v1_auth_users_get_serialize(
         self,
-        page,
-        page_size,
+        limit,
+        offset,
         _request_auth,
         _content_type,
         _headers,
@@ -1866,13 +1867,13 @@ class AuthenticationApi:
 
         # process the path parameters
         # process the query parameters
-        if page is not None:
+        if limit is not None:
             
-            _query_params.append(('page', page))
+            _query_params.append(('limit', limit))
             
-        if page_size is not None:
+        if offset is not None:
             
-            _query_params.append(('page_size', page_size))
+            _query_params.append(('offset', offset))
             
         # process the header parameters
         # process the form parameters

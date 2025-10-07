@@ -30,9 +30,9 @@ class UserListResponse(BaseModel):
     """ # noqa: E501
     users: List[UserResponse] = Field(description="List of users")
     total: StrictInt = Field(description="Total number of users")
-    page: StrictInt = Field(description="Current page number")
-    page_size: StrictInt = Field(description="Number of users per page")
-    __properties: ClassVar[List[str]] = ["users", "total", "page", "page_size"]
+    offset: StrictInt = Field(description="Number of results skipped")
+    limit: StrictInt = Field(description="Number of results returned")
+    __properties: ClassVar[List[str]] = ["users", "total", "offset", "limit"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -94,8 +94,8 @@ class UserListResponse(BaseModel):
         _obj = cls.model_validate({
             "users": [UserResponse.from_dict(_item) for _item in obj["users"]] if obj.get("users") is not None else None,
             "total": obj.get("total"),
-            "page": obj.get("page"),
-            "page_size": obj.get("page_size")
+            "offset": obj.get("offset"),
+            "limit": obj.get("limit")
         })
         return _obj
 

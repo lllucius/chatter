@@ -8,8 +8,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **users** | [**List[UserResponse]**](UserResponse.md) | List of users | 
 **total** | **int** | Total number of users | 
-**page** | **int** | Current page number | 
-**page_size** | **int** | Number of users per page | 
+**offset** | **int** | Number of results skipped | 
+**limit** | **int** | Number of results returned | 
 
 ## Example
 

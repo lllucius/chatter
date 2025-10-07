@@ -413,7 +413,7 @@ else:
   /**List All Workflow Executions
    * List all workflow executions for the current user with pagination.
    */
-  public async listAllWorkflowExecutionsApiV1WorkflowsExecutions(options?: { page?: number; pageSize?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+  public async listAllWorkflowExecutionsApiV1WorkflowsExecutions(options?: { limit?: number; offset?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/executions`,
       method: 'GET' as HTTPMethod,
@@ -421,8 +421,8 @@ else:
         ...options?.headers,
       },
       query: {
-        'page': options?.page,
-        'page_size': options?.pageSize,
+        'limit': options?.limit,
+        'offset': options?.offset,
         ...options?.query
       },
     };

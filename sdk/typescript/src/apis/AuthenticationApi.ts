@@ -322,15 +322,15 @@ Returns:
    * List all users (admin only).
 
 Args:
-    page: Page number (1-indexed)
-    page_size: Number of users per page
+    limit: Number of users to return
+    offset: Number of users to skip
     current_user: Current authenticated admin user
     session: Database session
 
 Returns:
     List of users with pagination info
    */
-  public async listUsersApiV1AuthUsers(options?: { page?: number; pageSize?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<UserListResponse> {
+  public async listUsersApiV1AuthUsers(options?: { limit?: number; offset?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<UserListResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/auth/users`,
       method: 'GET' as HTTPMethod,
@@ -338,8 +338,8 @@ Returns:
         ...options?.headers,
       },
       query: {
-        'page': options?.page,
-        'page_size': options?.pageSize,
+        'limit': options?.limit,
+        'offset': options?.offset,
         ...options?.query
       },
     };

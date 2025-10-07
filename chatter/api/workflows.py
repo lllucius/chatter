@@ -4,7 +4,7 @@ import json
 import time
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -952,8 +952,8 @@ async def get_supported_node_types(
 
 @router.get("/executions", response_model=dict[str, Any])
 async def list_all_workflow_executions(
-    page: int = 1,
-    page_size: int = 20,
+    page: int = Query(1, ge=1, description="Page number (1-indexed)"),
+    page_size: int = Query(20, ge=1, le=100, description="Number of results per page"),
     current_user: User = Depends(get_current_user),
     workflow_service: WorkflowManagementService = Depends(
         get_workflow_management_service

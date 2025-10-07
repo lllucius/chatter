@@ -1,6 +1,6 @@
 """Enhanced authentication endpoints with comprehensive security."""
 
-from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi import APIRouter, Depends, Query, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -710,8 +710,8 @@ async def deactivate_account(
 
 @router.get("/users", response_model=UserListResponse)
 async def list_users(
-    page: int = 1,
-    page_size: int = 50,
+    page: int = Query(1, ge=1, description="Page number (1-indexed)"),
+    page_size: int = Query(50, ge=1, le=100, description="Number of users per page"),
     current_user: User = Depends(get_current_admin_user),
     session: AsyncSession = Depends(get_session_generator),
 ) -> UserListResponse:

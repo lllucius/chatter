@@ -159,7 +159,7 @@ const WorkflowExecutionsPage: React.FC = () => {
       const sdk = getSDK();
       const response =
         await sdk.workflows.listAllWorkflowExecutionsApiV1WorkflowsExecutions({
-          page,
+          page: page + 1, // Convert from 0-indexed (frontend) to 1-indexed (API)
           pageSize,
         });
 

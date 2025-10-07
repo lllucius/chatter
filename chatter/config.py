@@ -512,6 +512,15 @@ class Settings(BaseSettings):
     workflow_max_concurrent: int = Field(
         default=10, description="Maximum concurrent workflows per user"
     )
+    workflow_max_nodes: int = Field(
+        default=100, description="Maximum nodes per workflow"
+    )
+    workflow_max_edges: int = Field(
+        default=200, description="Maximum edges per workflow"
+    )
+    workflow_max_execution_time_seconds: int = Field(
+        default=600, description="Maximum estimated execution time in seconds"
+    )
 
     # Token streaming settings
     streaming_chunk_size: int = Field(

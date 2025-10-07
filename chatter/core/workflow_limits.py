@@ -26,6 +26,9 @@ class WorkflowLimits:
     max_tokens: int
     max_memory_mb: int
     max_concurrent: int
+    max_nodes: int
+    max_edges: int
+    max_execution_time_seconds: int
 
 
 @dataclass
@@ -80,6 +83,9 @@ class WorkflowLimitManager:
             max_tokens=settings.workflow_max_tokens,
             max_memory_mb=settings.workflow_max_memory_mb,
             max_concurrent=settings.workflow_max_concurrent,
+            max_nodes=settings.workflow_max_nodes,
+            max_edges=settings.workflow_max_edges,
+            max_execution_time_seconds=settings.workflow_max_execution_time_seconds,
         )
 
     def check_concurrent_limit(

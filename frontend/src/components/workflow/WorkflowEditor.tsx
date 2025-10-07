@@ -717,33 +717,6 @@ const WorkflowEditor = React.forwardRef<
       setShowMiniMap(!showMiniMap);
     }, [showMiniMap]);
 
-    // Execute workflow
-    const handleExecute = useCallback(() => {
-      // First validate the workflow
-      const result = WorkflowValidator.validate(currentWorkflow);
-      if (!result.isValid) {
-        toastService.error(
-          `Cannot execute invalid workflow: ${result.errors.join(', ')}`,
-          'Execution Error'
-        );
-        return;
-      }
-
-      // Check if the workflow has input parameters
-      const hasInputParams = currentWorkflow.nodes.some(
-        (node) => node.type === 'start' && node.data?.config?.requiresInput
-      );
-
-      if (hasInputParams || currentWorkflow.nodes.length > 0) {
-        // Reset and show execution input dialog
-        setExecutionInputs({});
-        setShowExecutionDialog(true);
-      } else {
-        // Execute directly for simple workflows
-        executeWorkflow({});
-      }
-    }, [currentWorkflow]);
-
     // Execute workflow with inputs
     const executeWorkflow = useCallback(
       async (inputs: Record<string, string>) => {
@@ -776,6 +749,33 @@ const WorkflowEditor = React.forwardRef<
       },
       [debugMode, currentWorkflow]
     );
+
+    // Execute workflow
+    const handleExecute = useCallback(() => {
+      // First validate the workflow
+      const result = WorkflowValidator.validate(currentWorkflow);
+      if (!result.isValid) {
+        toastService.error(
+          `Cannot execute invalid workflow: ${result.errors.join(', ')}`,
+          'Execution Error'
+        );
+        return;
+      }
+
+      // Check if the workflow has input parameters
+      const hasInputParams = currentWorkflow.nodes.some(
+        (node) => node.type === 'start' && node.data?.config?.requiresInput
+      );
+
+      if (hasInputParams || currentWorkflow.nodes.length > 0) {
+        // Reset and show execution input dialog
+        setExecutionInputs({});
+        setShowExecutionDialog(true);
+      } else {
+        // Execute directly for simple workflows
+        executeWorkflow({});
+      }
+    }, [currentWorkflow, executeWorkflow]);
 
     // Debug workflow
     const handleDebug = useCallback(() => {

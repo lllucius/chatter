@@ -173,15 +173,52 @@ class RealTimeAnalyticsService:
             await sse_service.send_event_to_user(user_id, event)
 
     async def _get_cache_performance(self) -> dict[str, Any] | None:
-        """Get current cache performance metrics."""
+        """Get current cache performance metrics.
+        
+        Uses standardized cache interface - all cache implementations
+        must support get_stats() method.
+        """
         try:
-            # Check if cache has performance stats
-            if hasattr(self.cache, 'get_stats'):
-                return self.cache.get_stats()
-            return None
+            # All cache implementations support get_stats() via CacheInterface
+            stats = await self.cache.get_stats()
+            
+            # Ensure stats is a dictionary with expected structure
+            if not isinstance(stats, dict):
+                logger.warning(
+                    f"Cache stats returned unexpected type: {type(stats)}"
+                )
+                return self._get_fallback_stats()
+            
+            # Validate expected fields exist
+            required_fields = ["cache_hits", "cache_misses", "total_entries"]
+            if not all(field in stats for field in required_fields):
+                logger.warning(
+                    f"Cache stats missing required fields: {required_fields}"
+                )
+                # Return stats anyway but add defaults for missing fields
+                for field in required_fields:
+                    if field not in stats:
+                        stats[field] = 0
+            
+            return stats
+            
         except Exception as e:
             logger.error(f"Error getting cache performance: {e}")
-            return None
+            return self._get_fallback_stats()
+    
+    def _get_fallback_stats(self) -> dict[str, Any]:
+        """Get fallback statistics when cache stats unavailable.
+        
+        Provides basic metrics structure for monitoring compatibility.
+        """
+        return {
+            "cache_hits": 0,
+            "cache_misses": 0,
+            "total_entries": 0,
+            "hit_rate": 0.0,
+            "status": "unavailable",
+            "error": "Cache statistics not available",
+        }
 
     async def send_workflow_update(
         self,

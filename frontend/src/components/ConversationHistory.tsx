@@ -122,8 +122,19 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
     if (!actionConversation) return;
 
     try {
-      // This would be implemented with a proper export API
-      const blob = new Blob([JSON.stringify(actionConversation, null, 2)], {
+      const sdk = getSDK();
+      const response =
+        await sdk.conversations.getConversationApiV1ConversationsConversationId(
+          actionConversation.id,
+          { includeMessages: true }
+        );
+      
+      const exportData = {
+        conversation: actionConversation,
+        messages: response.messages || [],
+      };
+      
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
         type: 'application/json',
       });
       const url = URL.createObjectURL(blob);

@@ -140,8 +140,7 @@ function CrudDataTableInner<T, TCreate, TUpdate>(
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      // Convert 0-indexed page (MUI TablePagination) to 1-indexed page (backend API)
-      const result = await service.list(page + 1, rowsPerPage);
+      const result = await service.list(page, rowsPerPage);
       setItems(result.items);
       setTotal(result.total);
     } catch (error) {

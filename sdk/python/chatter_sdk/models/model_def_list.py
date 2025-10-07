@@ -30,9 +30,9 @@ class ModelDefList(BaseModel):
     """ # noqa: E501
     models: List[ModelDefWithProvider]
     total: StrictInt
-    page: StrictInt
-    per_page: StrictInt
-    __properties: ClassVar[List[str]] = ["models", "total", "page", "per_page"]
+    limit: StrictInt
+    offset: StrictInt
+    __properties: ClassVar[List[str]] = ["models", "total", "limit", "offset"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -94,8 +94,8 @@ class ModelDefList(BaseModel):
         _obj = cls.model_validate({
             "models": [ModelDefWithProvider.from_dict(_item) for _item in obj["models"]] if obj.get("models") is not None else None,
             "total": obj.get("total"),
-            "page": obj.get("page"),
-            "per_page": obj.get("per_page")
+            "limit": obj.get("limit"),
+            "offset": obj.get("offset")
         })
         return _obj
 

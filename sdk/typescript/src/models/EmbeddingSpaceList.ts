@@ -6,6 +6,6 @@ import { EmbeddingSpaceWithModel } from './EmbeddingSpaceWithModel';
 export interface EmbeddingSpaceList {
   spaces: EmbeddingSpaceWithModel[];
   total: number;
-  page: number;
-  per_page: number;
+  limit: number;
+  offset: number;
 }

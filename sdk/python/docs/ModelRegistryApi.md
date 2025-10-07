@@ -976,7 +976,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_embedding_spaces_api_v1_models_embedding_spaces_get**
-> EmbeddingSpaceList list_embedding_spaces_api_v1_models_embedding_spaces_get(model_id=model_id, page=page, per_page=per_page, active_only=active_only)
+> EmbeddingSpaceList list_embedding_spaces_api_v1_models_embedding_spaces_get(model_id=model_id, limit=limit, offset=offset, active_only=active_only)
 
 List Embedding Spaces
 
@@ -1013,13 +1013,13 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.ModelRegistryApi(api_client)
     model_id = 'model_id_example' # str | Filter by model ID (optional)
-    page = 1 # int | Page number (optional) (default to 1)
-    per_page = 20 # int | Items per page (optional) (default to 20)
+    limit = 20 # int | Maximum number of results (optional) (default to 20)
+    offset = 0 # int | Number of results to skip (optional) (default to 0)
     active_only = True # bool | Show only active spaces (optional) (default to True)
 
     try:
         # List Embedding Spaces
-        api_response = await api_instance.list_embedding_spaces_api_v1_models_embedding_spaces_get(model_id=model_id, page=page, per_page=per_page, active_only=active_only)
+        api_response = await api_instance.list_embedding_spaces_api_v1_models_embedding_spaces_get(model_id=model_id, limit=limit, offset=offset, active_only=active_only)
         print("The response of ModelRegistryApi->list_embedding_spaces_api_v1_models_embedding_spaces_get:\n")
         pprint(api_response)
     except Exception as e:
@@ -1034,8 +1034,8 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **model_id** | **str**| Filter by model ID | [optional] 
- **page** | **int**| Page number | [optional] [default to 1]
- **per_page** | **int**| Items per page | [optional] [default to 20]
+ **limit** | **int**| Maximum number of results | [optional] [default to 20]
+ **offset** | **int**| Number of results to skip | [optional] [default to 0]
  **active_only** | **bool**| Show only active spaces | [optional] [default to True]
 
 ### Return type
@@ -1061,7 +1061,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_models_api_v1_models_models_get**
-> ModelDefList list_models_api_v1_models_models_get(provider_id=provider_id, model_type=model_type, page=page, per_page=per_page, active_only=active_only)
+> ModelDefList list_models_api_v1_models_models_get(provider_id=provider_id, model_type=model_type, limit=limit, offset=offset, active_only=active_only)
 
 List Models
 
@@ -1100,13 +1100,13 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
     api_instance = chatter_sdk.ModelRegistryApi(api_client)
     provider_id = 'provider_id_example' # str | Filter by provider ID (optional)
     model_type = chatter_sdk.ModelType() # ModelType | Filter by model type (optional)
-    page = 1 # int | Page number (optional) (default to 1)
-    per_page = 20 # int | Items per page (optional) (default to 20)
+    limit = 20 # int | Maximum number of results (optional) (default to 20)
+    offset = 0 # int | Number of results to skip (optional) (default to 0)
     active_only = True # bool | Show only active models (optional) (default to True)
 
     try:
         # List Models
-        api_response = await api_instance.list_models_api_v1_models_models_get(provider_id=provider_id, model_type=model_type, page=page, per_page=per_page, active_only=active_only)
+        api_response = await api_instance.list_models_api_v1_models_models_get(provider_id=provider_id, model_type=model_type, limit=limit, offset=offset, active_only=active_only)
         print("The response of ModelRegistryApi->list_models_api_v1_models_models_get:\n")
         pprint(api_response)
     except Exception as e:
@@ -1122,8 +1122,8 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **provider_id** | **str**| Filter by provider ID | [optional] 
  **model_type** | [**ModelType**](.md)| Filter by model type | [optional] 
- **page** | **int**| Page number | [optional] [default to 1]
- **per_page** | **int**| Items per page | [optional] [default to 20]
+ **limit** | **int**| Maximum number of results | [optional] [default to 20]
+ **offset** | **int**| Number of results to skip | [optional] [default to 0]
  **active_only** | **bool**| Show only active models | [optional] [default to True]
 
 ### Return type
@@ -1149,7 +1149,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_providers_api_v1_models_providers_get**
-> ProviderList list_providers_api_v1_models_providers_get(page=page, per_page=per_page, active_only=active_only)
+> ProviderList list_providers_api_v1_models_providers_get(limit=limit, offset=offset, active_only=active_only)
 
 List Providers
 
@@ -1185,13 +1185,13 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.ModelRegistryApi(api_client)
-    page = 1 # int | Page number (optional) (default to 1)
-    per_page = 20 # int | Items per page (optional) (default to 20)
+    limit = 20 # int | Maximum number of results (optional) (default to 20)
+    offset = 0 # int | Number of results to skip (optional) (default to 0)
     active_only = True # bool | Show only active providers (optional) (default to True)
 
     try:
         # List Providers
-        api_response = await api_instance.list_providers_api_v1_models_providers_get(page=page, per_page=per_page, active_only=active_only)
+        api_response = await api_instance.list_providers_api_v1_models_providers_get(limit=limit, offset=offset, active_only=active_only)
         print("The response of ModelRegistryApi->list_providers_api_v1_models_providers_get:\n")
         pprint(api_response)
     except Exception as e:
@@ -1205,8 +1205,8 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **page** | **int**| Page number | [optional] [default to 1]
- **per_page** | **int**| Items per page | [optional] [default to 20]
+ **limit** | **int**| Maximum number of results | [optional] [default to 20]
+ **offset** | **int**| Number of results to skip | [optional] [default to 0]
  **active_only** | **bool**| Show only active providers | [optional] [default to True]
 
 ### Return type

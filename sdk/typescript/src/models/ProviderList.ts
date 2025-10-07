@@ -6,6 +6,6 @@ import { Provider } from './Provider';
 export interface ProviderList {
   providers: Provider[];
   total: number;
-  page: number;
-  per_page: number;
+  limit: number;
+  offset: number;
 }

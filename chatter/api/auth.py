@@ -710,16 +710,16 @@ async def deactivate_account(
 
 @router.get("/users", response_model=UserListResponse)
 async def list_users(
-    page: int = 1,
-    page_size: int = 50,
+    limit: int = 50,
+    offset: int = 0,
     current_user: User = Depends(get_current_admin_user),
     session: AsyncSession = Depends(get_session_generator),
 ) -> UserListResponse:
     """List all users (admin only).
 
     Args:
-        page: Page number (1-indexed)
-        page_size: Number of users per page
+        limit: Number of users to return
+        offset: Number of users to skip
         current_user: Current authenticated admin user
         session: Database session
 
@@ -727,9 +727,6 @@ async def list_users(
         List of users with pagination info
     """
     from sqlalchemy import select, func
-
-    # Calculate offset
-    offset = (page - 1) * page_size
 
     # Get total count
     count_query = select(func.count()).select_from(User)
@@ -740,7 +737,7 @@ async def list_users(
     query = (
         select(User)
         .offset(offset)
-        .limit(page_size)
+        .limit(limit)
         .order_by(User.created_at.desc())
     )
     result = await session.execute(query)
@@ -751,7 +748,7 @@ async def list_users(
             UserResponse.model_validate(user) for user in users
         ],
         total=total,
-        page=page,
-        page_size=page_size,
+        offset=offset,
+        limit=limit,
     )
 

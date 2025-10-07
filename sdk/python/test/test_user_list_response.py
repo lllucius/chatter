@@ -59,8 +59,8 @@ class TestUserListResponse(unittest.TestCase):
                         last_login_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ],
                 total = 56,
-                page = 56,
-                page_size = 56
+                offset = 56,
+                limit = 56
             )
         else:
             return UserListResponse(
@@ -87,8 +87,8 @@ class TestUserListResponse(unittest.TestCase):
                         last_login_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ],
                 total = 56,
-                page = 56,
-                page_size = 56,
+                offset = 56,
+                limit = 56,
         )
         """
 

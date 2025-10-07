@@ -6258,8 +6258,8 @@ class WorkflowsApi:
     @validate_call
     async def list_all_workflow_executions_api_v1_workflows_executions_get(
         self,
-        page: Optional[StrictInt] = None,
-        page_size: Optional[StrictInt] = None,
+        limit: Optional[StrictInt] = None,
+        offset: Optional[StrictInt] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6277,10 +6277,10 @@ class WorkflowsApi:
 
         List all workflow executions for the current user with pagination.
 
-        :param page:
-        :type page: int
-        :param page_size:
-        :type page_size: int
+        :param limit:
+        :type limit: int
+        :param offset:
+        :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -6304,8 +6304,8 @@ class WorkflowsApi:
         """ # noqa: E501
 
         _param = self._list_all_workflow_executions_api_v1_workflows_executions_get_serialize(
-            page=page,
-            page_size=page_size,
+            limit=limit,
+            offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -6330,8 +6330,8 @@ class WorkflowsApi:
     @validate_call
     async def list_all_workflow_executions_api_v1_workflows_executions_get_with_http_info(
         self,
-        page: Optional[StrictInt] = None,
-        page_size: Optional[StrictInt] = None,
+        limit: Optional[StrictInt] = None,
+        offset: Optional[StrictInt] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6349,10 +6349,10 @@ class WorkflowsApi:
 
         List all workflow executions for the current user with pagination.
 
-        :param page:
-        :type page: int
-        :param page_size:
-        :type page_size: int
+        :param limit:
+        :type limit: int
+        :param offset:
+        :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -6376,8 +6376,8 @@ class WorkflowsApi:
         """ # noqa: E501
 
         _param = self._list_all_workflow_executions_api_v1_workflows_executions_get_serialize(
-            page=page,
-            page_size=page_size,
+            limit=limit,
+            offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -6402,8 +6402,8 @@ class WorkflowsApi:
     @validate_call
     async def list_all_workflow_executions_api_v1_workflows_executions_get_without_preload_content(
         self,
-        page: Optional[StrictInt] = None,
-        page_size: Optional[StrictInt] = None,
+        limit: Optional[StrictInt] = None,
+        offset: Optional[StrictInt] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6421,10 +6421,10 @@ class WorkflowsApi:
 
         List all workflow executions for the current user with pagination.
 
-        :param page:
-        :type page: int
-        :param page_size:
-        :type page_size: int
+        :param limit:
+        :type limit: int
+        :param offset:
+        :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -6448,8 +6448,8 @@ class WorkflowsApi:
         """ # noqa: E501
 
         _param = self._list_all_workflow_executions_api_v1_workflows_executions_get_serialize(
-            page=page,
-            page_size=page_size,
+            limit=limit,
+            offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -6469,8 +6469,8 @@ class WorkflowsApi:
 
     def _list_all_workflow_executions_api_v1_workflows_executions_get_serialize(
         self,
-        page,
-        page_size,
+        limit,
+        offset,
         _request_auth,
         _content_type,
         _headers,
@@ -6493,13 +6493,13 @@ class WorkflowsApi:
 
         # process the path parameters
         # process the query parameters
-        if page is not None:
+        if limit is not None:
             
-            _query_params.append(('page', page))
+            _query_params.append(('limit', limit))
             
-        if page_size is not None:
+        if offset is not None:
             
-            _query_params.append(('page_size', page_size))
+            _query_params.append(('offset', offset))
             
         # process the header parameters
         # process the form parameters

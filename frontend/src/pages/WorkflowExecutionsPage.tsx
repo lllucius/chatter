@@ -159,8 +159,8 @@ const WorkflowExecutionsPage: React.FC = () => {
       const sdk = getSDK();
       const response =
         await sdk.workflows.listAllWorkflowExecutionsApiV1WorkflowsExecutions({
-          page,
-          pageSize,
+          limit: pageSize,
+          offset: page * pageSize,
         });
 
       return {

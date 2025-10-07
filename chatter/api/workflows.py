@@ -952,8 +952,8 @@ async def get_supported_node_types(
 
 @router.get("/executions", response_model=dict[str, Any])
 async def list_all_workflow_executions(
-    page: int = 1,
-    page_size: int = 20,
+    limit: int = 20,
+    offset: int = 0,
     current_user: User = Depends(get_current_user),
     workflow_service: WorkflowManagementService = Depends(
         get_workflow_management_service
@@ -961,13 +961,10 @@ async def list_all_workflow_executions(
 ) -> dict[str, Any]:
     """List all workflow executions for the current user with pagination."""
     try:
-        # Calculate offset
-        offset = (page - 1) * page_size
-
         executions, total_count = (
             await workflow_service.list_all_workflow_executions(
                 owner_id=current_user.id,
-                limit=page_size,
+                limit=limit,
                 offset=offset,
             )
         )
@@ -978,9 +975,8 @@ async def list_all_workflow_executions(
                 for exec in executions
             ],
             "total": total_count,
-            "page": page,
-            "page_size": page_size,
-            "total_pages": (total_count + page_size - 1) // page_size,
+            "offset": offset,
+            "limit": limit,
         }
 
     except Exception as e:

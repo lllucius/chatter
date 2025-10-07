@@ -14408,18 +14408,24 @@ paths:
         \  List of users with pagination info"
       operationId: list_users_api_v1_auth_users_get
       parameters:
-      - in: query
+      - description: Number of results per page
+        in: query
         name: limit
         required: false
         schema:
           default: 50
+          description: Number of results per page
+          minimum: 1
           title: Limit
           type: integer
-      - in: query
+      - description: Number of results to skip
+        in: query
         name: offset
         required: false
         schema:
           default: 0
+          description: Number of results to skip
+          minimum: 0
           title: Offset
           type: integer
       responses:
@@ -20566,18 +20572,24 @@ paths:
       description: List all workflow executions for the current user with pagination.
       operationId: list_all_workflow_executions_api_v1_workflows_executions_get
       parameters:
-      - in: query
+      - description: Number of results per page
+        in: query
         name: limit
         required: false
         schema:
           default: 20
+          description: Number of results per page
+          minimum: 1
           title: Limit
           type: integer
-      - in: query
+      - description: Number of results to skip
+        in: query
         name: offset
         required: false
         schema:
           default: 0
+          description: Number of results to skip
+          minimum: 0
           title: Offset
           type: integer
       responses:

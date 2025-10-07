@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from chatter.api.dependencies import PaginationLimit, PaginationOffset
 from chatter.core.auth import AuthService
 from chatter.core.exceptions import AuthenticationError
 from chatter.core.monitoring import (
@@ -710,8 +711,8 @@ async def deactivate_account(
 
 @router.get("/users", response_model=UserListResponse)
 async def list_users(
-    limit: int = 50,
-    offset: int = 0,
+    limit: PaginationLimit = 50,
+    offset: PaginationOffset = 0,
     current_user: User = Depends(get_current_admin_user),
     session: AsyncSession = Depends(get_session_generator),
 ) -> UserListResponse:

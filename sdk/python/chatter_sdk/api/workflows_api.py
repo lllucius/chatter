@@ -6258,8 +6258,8 @@ class WorkflowsApi:
     @validate_call
     async def list_all_workflow_executions_api_v1_workflows_executions_get(
         self,
-        limit: Optional[StrictInt] = None,
-        offset: Optional[StrictInt] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6277,9 +6277,9 @@ class WorkflowsApi:
 
         List all workflow executions for the current user with pagination.
 
-        :param limit:
+        :param limit: Number of results per page
         :type limit: int
-        :param offset:
+        :param offset: Number of results to skip
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -6330,8 +6330,8 @@ class WorkflowsApi:
     @validate_call
     async def list_all_workflow_executions_api_v1_workflows_executions_get_with_http_info(
         self,
-        limit: Optional[StrictInt] = None,
-        offset: Optional[StrictInt] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6349,9 +6349,9 @@ class WorkflowsApi:
 
         List all workflow executions for the current user with pagination.
 
-        :param limit:
+        :param limit: Number of results per page
         :type limit: int
-        :param offset:
+        :param offset: Number of results to skip
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -6402,8 +6402,8 @@ class WorkflowsApi:
     @validate_call
     async def list_all_workflow_executions_api_v1_workflows_executions_get_without_preload_content(
         self,
-        limit: Optional[StrictInt] = None,
-        offset: Optional[StrictInt] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6421,9 +6421,9 @@ class WorkflowsApi:
 
         List all workflow executions for the current user with pagination.
 
-        :param limit:
+        :param limit: Number of results per page
         :type limit: int
-        :param offset:
+        :param offset: Number of results to skip
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

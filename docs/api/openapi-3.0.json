@@ -1565,9 +1565,12 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "minimum": 1,
+              "description": "Number of results per page",
               "default": 50,
               "title": "Limit"
-            }
+            },
+            "description": "Number of results per page"
           },
           {
             "name": "offset",
@@ -1575,9 +1578,12 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "minimum": 0,
+              "description": "Number of results to skip",
               "default": 0,
               "title": "Offset"
-            }
+            },
+            "description": "Number of results to skip"
           }
         ],
         "responses": {
@@ -11150,9 +11156,12 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "minimum": 1,
+              "description": "Number of results per page",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "Number of results per page"
           },
           {
             "name": "offset",
@@ -11160,9 +11169,12 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "minimum": 0,
+              "description": "Number of results to skip",
               "default": 0,
               "title": "Offset"
-            }
+            },
+            "description": "Number of results to skip"
           }
         ],
         "responses": {

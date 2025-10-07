@@ -567,8 +567,8 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.AuthenticationApi(api_client)
-    limit = 50 # int |  (optional) (default to 50)
-    offset = 0 # int |  (optional) (default to 0)
+    limit = 50 # int | Number of results per page (optional) (default to 50)
+    offset = 0 # int | Number of results to skip (optional) (default to 0)
 
     try:
         # List Users
@@ -586,8 +586,8 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **limit** | **int**|  | [optional] [default to 50]
- **offset** | **int**|  | [optional] [default to 0]
+ **limit** | **int**| Number of results per page | [optional] [default to 50]
+ **offset** | **int**| Number of results to skip | [optional] [default to 0]
 
 ### Return type
 

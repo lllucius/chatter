@@ -17,8 +17,9 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import StrictInt, StrictStr
+from pydantic import Field, StrictStr
 from typing import List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.api_key_create import APIKeyCreate
 from chatter_sdk.models.api_key_response import APIKeyResponse
 from chatter_sdk.models.api_key_revoke_response import APIKeyRevokeResponse
@@ -1631,8 +1632,8 @@ class AuthenticationApi:
     @validate_call
     async def list_users_api_v1_auth_users_get(
         self,
-        limit: Optional[StrictInt] = None,
-        offset: Optional[StrictInt] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1650,9 +1651,9 @@ class AuthenticationApi:
 
         List all users (admin only).  Args:     limit: Number of users to return     offset: Number of users to skip     current_user: Current authenticated admin user     session: Database session  Returns:     List of users with pagination info
 
-        :param limit:
+        :param limit: Number of results per page
         :type limit: int
-        :param offset:
+        :param offset: Number of results to skip
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1703,8 +1704,8 @@ class AuthenticationApi:
     @validate_call
     async def list_users_api_v1_auth_users_get_with_http_info(
         self,
-        limit: Optional[StrictInt] = None,
-        offset: Optional[StrictInt] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1722,9 +1723,9 @@ class AuthenticationApi:
 
         List all users (admin only).  Args:     limit: Number of users to return     offset: Number of users to skip     current_user: Current authenticated admin user     session: Database session  Returns:     List of users with pagination info
 
-        :param limit:
+        :param limit: Number of results per page
         :type limit: int
-        :param offset:
+        :param offset: Number of results to skip
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1775,8 +1776,8 @@ class AuthenticationApi:
     @validate_call
     async def list_users_api_v1_auth_users_get_without_preload_content(
         self,
-        limit: Optional[StrictInt] = None,
-        offset: Optional[StrictInt] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1794,9 +1795,9 @@ class AuthenticationApi:
 
         List all users (admin only).  Args:     limit: Number of users to return     offset: Number of users to skip     current_user: Current authenticated admin user     session: Database session  Returns:     List of users with pagination info
 
-        :param limit:
+        :param limit: Number of results per page
         :type limit: int
-        :param offset:
+        :param offset: Number of results to skip
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

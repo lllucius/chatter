@@ -94,11 +94,19 @@ async def get_workflow_execution_service(
 
 async def get_execution_engine(
     session: AsyncSession = Depends(get_session_generator),
+    current_user: User | None = Depends(get_current_user),
 ):
     """Get shared execution engine instance.
     
     This is the unified execution engine for all workflow types,
     replacing multiple execution methods with a single execution pipeline.
+    
+    Args:
+        session: Database session
+        current_user: Current authenticated user (provides owner_id context)
+    
+    Returns:
+        ExecutionEngine instance with owner_id from auth context
     """
     from chatter.core.workflow_execution_engine import ExecutionEngine
     from chatter.services.llm import LLMService
@@ -108,6 +116,7 @@ async def get_execution_engine(
         session=session,
         llm_service=llm_service,
         debug_mode=False,
+        owner_id=current_user.id if current_user else None,
     )
 
 

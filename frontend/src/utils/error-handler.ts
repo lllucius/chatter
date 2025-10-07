@@ -4,6 +4,7 @@
  */
 
 import { toastService } from '../services/toast-service';
+import { authService } from '../services/auth-service';
 
 // Error response structure from backend
 interface ErrorResponse {
@@ -93,6 +94,16 @@ class ErrorHandler {
       (error as ErrorResponse)?.response?.status ||
       (error as { status?: number })?.status;
     return status !== undefined && status >= 500 && status < 600;
+  }
+
+  /**
+   * Check if error is an authentication error (401)
+   */
+  private isAuthenticationError(error: unknown): boolean {
+    const status =
+      (error as ErrorResponse)?.response?.status ||
+      (error as { status?: number })?.status;
+    return status === 401;
   }
 
   /**
@@ -235,6 +246,27 @@ class ErrorHandler {
       rethrow = false,
       fallbackMessage = 'An unexpected error occurred',
     } = options;
+
+    // Check for authentication error (401) and handle session invalidation
+    if (this.isAuthenticationError(error)) {
+      // Log out the user and redirect to login
+      authService.logout().then(() => {
+        // Redirect to login page
+        window.location.href = '/login';
+      });
+      
+      // Show a toast notification about the session expiry
+      toastService.error('Your session has expired. Please log in again.');
+      
+      // Log to console if requested
+      if (logToConsole) {
+        // eslint-disable-next-line no-console
+        console.error('[Error Handler] Authentication error - session invalidated:', error);
+      }
+      
+      // Don't rethrow for auth errors - we're handling it by redirecting
+      return;
+    }
 
     const userMessage = this.extractErrorMessage(error, fallbackMessage);
     const isDev = this.isDevelopment();

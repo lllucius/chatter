@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   errorHandler,
   handleError,
   handleErrorWithResult,
 } from '../error-handler';
 import { toastService } from '../../services/toast-service';
+import { authService } from '../../services/auth-service';
 
 // Mock the toast service
 vi.mock('../../services/toast-service', () => ({
@@ -12,6 +13,17 @@ vi.mock('../../services/toast-service', () => ({
     error: vi.fn(),
   },
 }));
+
+// Mock the auth service
+vi.mock('../../services/auth-service', () => ({
+  authService: {
+    logout: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
+// Mock window.location
+delete (window as { location?: Location }).location;
+window.location = { href: '' } as Location;
 
 // Mock console methods
 const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {
@@ -313,6 +325,72 @@ describe('ErrorHandler', () => {
       );
 
       expect(result.error).toBe('Error Title: Error Detail');
+    });
+  });
+
+  describe('Authentication Error Handling (401)', () => {
+    it('should invalidate session and redirect on 401 error', async () => {
+      const error = {
+        response: {
+          status: 401,
+          data: {
+            title: 'Authentication Required',
+            detail: 'Invalid token or API key',
+          },
+        },
+      };
+
+      handleError(error, { source: 'test' }, { logToConsole: false });
+
+      // Should call logout
+      expect(authService.logout).toHaveBeenCalled();
+
+      // Should show error toast
+      expect(toastService.error).toHaveBeenCalledWith(
+        'Your session has expired. Please log in again.'
+      );
+
+      // Wait for logout to complete
+      await vi.waitFor(() => {
+        // Should redirect to login
+        expect(window.location.href).toBe('/login');
+      });
+    });
+
+    it('should handle 401 error from status field directly', async () => {
+      const error = {
+        status: 401,
+      };
+
+      handleError(error, { source: 'test' }, { logToConsole: false });
+
+      expect(authService.logout).toHaveBeenCalled();
+      expect(toastService.error).toHaveBeenCalledWith(
+        'Your session has expired. Please log in again.'
+      );
+
+      await vi.waitFor(() => {
+        expect(window.location.href).toBe('/login');
+      });
+    });
+
+    it('should not rethrow 401 errors', () => {
+      const error = {
+        response: {
+          status: 401,
+        },
+      };
+
+      // Should not throw even with rethrow: true
+      expect(() => {
+        handleError(
+          error,
+          { source: 'test' },
+          { rethrow: true, logToConsole: false }
+        );
+      }).not.toThrow();
+
+      expect(authService.logout).toHaveBeenCalled();
     });
   });
 });

@@ -250,8 +250,8 @@ export const useAdministrationData = () => {
     try {
       const response = await callWithRateLimitRetry('loadUsers', () =>
         getSDK().auth.listUsersApiV1AuthUsers({
-          page: 1,
-          pageSize: 100,
+          limit: 100,
+          offset: 0,
         })
       );
       setUsers(response?.users || []);

@@ -8,8 +8,8 @@ export interface UserListResponse {
   users: UserResponse[];
   /** Total number of users */
   total: number;
-  /** Current page number */
-  page: number;
-  /** Number of users per page */
-  page_size: number;
+  /** Number of results skipped */
+  offset: number;
+  /** Number of results returned */
+  limit: number;
 }

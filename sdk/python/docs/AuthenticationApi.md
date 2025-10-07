@@ -522,15 +522,15 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_users_api_v1_auth_users_get**
-> UserListResponse list_users_api_v1_auth_users_get(page=page, page_size=page_size)
+> UserListResponse list_users_api_v1_auth_users_get(limit=limit, offset=offset)
 
 List Users
 
 List all users (admin only).
 
 Args:
-    page: Page number (1-indexed)
-    page_size: Number of users per page
+    limit: Number of users to return
+    offset: Number of users to skip
     current_user: Current authenticated admin user
     session: Database session
 
@@ -567,12 +567,12 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.AuthenticationApi(api_client)
-    page = 1 # int |  (optional) (default to 1)
-    page_size = 50 # int |  (optional) (default to 50)
+    limit = 50 # int | Number of results per page (optional) (default to 50)
+    offset = 0 # int | Number of results to skip (optional) (default to 0)
 
     try:
         # List Users
-        api_response = await api_instance.list_users_api_v1_auth_users_get(page=page, page_size=page_size)
+        api_response = await api_instance.list_users_api_v1_auth_users_get(limit=limit, offset=offset)
         print("The response of AuthenticationApi->list_users_api_v1_auth_users_get:\n")
         pprint(api_response)
     except Exception as e:
@@ -586,8 +586,8 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **page** | **int**|  | [optional] [default to 1]
- **page_size** | **int**|  | [optional] [default to 50]
+ **limit** | **int**| Number of results per page | [optional] [default to 50]
+ **offset** | **int**| Number of results to skip | [optional] [default to 0]
 
 ### Return type
 

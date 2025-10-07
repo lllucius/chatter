@@ -2038,7 +2038,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_all_workflow_executions_api_v1_workflows_executions_get**
-> Dict[str, object] list_all_workflow_executions_api_v1_workflows_executions_get(page=page, page_size=page_size)
+> Dict[str, object] list_all_workflow_executions_api_v1_workflows_executions_get(limit=limit, offset=offset)
 
 List All Workflow Executions
 
@@ -2073,12 +2073,12 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.WorkflowsApi(api_client)
-    page = 1 # int |  (optional) (default to 1)
-    page_size = 20 # int |  (optional) (default to 20)
+    limit = 20 # int | Number of results per page (optional) (default to 20)
+    offset = 0 # int | Number of results to skip (optional) (default to 0)
 
     try:
         # List All Workflow Executions
-        api_response = await api_instance.list_all_workflow_executions_api_v1_workflows_executions_get(page=page, page_size=page_size)
+        api_response = await api_instance.list_all_workflow_executions_api_v1_workflows_executions_get(limit=limit, offset=offset)
         print("The response of WorkflowsApi->list_all_workflow_executions_api_v1_workflows_executions_get:\n")
         pprint(api_response)
     except Exception as e:
@@ -2092,8 +2092,8 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **page** | **int**|  | [optional] [default to 1]
- **page_size** | **int**|  | [optional] [default to 20]
+ **limit** | **int**| Number of results per page | [optional] [default to 20]
+ **offset** | **int**| Number of results to skip | [optional] [default to 0]
 
 ### Return type
 

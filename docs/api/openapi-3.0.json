@@ -1551,7 +1551,7 @@
           "Authentication"
         ],
         "summary": "List Users",
-        "description": "List all users (admin only).\n\nArgs:\n    page: Page number (1-indexed)\n    page_size: Number of users per page\n    current_user: Current authenticated admin user\n    session: Database session\n\nReturns:\n    List of users with pagination info",
+        "description": "List all users (admin only).\n\nArgs:\n    limit: Number of users to return\n    offset: Number of users to skip\n    current_user: Current authenticated admin user\n    session: Database session\n\nReturns:\n    List of users with pagination info",
         "operationId": "list_users_api_v1_auth_users_get",
         "security": [
           {
@@ -1560,24 +1560,30 @@
         ],
         "parameters": [
           {
-            "name": "page",
+            "name": "limit",
             "in": "query",
             "required": false,
             "schema": {
               "type": "integer",
-              "default": 1,
-              "title": "Page"
-            }
+              "minimum": 1,
+              "description": "Number of results per page",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Number of results per page"
           },
           {
-            "name": "page_size",
+            "name": "offset",
             "in": "query",
             "required": false,
             "schema": {
               "type": "integer",
-              "default": 50,
-              "title": "Page Size"
-            }
+              "minimum": 0,
+              "description": "Number of results to skip",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of results to skip"
           }
         ],
         "responses": {
@@ -11145,24 +11151,30 @@
         ],
         "parameters": [
           {
-            "name": "page",
+            "name": "limit",
             "in": "query",
             "required": false,
             "schema": {
               "type": "integer",
-              "default": 1,
-              "title": "Page"
-            }
+              "minimum": 1,
+              "description": "Number of results per page",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Number of results per page"
           },
           {
-            "name": "page_size",
+            "name": "offset",
             "in": "query",
             "required": false,
             "schema": {
               "type": "integer",
-              "default": 20,
-              "title": "Page Size"
-            }
+              "minimum": 0,
+              "description": "Number of results to skip",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of results to skip"
           }
         ],
         "responses": {
@@ -40942,23 +40954,23 @@
             "title": "Total",
             "description": "Total number of users"
           },
-          "page": {
+          "offset": {
             "type": "integer",
-            "title": "Page",
-            "description": "Current page number"
+            "title": "Offset",
+            "description": "Number of results skipped"
           },
-          "page_size": {
+          "limit": {
             "type": "integer",
-            "title": "Page Size",
-            "description": "Number of users per page"
+            "title": "Limit",
+            "description": "Number of results returned"
           }
         },
         "type": "object",
         "required": [
           "users",
           "total",
-          "page",
-          "page_size"
+          "offset",
+          "limit"
         ],
         "title": "UserListResponse",
         "description": "Schema for users list response."

@@ -336,6 +336,6 @@ class UserListResponse(BaseModel):
         ..., description="List of users"
     )
     total: int = Field(..., description="Total number of users")
-    page: int = Field(..., description="Current page number")
-    page_size: int = Field(..., description="Number of users per page")
+    offset: int = Field(..., description="Number of results skipped")
+    limit: int = Field(..., description="Number of results returned")
 

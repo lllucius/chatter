@@ -9,9 +9,8 @@ import {
   Chip,
   Button,
 } from '../utils/mui';
-import { CodeIcon } from '../utils/icons';
+import { CodeIcon, RefreshIcon, AddIcon } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
-import { CrudPageHeader } from '../components/PageHeader';
 import CrudDataTable, {
   CrudConfig,
   CrudService,
@@ -136,13 +135,29 @@ const PromptsPage: React.FC = () => {
 
   const getItemId = (item: PromptResponse) => item.id;
 
+  const toolbar = (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={() => crudTableRef.current?.handleRefresh()}
+        size="small"
+      >
+        Refresh
+      </Button>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => crudTableRef.current?.handleCreate()}
+        size="small"
+      >
+        Add Prompt
+      </Button>
+    </>
+  );
+
   return (
-    <PageLayout title="Prompts">
-      <CrudPageHeader
-        entityName="Prompt"
-        onRefresh={() => crudTableRef.current?.handleRefresh()}
-        onAdd={() => crudTableRef.current?.handleCreate()}
-      />
+    <PageLayout title="Prompts" toolbar={toolbar}>
       <CrudDataTable
         ref={crudTableRef}
         config={config}

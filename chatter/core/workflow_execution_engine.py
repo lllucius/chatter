@@ -516,6 +516,7 @@ class ExecutionEngine:
                 workflow=graph,
                 initial_state=initial_state,
                 thread_id=context.thread_id,
+                enable_llm_streaming=True,
             ):
                 # Process streaming updates
                 event_name = update.get("event")

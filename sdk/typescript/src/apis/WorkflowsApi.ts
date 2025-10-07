@@ -204,7 +204,7 @@ export class WorkflowsApi extends BaseAPI {
     return response.json() as Promise<WorkflowTemplateResponse>;
   }
   /**Validate Workflow Template
-   * Validate a workflow template.
+   * Validate a workflow template using the unified validation orchestrator.
    */
   public async validateWorkflowTemplateApiV1WorkflowsTemplatesValidate(data: WorkflowTemplateValidationRequest): Promise<WorkflowTemplateValidationResponse> {
     const requestContext: RequestOpts = {
@@ -220,7 +220,36 @@ export class WorkflowsApi extends BaseAPI {
     return response.json() as Promise<WorkflowTemplateValidationResponse>;
   }
   /**Execute Workflow Template
-   * Execute a workflow template directly.
+   * Execute a workflow template directly using the unified execution engine.
+
+**New in Phase 7**: Templates now execute directly without creating temporary
+workflow definitions, reducing database writes by 30%.
+
+**Execution Flow**:
+1. Verifies template exists
+2. Creates ExecutionRequest with template_id (no temporary definition!)
+3. Executes through unified ExecutionEngine
+4. Returns standardized WorkflowExecutionResponse
+
+**Key Improvement**: No temporary definitions are created. Templates execute
+directly through the ExecutionEngine, completing the Phase 4 optimization.
+
+**Request Body**:
+- `input_data`: Input parameters for the template
+- `debug_mode`: Enable detailed logging (default: false)
+
+**Response**: Same as workflow definition execution
+
+**Example**:
+```python
+# Using Python SDK
+result = client.workflows.execute_template(
+    template_id="template_123",
+    input_data={"query": "What is AI?"},
+    debug_mode=False
+)
+print(f"Template executed successfully: {result.id}")
+```
    */
   public async executeWorkflowTemplateApiV1WorkflowsTemplatesTemplateIdExecute(templateId: string, data: WorkflowTemplateExecutionRequest): Promise<WorkflowExecutionResponse> {
     const requestContext: RequestOpts = {
@@ -238,7 +267,7 @@ export class WorkflowsApi extends BaseAPI {
   /**Execute Temporary Workflow Template
    * Execute a temporary workflow template directly without storing it.
 
-This endpoint allows you to pass template data directly and execute it
+This endpoint allows you to pass template data (nodes/edges) directly and execute it
 without persisting the template to the database first.
    */
   public async executeTemporaryWorkflowTemplateApiV1WorkflowsTemplatesExecute(data: WorkflowTemplateDirectExecutionRequest): Promise<WorkflowExecutionResponse> {
@@ -269,7 +298,40 @@ without persisting the template to the database first.
     return response.json() as Promise<WorkflowAnalyticsResponse>;
   }
   /**Execute Workflow
-   * Execute a workflow definition.
+   * Execute a workflow definition using the unified execution engine.
+
+**New in Phase 7**: This endpoint now uses the unified ExecutionEngine for all workflow
+execution, providing consistent behavior and better performance.
+
+**Execution Flow**:
+1. Verifies workflow definition exists and user has access
+2. Creates ExecutionRequest with definition_id and input_data
+3. Executes through unified ExecutionEngine
+4. Returns standardized WorkflowExecutionResponse
+
+**Request Body**:
+- `input_data`: Input parameters for the workflow
+- `debug_mode`: Enable detailed logging (default: false)
+
+**Response**:
+- `id`: Execution ID for tracking
+- `definition_id`: ID of the executed workflow definition
+- `status`: Execution status (completed/failed)
+- `output_data`: Workflow execution results
+- `execution_time_ms`: Execution duration in milliseconds
+- `tokens_used`: Total LLM tokens consumed
+- `cost`: Execution cost in USD
+
+**Example**:
+```python
+# Using Python SDK
+result = client.workflows.execute_definition(
+    workflow_id="def_123",
+    input_data={"query": "Hello"},
+    debug_mode=False
+)
+print(f"Execution {result.id} completed in {result.execution_time_ms}ms")
+```
    */
   public async executeWorkflowApiV1WorkflowsDefinitionsWorkflowIdExecute(workflowId: string, data: WorkflowExecutionRequest): Promise<WorkflowExecutionResponse> {
     const requestContext: RequestOpts = {
@@ -285,7 +347,41 @@ without persisting the template to the database first.
     return response.json() as Promise<WorkflowExecutionResponse>;
   }
   /**Validate Workflow Definition
-   * Validate a workflow definition - supports both legacy and modern formats.
+   * Validate a workflow definition using the unified validation orchestrator.
+
+**New in Phase 7**: All validation now goes through the unified WorkflowValidator,
+ensuring consistent validation across all 4 validation layers.
+
+**Validation Layers**:
+1. **Structure Validation**: Nodes, edges, connectivity, graph validity
+2. **Security Validation**: Security policies, permissions, data access
+3. **Capability Validation**: Feature support, capability limits
+4. **Resource Validation**: Resource quotas, usage limits
+
+**Request Body**:
+- Can be WorkflowDefinitionCreate schema OR raw dict with nodes/edges
+- Supports both legacy and modern formats
+
+**Response**:
+- `is_valid`: Overall validation result
+- `errors`: List of validation errors from all layers
+- `warnings`: Non-blocking warnings
+- `metadata`: Additional validation details
+
+**Example**:
+```python
+# Using Python SDK
+result = client.workflows.validate_definition({
+    "nodes": [...],
+    "edges": [...]
+})
+
+if result.is_valid:
+    print("Workflow is valid!")
+else:
+    for error in result.errors:
+        print(f"Error: {error['message']}")
+```
    */
   public async validateWorkflowDefinitionApiV1WorkflowsDefinitionsValidate(data: WorkflowDefinitionCreate | Record<string, unknown>): Promise<WorkflowValidationResponse> {
     const requestContext: RequestOpts = {
@@ -577,7 +673,7 @@ Available templates:
     return response;
   }
   /**Execute Custom Workflow
-   * Execute a custom workflow definition using the modern system.
+   * Execute a custom workflow definition using the modern unified execution engine.
    */
   public async executeCustomWorkflowApiV1WorkflowsDefinitionsCustomExecute(data: Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, options?: { message?: string; entryPoint?: string | null; provider?: string; model?: string; conversationId?: string | null; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
     const requestContext: RequestOpts = {

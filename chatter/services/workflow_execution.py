@@ -216,31 +216,7 @@ class WorkflowExecutionService:
         user_id: str,
         request: ChatRequest,
     ) -> tuple[Conversation, Message]:
-        """Execute chat workflow - API wrapper method."""
-        # Get or create conversation
-        conversation = await self._get_or_create_conversation(
-            user_id, request
-        )
-
-        # Execute the actual workflow directly with ChatRequest
-        message, result = await self._execute_chat_workflow_internal(
-            conversation=conversation,
-            chat_request=request,
-            user_id=user_id,
-        )
-
-        return conversation, message
-
-    async def execute_with_engine(
-        self,
-        user_id: str,
-        request: ChatRequest,
-    ) -> tuple[Conversation, Message]:
-        """Execute chat workflow using the new unified ExecutionEngine.
-        
-        This is the new implementation that will replace execute_chat_workflow.
-        Currently being tested before full migration.
-        """
+        """Execute chat workflow using the unified ExecutionEngine."""
         from chatter.schemas.execution import ExecutionRequest
         
         # Get or create conversation
@@ -267,7 +243,7 @@ class WorkflowExecutionService:
             workflow_config=request.workflow_config or {},
         )
         
-        # Execute using the new engine
+        # Execute using the unified engine
         result = await self.execution_engine.execute(
             request=execution_request,
             user_id=user_id,
@@ -298,90 +274,6 @@ class WorkflowExecutionService:
         )
         
         return conversation, message
-
-    async def _execute_chat_workflow_internal(
-        self,
-        conversation: Conversation,
-        chat_request: ChatRequest,
-        user_id: str,
-    ) -> tuple[Message, dict[str, Any]]:
-        """Execute a chat workflow using the unified ExecutionEngine.
-        
-        This method is deprecated and wraps execute_with_engine for backward compatibility.
-        """
-        start_time = time.time()
-
-        try:
-            # Use the new unified execution engine
-            from chatter.schemas.execution import ExecutionRequest
-            
-            # Convert ChatRequest to ExecutionRequest
-            execution_request = ExecutionRequest(
-                message=chat_request.message,
-                provider=chat_request.provider,
-                model=chat_request.model,
-                temperature=chat_request.temperature,
-                max_tokens=chat_request.max_tokens,
-                system_prompt=chat_request.system_prompt_override,
-                enable_memory=chat_request.enable_memory,
-                enable_retrieval=chat_request.enable_retrieval,
-                enable_tools=chat_request.enable_tools,
-                streaming=False,
-                memory_window=getattr(chat_request, 'memory_window', 10),
-                max_tool_calls=getattr(chat_request, 'max_tool_calls', 10),
-                document_ids=chat_request.document_ids,
-                conversation_id=conversation.id,
-                workflow_config=chat_request.workflow_config or {},
-            )
-            
-            # Execute using the new engine
-            result = await self.execution_engine.execute(
-                request=execution_request,
-                user_id=user_id,
-            )
-            
-            # Create and save message
-            message = await self._create_and_save_message(
-                conversation=conversation,
-                content=result.response,
-                role=MessageRole.ASSISTANT,
-                metadata=result.metadata,
-                prompt_tokens=result.prompt_tokens,
-                completion_tokens=result.completion_tokens,
-                cost=result.cost,
-                provider_used=chat_request.provider,
-                response_time_ms=result.execution_time_ms,
-            )
-            
-            # Create usage info dict for backward compatibility
-            usage_info = {
-                "execution_time_ms": result.execution_time_ms,
-                "tokens_used": result.tokens_used,
-                "cost": result.cost,
-                "prompt_tokens": result.prompt_tokens,
-                "completion_tokens": result.completion_tokens,
-            }
-            
-            return message, usage_info
-
-        except Exception as e:
-            logger.error(f"Workflow execution failed: {e}")
-            # Create error message
-            error_message = await self._create_and_save_message(
-                conversation=conversation,
-                content=f"I encountered an error: {str(e)}",
-                role=MessageRole.ASSISTANT,
-                metadata={"error": True, "error_message": str(e)},
-            )
-
-            execution_time_ms = int((time.time() - start_time) * 1000)
-            usage_info = {
-                "execution_time_ms": execution_time_ms,
-                "error": True,
-                "error_message": str(e),
-            }
-
-            return error_message, usage_info
 
     async def execute_chat_workflow_streaming(
         self,
@@ -434,67 +326,6 @@ class WorkflowExecutionService:
                 content=f"Error: {str(e)}",
                 metadata={"error": True},
             )
-
-    async def execute_custom_workflow(
-        self,
-        nodes: list[dict[str, Any]],
-        edges: list[dict[str, Any]],
-        message: str,
-        user_id: str,
-        provider: str | None = None,
-        model: str | None = None,
-        **kwargs,
-    ) -> dict[str, Any]:
-        """Execute a custom workflow definition."""
-        try:
-            # Log workflow debugging information before execution
-            _log_workflow_debug_info(
-                nodes=nodes,
-                edges=edges,
-                execution_type="custom_workflow",
-            )
-
-            # Get LLM
-            llm = await self.llm_service.get_llm(
-                provider=provider, model=model
-            )
-
-            # Create custom workflow
-            workflow = await workflow_manager.create_custom_workflow(
-                nodes=nodes,
-                edges=edges,
-                llm=llm,
-                **kwargs,
-            )
-
-            # Create initial state
-            initial_state: WorkflowNodeContext = {
-                "messages": [HumanMessage(content=message)],
-                "user_id": user_id,
-                "conversation_id": generate_ulid(),
-                "retrieval_context": None,
-                "conversation_summary": None,
-                "tool_call_count": 0,
-                "metadata": {},
-                "variables": {},
-                "loop_state": {},
-                "error_state": {},
-                "conditional_results": {},
-                "execution_history": [],
-                "usage_metadata": {},
-            }
-
-            # Execute workflow
-            result = await workflow_manager.run_workflow(
-                workflow=workflow,
-                initial_state=initial_state,
-            )
-
-            return result
-
-        except Exception as e:
-            logger.error(f"Custom workflow execution failed: {e}")
-            raise
 
     async def execute_workflow_definition(
         self,

@@ -6,14 +6,16 @@
  */
 
 import { useState, useCallback } from 'react';
-import * as WorkflowAPI from '../services/workflow-api-service';
+import * as WorkflowAPI from '../services/workflow-service';
+import type {
+    ExecutionRequest,
+} from '../services/workflow-service';
 import type {
     WorkflowExecutionResponse,
     WorkflowValidationResponse,
-    ExecutionRequest,
     WorkflowNode,
     WorkflowEdge,
-} from '../services/workflow-api-service';
+} from 'chatter-sdk';
 
 // ============================================================================
 // Hook: useWorkflowExecution
@@ -185,7 +187,7 @@ export function useWorkflowValidation(): UseWorkflowValidationResult {
         setLoading(false);
     }, []);
 
-    const isValid = validation?.isValid ?? false;
+    const isValid = validation?.is_valid ?? false;
 
     return { validate, validation, loading, error, isValid, reset };
 }

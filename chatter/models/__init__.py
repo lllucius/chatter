@@ -27,6 +27,7 @@ from chatter.models.registry import (
 )
 from chatter.models.toolserver import ServerTool, ToolServer, ToolUsage
 from chatter.models.user import User
+from chatter.models.user_preference import UserPreference
 from chatter.models.workflow import (
     TemplateCategory,
     TemplateSpec,
@@ -36,6 +37,7 @@ from chatter.utils.audit_logging import AuditLog
 
 __all__ = [
     "User",
+    "UserPreference",
     "Conversation",
     "ConversationStatus",
     "Message",

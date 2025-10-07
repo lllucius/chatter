@@ -301,6 +301,14 @@ class ExecutionEngine:
             graph_definition = create_workflow_definition_from_model(
                 definition
             )
+        elif context.workflow_type == WorkflowType.TEMPLATE:
+            # Load from template
+            template = await self._load_template(
+                context.source_template_id
+            )
+            graph_definition = create_workflow_definition_from_model(
+                template
+            )
         elif context.workflow_type == WorkflowType.CUSTOM:
             # Create from nodes and edges in config
             graph_definition = self._create_custom_definition(context)
@@ -320,6 +328,32 @@ class ExecutionEngine:
         )
 
         return workflow
+
+    async def _load_template(self, template_id: str | None) -> Any:
+        """Load workflow template from database.
+
+        Args:
+            template_id: Template ID
+
+        Returns:
+            WorkflowTemplate model
+        """
+        from chatter.services.workflow_management import (
+            WorkflowManagementService,
+        )
+
+        if not template_id:
+            raise ValueError("Template ID is required for template workflow type")
+
+        workflow_service = WorkflowManagementService(self.session)
+        template = await workflow_service.get_workflow_template(
+            template_id=template_id
+        )
+
+        if not template:
+            raise ValueError(f"Template not found: {template_id}")
+
+        return template
 
     async def _load_definition(self, definition_id: str | None) -> Any:
         """Load workflow definition from database.
@@ -436,6 +470,9 @@ class ExecutionEngine:
                 execution_id=context.execution_id,
                 conversation_id=context.conversation_id,
                 workflow_type=context.workflow_type.value,
+                user_id=context.user_id,
+                definition_id=context.source_definition_id,
+                template_id=context.source_template_id,
             )
             execution_result.execution_time_ms = execution_time_ms
 

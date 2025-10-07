@@ -8,8 +8,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **spaces** | [**List[EmbeddingSpaceWithModel]**](EmbeddingSpaceWithModel.md) |  | 
 **total** | **int** |  | 
-**page** | **int** |  | 
-**per_page** | **int** |  | 
+**limit** | **int** |  | 
+**offset** | **int** |  | 
 
 ## Example
 

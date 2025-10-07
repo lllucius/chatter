@@ -3252,8 +3252,8 @@ class ModelRegistryApi:
     async def list_embedding_spaces_api_v1_models_embedding_spaces_get(
         self,
         model_id: Annotated[Optional[StrictStr], Field(description="Filter by model ID")] = None,
-        page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active spaces")] = None,
         _request_timeout: Union[
             None,
@@ -3274,10 +3274,10 @@ class ModelRegistryApi:
 
         :param model_id: Filter by model ID
         :type model_id: str
-        :param page: Page number
-        :type page: int
-        :param per_page: Items per page
-        :type per_page: int
+        :param limit: Maximum number of results
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
         :param active_only: Show only active spaces
         :type active_only: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -3304,8 +3304,8 @@ class ModelRegistryApi:
 
         _param = self._list_embedding_spaces_api_v1_models_embedding_spaces_get_serialize(
             model_id=model_id,
-            page=page,
-            per_page=per_page,
+            limit=limit,
+            offset=offset,
             active_only=active_only,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3332,8 +3332,8 @@ class ModelRegistryApi:
     async def list_embedding_spaces_api_v1_models_embedding_spaces_get_with_http_info(
         self,
         model_id: Annotated[Optional[StrictStr], Field(description="Filter by model ID")] = None,
-        page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active spaces")] = None,
         _request_timeout: Union[
             None,
@@ -3354,10 +3354,10 @@ class ModelRegistryApi:
 
         :param model_id: Filter by model ID
         :type model_id: str
-        :param page: Page number
-        :type page: int
-        :param per_page: Items per page
-        :type per_page: int
+        :param limit: Maximum number of results
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
         :param active_only: Show only active spaces
         :type active_only: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -3384,8 +3384,8 @@ class ModelRegistryApi:
 
         _param = self._list_embedding_spaces_api_v1_models_embedding_spaces_get_serialize(
             model_id=model_id,
-            page=page,
-            per_page=per_page,
+            limit=limit,
+            offset=offset,
             active_only=active_only,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3412,8 +3412,8 @@ class ModelRegistryApi:
     async def list_embedding_spaces_api_v1_models_embedding_spaces_get_without_preload_content(
         self,
         model_id: Annotated[Optional[StrictStr], Field(description="Filter by model ID")] = None,
-        page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active spaces")] = None,
         _request_timeout: Union[
             None,
@@ -3434,10 +3434,10 @@ class ModelRegistryApi:
 
         :param model_id: Filter by model ID
         :type model_id: str
-        :param page: Page number
-        :type page: int
-        :param per_page: Items per page
-        :type per_page: int
+        :param limit: Maximum number of results
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
         :param active_only: Show only active spaces
         :type active_only: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -3464,8 +3464,8 @@ class ModelRegistryApi:
 
         _param = self._list_embedding_spaces_api_v1_models_embedding_spaces_get_serialize(
             model_id=model_id,
-            page=page,
-            per_page=per_page,
+            limit=limit,
+            offset=offset,
             active_only=active_only,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3487,8 +3487,8 @@ class ModelRegistryApi:
     def _list_embedding_spaces_api_v1_models_embedding_spaces_get_serialize(
         self,
         model_id,
-        page,
-        per_page,
+        limit,
+        offset,
         active_only,
         _request_auth,
         _content_type,
@@ -3516,13 +3516,13 @@ class ModelRegistryApi:
             
             _query_params.append(('model_id', model_id))
             
-        if page is not None:
+        if limit is not None:
             
-            _query_params.append(('page', page))
+            _query_params.append(('limit', limit))
             
-        if per_page is not None:
+        if offset is not None:
             
-            _query_params.append(('per_page', per_page))
+            _query_params.append(('offset', offset))
             
         if active_only is not None:
             
@@ -3570,8 +3570,8 @@ class ModelRegistryApi:
         self,
         provider_id: Annotated[Optional[StrictStr], Field(description="Filter by provider ID")] = None,
         model_type: Annotated[Optional[ModelType], Field(description="Filter by model type")] = None,
-        page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active models")] = None,
         _request_timeout: Union[
             None,
@@ -3594,10 +3594,10 @@ class ModelRegistryApi:
         :type provider_id: str
         :param model_type: Filter by model type
         :type model_type: ModelType
-        :param page: Page number
-        :type page: int
-        :param per_page: Items per page
-        :type per_page: int
+        :param limit: Maximum number of results
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
         :param active_only: Show only active models
         :type active_only: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -3625,8 +3625,8 @@ class ModelRegistryApi:
         _param = self._list_models_api_v1_models_models_get_serialize(
             provider_id=provider_id,
             model_type=model_type,
-            page=page,
-            per_page=per_page,
+            limit=limit,
+            offset=offset,
             active_only=active_only,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3654,8 +3654,8 @@ class ModelRegistryApi:
         self,
         provider_id: Annotated[Optional[StrictStr], Field(description="Filter by provider ID")] = None,
         model_type: Annotated[Optional[ModelType], Field(description="Filter by model type")] = None,
-        page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active models")] = None,
         _request_timeout: Union[
             None,
@@ -3678,10 +3678,10 @@ class ModelRegistryApi:
         :type provider_id: str
         :param model_type: Filter by model type
         :type model_type: ModelType
-        :param page: Page number
-        :type page: int
-        :param per_page: Items per page
-        :type per_page: int
+        :param limit: Maximum number of results
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
         :param active_only: Show only active models
         :type active_only: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -3709,8 +3709,8 @@ class ModelRegistryApi:
         _param = self._list_models_api_v1_models_models_get_serialize(
             provider_id=provider_id,
             model_type=model_type,
-            page=page,
-            per_page=per_page,
+            limit=limit,
+            offset=offset,
             active_only=active_only,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3738,8 +3738,8 @@ class ModelRegistryApi:
         self,
         provider_id: Annotated[Optional[StrictStr], Field(description="Filter by provider ID")] = None,
         model_type: Annotated[Optional[ModelType], Field(description="Filter by model type")] = None,
-        page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active models")] = None,
         _request_timeout: Union[
             None,
@@ -3762,10 +3762,10 @@ class ModelRegistryApi:
         :type provider_id: str
         :param model_type: Filter by model type
         :type model_type: ModelType
-        :param page: Page number
-        :type page: int
-        :param per_page: Items per page
-        :type per_page: int
+        :param limit: Maximum number of results
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
         :param active_only: Show only active models
         :type active_only: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -3793,8 +3793,8 @@ class ModelRegistryApi:
         _param = self._list_models_api_v1_models_models_get_serialize(
             provider_id=provider_id,
             model_type=model_type,
-            page=page,
-            per_page=per_page,
+            limit=limit,
+            offset=offset,
             active_only=active_only,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3817,8 +3817,8 @@ class ModelRegistryApi:
         self,
         provider_id,
         model_type,
-        page,
-        per_page,
+        limit,
+        offset,
         active_only,
         _request_auth,
         _content_type,
@@ -3850,13 +3850,13 @@ class ModelRegistryApi:
             
             _query_params.append(('model_type', model_type.value))
             
-        if page is not None:
+        if limit is not None:
             
-            _query_params.append(('page', page))
+            _query_params.append(('limit', limit))
             
-        if per_page is not None:
+        if offset is not None:
             
-            _query_params.append(('per_page', per_page))
+            _query_params.append(('offset', offset))
             
         if active_only is not None:
             
@@ -3902,8 +3902,8 @@ class ModelRegistryApi:
     @validate_call
     async def list_providers_api_v1_models_providers_get(
         self,
-        page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active providers")] = None,
         _request_timeout: Union[
             None,
@@ -3922,10 +3922,10 @@ class ModelRegistryApi:
 
         List all providers.
 
-        :param page: Page number
-        :type page: int
-        :param per_page: Items per page
-        :type per_page: int
+        :param limit: Maximum number of results
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
         :param active_only: Show only active providers
         :type active_only: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -3951,8 +3951,8 @@ class ModelRegistryApi:
         """ # noqa: E501
 
         _param = self._list_providers_api_v1_models_providers_get_serialize(
-            page=page,
-            per_page=per_page,
+            limit=limit,
+            offset=offset,
             active_only=active_only,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3978,8 +3978,8 @@ class ModelRegistryApi:
     @validate_call
     async def list_providers_api_v1_models_providers_get_with_http_info(
         self,
-        page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active providers")] = None,
         _request_timeout: Union[
             None,
@@ -3998,10 +3998,10 @@ class ModelRegistryApi:
 
         List all providers.
 
-        :param page: Page number
-        :type page: int
-        :param per_page: Items per page
-        :type per_page: int
+        :param limit: Maximum number of results
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
         :param active_only: Show only active providers
         :type active_only: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -4027,8 +4027,8 @@ class ModelRegistryApi:
         """ # noqa: E501
 
         _param = self._list_providers_api_v1_models_providers_get_serialize(
-            page=page,
-            per_page=per_page,
+            limit=limit,
+            offset=offset,
             active_only=active_only,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4054,8 +4054,8 @@ class ModelRegistryApi:
     @validate_call
     async def list_providers_api_v1_models_providers_get_without_preload_content(
         self,
-        page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active providers")] = None,
         _request_timeout: Union[
             None,
@@ -4074,10 +4074,10 @@ class ModelRegistryApi:
 
         List all providers.
 
-        :param page: Page number
-        :type page: int
-        :param per_page: Items per page
-        :type per_page: int
+        :param limit: Maximum number of results
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
         :param active_only: Show only active providers
         :type active_only: bool
         :param _request_timeout: timeout setting for this request. If one
@@ -4103,8 +4103,8 @@ class ModelRegistryApi:
         """ # noqa: E501
 
         _param = self._list_providers_api_v1_models_providers_get_serialize(
-            page=page,
-            per_page=per_page,
+            limit=limit,
+            offset=offset,
             active_only=active_only,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4125,8 +4125,8 @@ class ModelRegistryApi:
 
     def _list_providers_api_v1_models_providers_get_serialize(
         self,
-        page,
-        per_page,
+        limit,
+        offset,
         active_only,
         _request_auth,
         _content_type,
@@ -4150,13 +4150,13 @@ class ModelRegistryApi:
 
         # process the path parameters
         # process the query parameters
-        if page is not None:
+        if limit is not None:
             
-            _query_params.append(('page', page))
+            _query_params.append(('limit', limit))
             
-        if per_page is not None:
+        if offset is not None:
             
-            _query_params.append(('per_page', per_page))
+            _query_params.append(('offset', offset))
             
         if active_only is not None:
             

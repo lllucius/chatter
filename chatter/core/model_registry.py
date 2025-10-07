@@ -46,8 +46,8 @@ def get_sync_engine():
 class ListParams:
     """Parameters for list operations."""
 
-    page: int = 1
-    per_page: int = 20
+    limit: int = 20
+    offset: int = 0
     active_only: bool = True
 
 
@@ -144,9 +144,7 @@ class ModelRegistryService:
             total = await self.session.scalar(count_query)
 
             # Apply pagination
-            query = query.offset(
-                (params.page - 1) * params.per_page
-            ).limit(params.per_page)
+            query = query.offset(params.offset).limit(params.limit)
             result = await self.session.execute(query)
             providers = result.scalars().all()
 
@@ -498,9 +496,7 @@ class ModelRegistryService:
         total = await self.session.scalar(count_query)
 
         # Apply pagination
-        query = query.offset((params.page - 1) * params.per_page).limit(
-            params.per_page
-        )
+        query = query.offset(params.offset).limit(params.limit)
         result = await self.session.execute(query)
         models = result.scalars().all()
 
@@ -738,9 +734,7 @@ class ModelRegistryService:
         total = await self.session.scalar(count_query)
 
         # Apply pagination
-        query = query.offset((params.page - 1) * params.per_page).limit(
-            params.per_page
-        )
+        query = query.offset(params.offset).limit(params.limit)
         result = await self.session.execute(query)
         spaces = result.scalars().all()
 

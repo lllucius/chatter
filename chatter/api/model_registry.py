@@ -46,8 +46,8 @@ router = APIRouter()
 # Provider endpoints
 @router.get("/providers", response_model=ProviderList)
 async def list_providers(
-    page: int = Query(1, ge=1, description="Page number"),
-    per_page: int = Query(20, ge=1, description="Items per page"),
+    limit: int = Query(20, ge=1, description="Maximum number of results"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
     active_only: bool = Query(
         True, description="Show only active providers"
     ),
@@ -57,7 +57,7 @@ async def list_providers(
     """List all providers."""
     service = ModelRegistryService(session)
     params = ListParams(
-        page=page, per_page=per_page, active_only=active_only
+        limit=limit, offset=offset, active_only=active_only
     )
 
     providers, total = await service.list_providers(params)
@@ -65,8 +65,8 @@ async def list_providers(
     return ProviderList(
         providers=providers,  # Can use sequence directly
         total=total,
-        page=page,
-        per_page=per_page,
+        limit=limit,
+        offset=offset,
     )
 
 
@@ -311,8 +311,8 @@ async def list_models(
     model_type: ModelType = Query(
         None, description="Filter by model type"
     ),
-    page: int = Query(1, ge=1, description="Page number"),
-    per_page: int = Query(20, ge=1, description="Items per page"),
+    limit: int = Query(20, ge=1, description="Maximum number of results"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
     active_only: bool = Query(
         True, description="Show only active models"
     ),
@@ -322,7 +322,7 @@ async def list_models(
     """List all model definitions."""
     service = ModelRegistryService(session)
     params = ListParams(
-        page=page, per_page=per_page, active_only=active_only
+        limit=limit, offset=offset, active_only=active_only
     )
 
     models, total = await service.list_models(
@@ -330,7 +330,7 @@ async def list_models(
     )
 
     return ModelDefList(
-        models=models, total=total, page=page, per_page=per_page
+        models=models, total=total, limit=limit, offset=offset
     )
 
 
@@ -532,8 +532,8 @@ async def set_default_model(
 @router.get("/embedding-spaces", response_model=EmbeddingSpaceList)
 async def list_embedding_spaces(
     model_id: str = Query(None, description="Filter by model ID"),
-    page: int = Query(1, ge=1, description="Page number"),
-    per_page: int = Query(20, ge=1, description="Items per page"),
+    limit: int = Query(20, ge=1, description="Maximum number of results"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
     active_only: bool = Query(
         True, description="Show only active spaces"
     ),
@@ -543,7 +543,7 @@ async def list_embedding_spaces(
     """List all embedding spaces."""
     service = ModelRegistryService(session)
     params = ListParams(
-        page=page, per_page=per_page, active_only=active_only
+        limit=limit, offset=offset, active_only=active_only
     )
 
     spaces, total = await service.list_embedding_spaces(
@@ -551,7 +551,7 @@ async def list_embedding_spaces(
     )
 
     return EmbeddingSpaceList(
-        spaces=spaces, total=total, page=page, per_page=per_page
+        spaces=spaces, total=total, limit=limit, offset=offset
     )
 
 

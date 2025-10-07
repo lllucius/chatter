@@ -3718,11 +3718,11 @@ components:
     EmbeddingSpaceList:
       description: List of embedding spaces with pagination.
       properties:
-        page:
-          title: Page
+        limit:
+          title: Limit
           type: integer
-        per_page:
-          title: Per Page
+        offset:
+          title: Offset
           type: integer
         spaces:
           items:
@@ -3735,8 +3735,8 @@ components:
       required:
       - spaces
       - total
-      - page
-      - per_page
+      - limit
+      - offset
       title: EmbeddingSpaceList
       type: object
     EmbeddingSpaceUpdate:
@@ -4778,16 +4778,16 @@ components:
     ModelDefList:
       description: List of model definitions with pagination.
       properties:
+        limit:
+          title: Limit
+          type: integer
         models:
           items:
             $ref: '#/components/schemas/ModelDefWithProvider'
           title: Models
           type: array
-        page:
-          title: Page
-          type: integer
-        per_page:
-          title: Per Page
+        offset:
+          title: Offset
           type: integer
         total:
           title: Total
@@ -4795,8 +4795,8 @@ components:
       required:
       - models
       - total
-      - page
-      - per_page
+      - limit
+      - offset
       title: ModelDefList
       type: object
     ModelDefUpdate:
@@ -7407,11 +7407,11 @@ components:
     ProviderList:
       description: List of providers with pagination.
       properties:
-        page:
-          title: Page
+        limit:
+          title: Limit
           type: integer
-        per_page:
-          title: Per Page
+        offset:
+          title: Offset
           type: integer
         providers:
           items:
@@ -7424,8 +7424,8 @@ components:
       required:
       - providers
       - total
-      - page
-      - per_page
+      - limit
+      - offset
       title: ProviderList
       type: object
     ProviderType:
@@ -16373,25 +16373,25 @@ paths:
           description: Filter by model ID
           title: Model Id
           type: string
-      - description: Page number
+      - description: Maximum number of results
         in: query
-        name: page
-        required: false
-        schema:
-          default: 1
-          description: Page number
-          minimum: 1
-          title: Page
-          type: integer
-      - description: Items per page
-        in: query
-        name: per_page
+        name: limit
         required: false
         schema:
           default: 20
-          description: Items per page
+          description: Maximum number of results
           minimum: 1
-          title: Per Page
+          title: Limit
+          type: integer
+      - description: Number of results to skip
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          description: Number of results to skip
+          minimum: 0
+          title: Offset
           type: integer
       - description: Show only active spaces
         in: query
@@ -16659,25 +16659,25 @@ paths:
         schema:
           $ref: '#/components/schemas/ModelType'
           description: Filter by model type
-      - description: Page number
+      - description: Maximum number of results
         in: query
-        name: page
-        required: false
-        schema:
-          default: 1
-          description: Page number
-          minimum: 1
-          title: Page
-          type: integer
-      - description: Items per page
-        in: query
-        name: per_page
+        name: limit
         required: false
         schema:
           default: 20
-          description: Items per page
+          description: Maximum number of results
           minimum: 1
-          title: Per Page
+          title: Limit
+          type: integer
+      - description: Number of results to skip
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          description: Number of results to skip
+          minimum: 0
+          title: Offset
           type: integer
       - description: Show only active models
         in: query
@@ -16930,25 +16930,25 @@ paths:
       description: List all providers.
       operationId: list_providers_api_v1_models_providers_get
       parameters:
-      - description: Page number
+      - description: Maximum number of results
         in: query
-        name: page
-        required: false
-        schema:
-          default: 1
-          description: Page number
-          minimum: 1
-          title: Page
-          type: integer
-      - description: Items per page
-        in: query
-        name: per_page
+        name: limit
         required: false
         schema:
           default: 20
-          description: Items per page
+          description: Maximum number of results
           minimum: 1
-          title: Per Page
+          title: Limit
+          type: integer
+      - description: Number of results to skip
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          description: Number of results to skip
+          minimum: 0
+          title: Offset
           type: integer
       - description: Show only active providers
         in: query

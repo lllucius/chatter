@@ -30,9 +30,9 @@ class ProviderList(BaseModel):
     """ # noqa: E501
     providers: List[Provider]
     total: StrictInt
-    page: StrictInt
-    per_page: StrictInt
-    __properties: ClassVar[List[str]] = ["providers", "total", "page", "per_page"]
+    limit: StrictInt
+    offset: StrictInt
+    __properties: ClassVar[List[str]] = ["providers", "total", "limit", "offset"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -94,8 +94,8 @@ class ProviderList(BaseModel):
         _obj = cls.model_validate({
             "providers": [Provider.from_dict(_item) for _item in obj["providers"]] if obj.get("providers") is not None else None,
             "total": obj.get("total"),
-            "page": obj.get("page"),
-            "per_page": obj.get("per_page")
+            "limit": obj.get("limit"),
+            "offset": obj.get("offset")
         })
         return _obj
 

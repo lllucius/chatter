@@ -8,8 +8,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **providers** | [**List[Provider]**](Provider.md) |  | 
 **total** | **int** |  | 
-**page** | **int** |  | 
-**per_page** | **int** |  | 
+**limit** | **int** |  | 
+**offset** | **int** |  | 
 
 ## Example
 

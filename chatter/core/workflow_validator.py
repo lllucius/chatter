@@ -252,9 +252,9 @@ class WorkflowValidator:
             ValidationResult with resource validation results
         """
         try:
-            from chatter.core.workflow_limits import WorkflowLimits
+            from chatter.core.workflow_limits import workflow_limit_manager
             
-            limits = WorkflowLimits()
+            limits = workflow_limit_manager.get_default_limits()
             
             # Check workflow size limits
             nodes = workflow_data.get("nodes", [])

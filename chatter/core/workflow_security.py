@@ -577,6 +577,62 @@ class WorkflowSecurityManager:
             ],
         }
 
+    async def check_workflow_security(
+        self,
+        workflow_data: dict[str, Any],
+        user_id: str,
+    ) -> dict[str, Any]:
+        """Check if workflow meets security requirements.
+
+        Args:
+            workflow_data: Workflow definition data
+            user_id: User ID
+
+        Returns:
+            Dict with 'allowed' bool, optional 'reason' and 'warnings' list
+        """
+        warnings = []
+        
+        # Check for sensitive content in workflow
+        if self.contains_sensitive_content(workflow_data):
+            return {
+                "allowed": False,
+                "reason": "Workflow contains sensitive content patterns",
+            }
+        
+        # Check if workflow uses tools that user doesn't have permission for
+        nodes = workflow_data.get("nodes", [])
+        user_perms = self.get_user_permissions(user_id)
+        
+        for node in nodes:
+            node_type = node.get("type") or node.get("data", {}).get(
+                "nodeType"
+            )
+            
+            # Check tool permissions
+            if node_type == "tool":
+                tool_name = node.get("config", {}).get("tool")
+                if tool_name and not user_perms.can_use_tool(tool_name):
+                    return {
+                        "allowed": False,
+                        "reason": f"User does not have permission to use tool: {tool_name}",
+                    }
+        
+        # Check for potential security concerns
+        if len(nodes) > 50:
+            warnings.append("Large workflow may impact performance")
+        
+        # Check for external connections
+        for node in nodes:
+            if node.get("type") == "external_api":
+                warnings.append("Workflow uses external API connections")
+        
+        result: dict[str, Any] = {"allowed": True}
+        if warnings:
+            result["warnings"] = warnings
+        
+        return result
+
 
 # Global instance
 workflow_security_manager = WorkflowSecurityManager()

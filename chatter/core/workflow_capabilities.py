@@ -236,3 +236,71 @@ class WorkflowSpec:
                 capabilities.enable_web_search = True
 
         return capabilities
+
+
+class WorkflowCapabilityChecker:
+    """Checker for workflow capabilities and features support."""
+
+    def __init__(self) -> None:
+        """Initialize workflow capability checker."""
+        # Define unsupported and deprecated features
+        self.unsupported_features: set[str] = {
+            "advanced_loop",
+            "parallel_branching",
+            "dynamic_tool_loading",
+        }
+        self.deprecated_features: set[str] = {
+            "old_node_type",
+            "legacy_edge_format",
+        }
+
+    async def check_workflow_capabilities(
+        self,
+        workflow_data: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Check if workflow uses supported capabilities.
+
+        Args:
+            workflow_data: Workflow definition data
+
+        Returns:
+            Dict with unsupported_features and deprecated_features lists
+        """
+        found_unsupported: list[str] = []
+        found_deprecated: list[str] = []
+
+        # Check nodes for unsupported/deprecated features
+        nodes = workflow_data.get("nodes", [])
+        for node in nodes:
+            node_type = node.get("type") or node.get("data", {}).get(
+                "nodeType"
+            )
+            
+            # Check if node type is unsupported
+            if node_type in self.unsupported_features:
+                found_unsupported.append(node_type)
+            
+            # Check if node type is deprecated
+            if node_type in self.deprecated_features:
+                found_deprecated.append(node_type)
+            
+            # Check node config for special features
+            config = node.get("config", {})
+            if config.get("advanced_loop"):
+                found_unsupported.append("advanced_loop")
+            if config.get("parallel_branching"):
+                found_unsupported.append("parallel_branching")
+
+        # Check edges for deprecated formats
+        edges = workflow_data.get("edges", [])
+        for edge in edges:
+            if edge.get("format") == "legacy":
+                found_deprecated.append("legacy_edge_format")
+
+        result: dict[str, Any] = {}
+        if found_unsupported:
+            result["unsupported_features"] = list(set(found_unsupported))
+        if found_deprecated:
+            result["deprecated_features"] = list(set(found_deprecated))
+
+        return result

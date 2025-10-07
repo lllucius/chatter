@@ -213,7 +213,7 @@ const ModelManagementPage: React.FC = () => {
         const response =
           await getSDK().modelRegistry.listProvidersApiV1ModelsProviders({
             activeOnly: false,
-            page: page,
+            page: page + 1,
             perPage: pageSize,
           });
         return {
@@ -361,7 +361,7 @@ const ModelManagementPage: React.FC = () => {
       const response = await getSDK().modelRegistry.listModelsApiV1ModelsModels(
         {
           activeOnly: false,
-          page: page,
+          page: page + 1,
           perPage: pageSize,
         }
       );

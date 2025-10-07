@@ -1186,7 +1186,7 @@ async def execute_chat_workflow_streaming(
                 if await chat_request.is_disconnected():
                     logger.info("Client disconnected during streaming")
                     break
-                yield f"data: {json.dumps(chunk.model_dump())}\n\n"
+                yield f"data: {json.dumps(chunk.model_dump(exclude_none=True))}\n\n"
         except Exception as e:
             error_chunk = {"type": "error", "error": str(e)}
             yield f"data: {json.dumps(error_chunk)}\n\n"

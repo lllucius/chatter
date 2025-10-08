@@ -437,6 +437,10 @@ class WorkflowManagementService:
         try:
             result = await self.session.execute(
                 select(WorkflowExecution)
+                .options(
+                    selectinload(WorkflowExecution.template),
+                    selectinload(WorkflowExecution.definition),
+                )
                 .where(
                     and_(
                         WorkflowExecution.definition_id
@@ -469,9 +473,13 @@ class WorkflowManagementService:
             )
             total_count = len(list(count_result.scalars().all()))
 
-            # Get paginated results
+            # Get paginated results with eager loading of relationships
             result = await self.session.execute(
                 select(WorkflowExecution)
+                .options(
+                    selectinload(WorkflowExecution.template),
+                    selectinload(WorkflowExecution.definition),
+                )
                 .where(WorkflowExecution.owner_id == owner_id)
                 .order_by(WorkflowExecution.created_at.desc())
                 .limit(limit)

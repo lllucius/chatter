@@ -387,7 +387,14 @@ class WorkflowGraphBuilder:
                 messages = self._apply_context(context, messages)
 
                 try:
-                    response = await self.llm.ainvoke(
+                    # Use LLM without tools for finalize_response node
+                    # to prevent infinite tool calling loops
+                    llm_to_use = (
+                        self.llm_for_final
+                        if self.node_id == "finalize_response"
+                        else self.llm
+                    )
+                    response = await llm_to_use.ainvoke(
                         messages, **self.kwargs
                     )
                     return {"messages": [response]}

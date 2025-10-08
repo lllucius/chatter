@@ -143,3 +143,75 @@ class TestFinalizeResponseNoTools:
         response_message = result["messages"][0]
         assert isinstance(response_message, AIMessage)
         assert len(response_message.tool_calls) > 0
+
+    @pytest.mark.asyncio
+    async def test_finalize_response_prevents_infinite_loop(self):
+        """Test that finalize_response prevents infinite tool calling loops."""
+        builder = WorkflowGraphBuilder()
+        
+        # Create mock LLM instances
+        mock_llm_without_tools = Mock()
+        
+        # Mock ainvoke to return a text response (not tool calls)
+        mock_llm_without_tools.ainvoke = AsyncMock(
+            return_value=AIMessage(
+                content="Based on the tool results, the current time is 12:00 PM.",
+                response_metadata={"finish_reason": "stop"}
+            )
+        )
+        
+        # Create tools list
+        mock_tools = [Mock(name="get_time")]
+        
+        # Create finalize_response node
+        config = {"system_message": "Provide a final response based on the tool results."}
+        finalize_node = builder._create_llm_node(
+            "finalize_response",
+            mock_llm_without_tools,
+            mock_tools,
+            config
+        )
+        
+        # Create a context that simulates multiple tool calls (hitting the limit)
+        context: WorkflowNodeContext = {
+            "messages": [
+                HumanMessage(content="What time is it?"),
+                AIMessage(content="", tool_calls=[{"name": "get_time", "args": {}, "id": "tc1"}]),
+                ToolMessage(content="2025-10-03T12:00:00", tool_call_id="tc1"),
+                AIMessage(content="", tool_calls=[{"name": "get_time", "args": {}, "id": "tc2"}]),
+                ToolMessage(content="2025-10-03T12:00:01", tool_call_id="tc2"),
+                AIMessage(content="", tool_calls=[{"name": "get_time", "args": {}, "id": "tc3"}]),
+                ToolMessage(content="2025-10-03T12:00:02", tool_call_id="tc3"),
+            ],
+            "user_id": "test-user",
+            "conversation_id": "test-conv",
+            "retrieval_context": None,
+            "conversation_summary": None,
+            "tool_call_count": 3,  # At the limit
+            "metadata": {},
+            "variables": {},
+            "loop_state": {},
+            "error_state": {},
+            "conditional_results": {},
+            "execution_history": [],
+            "usage_metadata": {},
+        }
+        
+        # Execute the finalize_response node
+        result = await finalize_node.execute(context)
+        
+        # Verify the result contains a text message (not tool calls)
+        assert "messages" in result
+        assert len(result["messages"]) == 1
+        
+        response_message = result["messages"][0]
+        assert isinstance(response_message, AIMessage)
+        
+        # The critical assertion: finalize_response should NOT have tool_calls
+        # This prevents the infinite loop
+        assert not hasattr(response_message, 'tool_calls') or len(response_message.tool_calls) == 0, \
+            "finalize_response should not call tools - this would cause infinite loop!"
+        
+        # Verify it has actual content instead
+        assert response_message.content, "finalize_response should return text content"
+        assert "12:00 PM" in response_message.content, "Response should use the tool results"

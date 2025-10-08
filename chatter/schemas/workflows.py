@@ -645,6 +645,9 @@ class WorkflowExecutionResponse(WorkflowExecutionBase):
         ..., description="Workflow definition ID"
     )
     owner_id: str = Field(..., description="Owner user ID")
+    workflow_name: str = Field(
+        default="Unknown Workflow", description="Name of the executed workflow"
+    )
     status: str = Field(..., description="Execution status")
     started_at: datetime | None = Field(
         None, description="Execution start time"

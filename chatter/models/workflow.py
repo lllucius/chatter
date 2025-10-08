@@ -575,11 +575,19 @@ class WorkflowExecution(Base):
 
     def to_dict(self) -> dict[str, Any]:
         """Convert workflow execution to dictionary."""
+        # Get workflow name from template or definition
+        workflow_name = "Unknown Workflow"
+        if self.template and hasattr(self.template, 'name'):
+            workflow_name = self.template.name
+        elif self.definition and hasattr(self.definition, 'name'):
+            workflow_name = self.definition.name
+        
         return {
             "id": self.id,
             "definition_id": self.definition_id,
             "template_id": self.template_id,
             "workflow_type": self.workflow_type,
+            "workflow_name": workflow_name,
             "workflow_config": self.workflow_config,
             "owner_id": self.owner_id,
             "status": self.status,

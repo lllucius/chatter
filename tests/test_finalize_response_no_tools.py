@@ -52,7 +52,7 @@ class TestFinalizeResponseNoTools:
             "messages": [
                 HumanMessage(content="What time is it?"),
                 AIMessage(content="", tool_calls=[{"name": "get_time", "args": {}, "id": "tc1"}]),
-                ToolMessage(content="tool called", tool_call_id="tc1"),
+                ToolMessage(content="2025-10-03T12:00:00", tool_call_id="tc1"),
             ],
             "user_id": "test-user",
             "conversation_id": "test-conv",
@@ -177,11 +177,11 @@ class TestFinalizeResponseNoTools:
             "messages": [
                 HumanMessage(content="What time is it?"),
                 AIMessage(content="", tool_calls=[{"name": "get_time", "args": {}, "id": "tc1"}]),
-                ToolMessage(content="tool called", tool_call_id="tc1"),
+                ToolMessage(content="2025-10-03T12:00:00", tool_call_id="tc1"),
                 AIMessage(content="", tool_calls=[{"name": "get_time", "args": {}, "id": "tc2"}]),
-                ToolMessage(content="tool called", tool_call_id="tc2"),
+                ToolMessage(content="2025-10-03T12:00:01", tool_call_id="tc2"),
                 AIMessage(content="", tool_calls=[{"name": "get_time", "args": {}, "id": "tc3"}]),
-                ToolMessage(content="tool called", tool_call_id="tc3"),
+                ToolMessage(content="2025-10-03T12:00:02", tool_call_id="tc3"),
             ],
             "user_id": "test-user",
             "conversation_id": "test-conv",

@@ -295,7 +295,7 @@ class EnhancedToolExecutor:
             except Exception as e:
                 logger.error(f"Tool execution error: {e}")
                 error_message = ToolMessage(
-                    content="tool called",
+                    content=f"Error executing tool: {str(e)}",
                     tool_call_id=tool_call.get("id", ""),
                 )
                 tool_messages.append(error_message)
@@ -348,7 +348,7 @@ class EnhancedToolExecutor:
             )
             return {
                 "message": ToolMessage(
-                    content="tool called", tool_call_id=tool_id
+                    content=error_msg, tool_call_id=tool_id
                 ),
                 "execution_info": {
                     "tool_name": tool_name,
@@ -389,7 +389,7 @@ class EnhancedToolExecutor:
 
             return {
                 "message": ToolMessage(
-                    content="tool called", tool_call_id=tool_id
+                    content=result_str, tool_call_id=tool_id
                 ),
                 "execution_info": {
                     "tool_name": tool_name,
@@ -414,7 +414,7 @@ class EnhancedToolExecutor:
 
             return {
                 "message": ToolMessage(
-                    content="tool called", tool_call_id=tool_id
+                    content=error_msg, tool_call_id=tool_id
                 ),
                 "execution_info": {
                     "tool_name": tool_name,

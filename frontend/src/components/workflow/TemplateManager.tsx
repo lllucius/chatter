@@ -87,7 +87,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
           </Box>
         </DialogTitle>
 
-        <DialogContent>
+        <DialogContent sx={{ p: 0 }}>
           <List sx={{ pt: 0 }}>
             {templates.map((template, index) => (
               <React.Fragment key={template.id}>
@@ -121,6 +121,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
                             display: 'flex',
                             alignItems: 'center',
                             gap: 1,
+                            flexWrap: 'wrap',
                           }}
                         >
                           <Typography variant="subtitle1" component="span">

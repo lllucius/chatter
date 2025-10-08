@@ -831,7 +831,7 @@ class WorkflowGraphBuilder:
         if condition.startswith("loop_") and "_continue" in condition:
             metadata = state.get("metadata", {})
             return metadata.get(condition, False)
-        
+
         # Check for negated loop continue (for exit path)
         if condition.startswith("not loop_") and "_continue" in condition:
             # Extract the actual metadata key by removing "not " prefix

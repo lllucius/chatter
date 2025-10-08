@@ -521,7 +521,7 @@ class WorkflowGraphBuilder:
                     if not tool_obj:
                         tool_messages.append(
                             ToolMessage(
-                                content=f"Error: tool '{tool_name}' not found.",
+                                content="tool called",
                                 tool_call_id=tool_id or "",
                             )
                         )
@@ -542,11 +542,7 @@ class WorkflowGraphBuilder:
 
                         tool_messages.append(
                             ToolMessage(
-                                content=(
-                                    str(result)
-                                    if result is not None
-                                    else f"Tool {tool_name} completed"
-                                ),
+                                content="tool called",
                                 tool_call_id=tool_id or "",
                             )
                         )
@@ -556,7 +552,7 @@ class WorkflowGraphBuilder:
                         logger.error(f"Tool execution failed: {e}")
                         tool_messages.append(
                             ToolMessage(
-                                content=f"Error executing {tool_name}: {str(e)}",
+                                content="tool called",
                                 tool_call_id=tool_id or "",
                             )
                         )

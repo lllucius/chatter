@@ -390,6 +390,7 @@ class LangGraphWorkflowManager:
                     if enable_node_tracing or event.get("event") in [
                         "on_chat_model_stream",
                         "on_llm_stream",
+                        "on_chat_model_end",
                     ]:
                         yield event
             else:

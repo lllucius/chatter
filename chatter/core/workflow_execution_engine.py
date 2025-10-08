@@ -523,7 +523,7 @@ class ExecutionEngine:
             ):
                 # Process streaming updates
                 event_name = update.get("event")
-
+                print("EVENT", update)
                 # Handle chat model streaming events
                 if event_name in ["on_chat_model_stream", "on_llm_stream"]:
                     data = update.get("data", {})
@@ -546,6 +546,7 @@ class ExecutionEngine:
 
                 # Handle completion event
                 elif event_name == "on_chat_model_end":
+                    print("=============================================")
                     data = update.get("data", {})
                     output = data.get("output", {})
 
@@ -560,6 +561,8 @@ class ExecutionEngine:
                     total_tokens = usage_metadata.get("total_tokens", 0)
                     input_tokens = usage_metadata.get("input_tokens", 0)
                     output_tokens = usage_metadata.get("output_tokens", 0)
+                    print("TOTAL", total_tokens)
+                    print("TOTAL", output_tokens)
 
                     yield StreamingChatChunk(
                         type="complete",

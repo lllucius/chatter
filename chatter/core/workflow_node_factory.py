@@ -11,13 +11,14 @@ import asyncio
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import Any, TypedDict
+from typing import Annotated, Any, TypedDict
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import (
     BaseMessage,
     HumanMessage,
 )
+from langgraph.graph import add_messages
 
 from chatter.utils.logging import get_logger
 
@@ -28,7 +29,8 @@ class WorkflowNodeContext(TypedDict):
     """Extended context for workflow execution with support for all node types."""
 
     # Core fields from ConversationState
-    messages: Sequence[BaseMessage]
+    # Use add_messages reducer to append messages instead of replacing them
+    messages: Annotated[Sequence[BaseMessage], add_messages]
     user_id: str
     conversation_id: str
     retrieval_context: str | None

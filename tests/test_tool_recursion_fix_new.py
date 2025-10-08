@@ -20,8 +20,8 @@ class TestToolRecursionFix:
         # Simulate messages that would cause recursion
         recent_tool_calls = ["get_time", "get_time", "get_time"]
         tool_results = [
-            "tool called",
-            "tool called",
+            "2025-09-21T17:42:09.433315",
+            "2025-09-21T17:42:11.067013",
         ]
 
         # Apply the logic from the fix
@@ -57,12 +57,12 @@ class TestToolRecursionFix:
             MockMessage(content="what is the time"),
             MockMessage(content="", tool_calls=[{"name": "get_time"}]),
             MockMessage(
-                content="tool called",
+                content="2025-09-21T17:42:09.433315",
                 tool_call_id="call_1",
             ),
             MockMessage(content="", tool_calls=[{"name": "get_time"}]),
             MockMessage(
-                content="tool called",
+                content="2025-09-21T17:42:11.067013",
                 tool_call_id="call_2",
             ),
             MockMessage(content="", tool_calls=[{"name": "get_time"}]),
@@ -83,7 +83,7 @@ class TestToolRecursionFix:
         assert len(recent_tool_calls) == 3
         assert all(call == "get_time" for call in recent_tool_calls)
         assert len(tool_results) == 2
-        assert "tool called" in tool_results
+        assert "2025-09-21T17:42:09.433315" in tool_results
 
         # Test recursion detection
         tool_counts = Counter(recent_tool_calls)
@@ -98,7 +98,7 @@ class TestToolRecursionFix:
         """Test that normal tool usage (without recursion) is not affected."""
         # Single tool call - should not trigger recursion detection
         recent_tool_calls = ["get_time"]
-        tool_results = ["tool called"]
+        tool_results = ["2025-09-21T17:42:09.433315"]
 
         tool_counts = Counter(recent_tool_calls)
         repeated_tools = [
@@ -119,7 +119,7 @@ class TestToolRecursionFix:
         """Test that using different tools doesn't trigger recursion detection."""
         # Different tools being called - should not trigger recursion
         recent_tool_calls = ["get_time", "calculator", "get_weather"]
-        tool_results = ["tool called", "tool called", "tool called"]
+        tool_results = ["2025-09-21T17:42:09.433315", "42", "Sunny"]
 
         tool_counts = Counter(recent_tool_calls)
         repeated_tools = [
@@ -148,7 +148,7 @@ class TestToolRecursionFix:
                 ],
             ),
             ToolMessage(
-                content="tool called",
+                content="2025-09-21T17:42:09.433315",
                 tool_call_id="call_1",
             ),
             AIMessage(
@@ -158,7 +158,7 @@ class TestToolRecursionFix:
                 ],
             ),
             ToolMessage(
-                content="tool called",
+                content="2025-09-21T17:42:11.067013",
                 tool_call_id="call_2",
             ),
         ]
@@ -175,9 +175,8 @@ class TestToolRecursionFix:
 
         assert len(tool_results) == 2
         assert user_question == "what is the time"
-        assert "tool called" in tool_results
-        assert tool_results[0] == "tool called"
-        assert tool_results[1] == "tool called"
+        assert "2025-09-21T17:42:09.433315" in tool_results
+        assert "2025-09-21T17:42:11.067013" in tool_results
 
         # Test final context generation
         if tool_results and user_question:
@@ -187,7 +186,7 @@ class TestToolRecursionFix:
                 f"Please provide a direct and helpful answer to: {user_question}"
             )
 
-            assert "tool called" in final_context
+            assert "2025-09-21T17:42:09.433315" in final_context
             assert "what is the time" in final_context
             assert (
                 "Please provide a direct and helpful answer"

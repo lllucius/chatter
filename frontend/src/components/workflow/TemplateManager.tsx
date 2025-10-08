@@ -79,7 +79,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <TemplateIcon sx={{ mr: 1 }} />

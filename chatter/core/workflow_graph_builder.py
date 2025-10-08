@@ -671,19 +671,44 @@ class WorkflowGraphBuilder:
             messages = state.get("messages", [])
             if messages:
                 last_message = messages[-1]
-                return hasattr(last_message, "tool_calls") and bool(
+                has_tool_calls = hasattr(last_message, "tool_calls") and bool(
                     last_message.tool_calls
                 )
+                
+                # Check finish_reason in response_metadata
+                # If finish_reason is 'stop', the LLM has completed even if tool_calls exist
+                finish_reason = None
+                if hasattr(last_message, "response_metadata"):
+                    finish_reason = last_message.response_metadata.get(
+                        "finish_reason"
+                    )
+                
+                # Return True only if tool calls are present AND finish_reason is NOT 'stop'
+                return has_tool_calls and finish_reason != "stop"
             return False
 
         if condition == "no_tool_calls":
             messages = state.get("messages", [])
             if messages:
                 last_message = messages[-1]
-                return not (
+                # Check if there are no tool calls
+                has_no_tool_calls = not (
                     hasattr(last_message, "tool_calls")
                     and bool(last_message.tool_calls)
                 )
+                
+                # Also check finish_reason in response_metadata
+                # If finish_reason is 'stop', the LLM has completed its response
+                finish_reason = None
+                if hasattr(last_message, "response_metadata"):
+                    finish_reason = last_message.response_metadata.get(
+                        "finish_reason"
+                    )
+                
+                # Return True if either:
+                # 1. No tool calls are present, OR
+                # 2. finish_reason indicates completion (stop)
+                return has_no_tool_calls or finish_reason == "stop"
             return True  # If no messages, assume no tool calls
 
         # Handle capability-specific variable conditions BEFORE general tool_calls check

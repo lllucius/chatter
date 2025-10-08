@@ -121,9 +121,11 @@ class ExecutionResult:
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary format."""
+        from chatter.utils.problem import _sanitize_for_json
+        
         return {
             "response": self.response,
-            "messages": self.messages,
+            "messages": _sanitize_for_json(self.messages),
             "execution_time_ms": self.execution_time_ms,
             "tokens_used": self.tokens_used,
             "cost": self.cost,

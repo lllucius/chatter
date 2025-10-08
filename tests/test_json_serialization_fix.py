@@ -3,6 +3,7 @@
 import json
 
 from fastapi.exceptions import RequestValidationError
+from langchain_core.messages import AIMessage, HumanMessage
 
 from chatter.utils.problem import ValidationProblem, _sanitize_for_json
 
@@ -127,3 +128,29 @@ class TestJsonSerializationFix:
 
         # Verify it's still JSON serializable
         json.dumps(result)
+
+    def test_sanitize_langchain_messages(self):
+        """Test that LangChain message objects are properly sanitized."""
+        # Create test messages
+        ai_message = AIMessage(content="Hello, I am an AI assistant")
+        human_message = HumanMessage(content="Hello AI")
+        
+        # Test single message
+        result = _sanitize_for_json(ai_message)
+        json.dumps(result)  # Should not raise
+        
+        # Test list of messages
+        messages_list = [human_message, ai_message]
+        result_list = _sanitize_for_json(messages_list)
+        json.dumps(result_list)  # Should not raise
+        
+        # Test messages in a dict (like ExecutionResult.to_dict)
+        test_data = {
+            "response": "Hello, I am an AI assistant",
+            "messages": [human_message, ai_message],
+            "execution_time_ms": 100,
+        }
+        
+        result_dict = _sanitize_for_json(test_data)
+        # Should be JSON serializable
+        json.dumps(result_dict)

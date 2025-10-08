@@ -826,6 +826,19 @@ class WorkflowGraphBuilder:
                         == expected_value.lower()
                     )
 
+        # Check loop continue/exit conditions from metadata
+        # Loop nodes set "loop_{node_id}_continue" in metadata
+        if condition.startswith("loop_") and "_continue" in condition:
+            metadata = state.get("metadata", {})
+            return metadata.get(condition, False)
+
+        # Check for negated loop continue (for exit path)
+        if condition.startswith("not loop_") and "_continue" in condition:
+            # Extract the actual metadata key by removing "not " prefix
+            metadata_key = condition.replace("not ", "")
+            metadata = state.get("metadata", {})
+            return not metadata.get(metadata_key, False)
+
         return True
 
     def _find_entry_point(

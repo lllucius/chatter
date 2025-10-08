@@ -351,7 +351,7 @@ class WorkflowTracker:
             )
 
             # Create execution record with new Phase 4 signature
-            await workflow_service.create_workflow_execution(
+            execution = await workflow_service.create_workflow_execution(
                 owner_id=context.user_id,
                 definition_id=context.source_definition_id,
                 template_id=context.source_template_id,
@@ -359,9 +359,20 @@ class WorkflowTracker:
                 workflow_config=context.config.workflow_config,
                 input_data=context.config.input_data,
             )
+            
+            # Store execution ID in context for later updates
+            context.execution_record_id = execution.id
+            
+            # Immediately update to running status with started_at timestamp
+            await workflow_service.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=context.user_id,
+                status="running",
+                started_at=datetime.now(UTC),
+            )
 
             logger.debug(
-                f"Created execution record for {context.execution_id}"
+                f"Created execution record {execution.id} for {context.execution_id}"
             )
         except Exception as e:
             logger.warning(
@@ -413,13 +424,18 @@ class WorkflowTracker:
                 update_data["error"] = error_message
                 update_data["execution_log"] = self.get_logs()
 
-            # Note: This is a simplified version
-            # In reality, we need to track the actual execution record ID
-            # which may differ from context.execution_id
-            # This will be refined when we implement the full tracking
+            # Get the execution record ID from context, or fall back to execution_id
+            execution_id = getattr(context, 'execution_record_id', context.execution_id)
+            
+            # Actually update the execution record
+            await workflow_service.update_workflow_execution(
+                execution_id=execution_id,
+                owner_id=context.user_id,
+                **update_data
+            )
 
             logger.debug(
-                f"Updated execution record for {context.execution_id}"
+                f"Updated execution record {execution_id} for {context.execution_id}"
             )
         except Exception as e:
             logger.warning(

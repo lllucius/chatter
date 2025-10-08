@@ -82,6 +82,7 @@ class ExecutionContext:
     source_template_id: str | None = None
     source_definition_id: str | None = None
     workflow_id: str | None = None  # For monitoring service
+    execution_record_id: str | None = None  # Database execution record ID
 
     # Configuration
     config: ExecutionConfig = field(default_factory=ExecutionConfig)

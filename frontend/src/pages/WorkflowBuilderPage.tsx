@@ -24,7 +24,6 @@ import {
   Error as ErrorHandlerIcon,
   Schedule as DelayIcon,
   CheckCircle as ValidIcon,
-  GetApp as ExampleIcon,
   GridOn as GridIcon,
   Undo as UndoIcon,
   Redo as RedoIcon,
@@ -100,8 +99,6 @@ const WorkflowBuilderPage: React.FC = () => {
   const [editMenuAnchor, setEditMenuAnchor] = useState<null | HTMLElement>(
     null
   );
-  const [exampleMenuAnchor, setExampleMenuAnchor] =
-    useState<null | HTMLElement>(null);
   const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(
     null
   );
@@ -319,16 +316,6 @@ const WorkflowBuilderPage: React.FC = () => {
         Templates
       </Button>
 
-      {/* Examples Dropdown */}
-      <Button
-        variant="outlined"
-        onClick={(e) => setExampleMenuAnchor(e.currentTarget)}
-        startIcon={<ExampleIcon />}
-        endIcon={<MoreIcon />}
-      >
-        Examples
-      </Button>
-
       {/* More Actions Dropdown */}
       <Button
         variant="outlined"
@@ -477,44 +464,6 @@ const WorkflowBuilderPage: React.FC = () => {
         >
           <DeleteIcon sx={{ mr: 1 }} />
           Delete
-        </MenuItem>
-      </Menu>
-
-      {/* Examples Menu */}
-      <Menu
-        anchorEl={exampleMenuAnchor}
-        open={Boolean(exampleMenuAnchor)}
-        onClose={() => setExampleMenuAnchor(null)}
-      >
-        <MenuItem
-          onClick={() => {
-            if (workflowEditorRef.current) {
-              workflowEditorRef.current.loadExample('simple');
-            }
-            setExampleMenuAnchor(null);
-          }}
-        >
-          Simple Chat
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (workflowEditorRef.current) {
-              workflowEditorRef.current.loadExample('ragWithTools');
-            }
-            setExampleMenuAnchor(null);
-          }}
-        >
-          RAG with Tools
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (workflowEditorRef.current) {
-              workflowEditorRef.current.loadExample('parallelProcessing');
-            }
-            setExampleMenuAnchor(null);
-          }}
-        >
-          Multi-step Process
         </MenuItem>
       </Menu>
 

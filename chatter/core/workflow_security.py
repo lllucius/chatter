@@ -434,28 +434,7 @@ class WorkflowSecurityManager:
         # For workflow data, exclude metadata and certain config fields from sensitive content check
         # to avoid false positives on legitimate technical terms like "max_tokens"
         if isinstance(data, dict):
-            # Filter out metadata and safe config fields
-            filtered_data = {}
-            safe_keys = {"metadata", "workflow_metadata", "config", "data"}
-            safe_config_patterns = {"token", "max_token", "timeout"}
-            
-            for key, value in data.items():
-                # Skip entire metadata sections
-                if key in safe_keys:
-                    continue
-                # For nested dicts, check recursively but skip safe config keys
-                if isinstance(value, dict):
-                    filtered_value = {}
-                    for k, v in value.items():
-                        # Skip known safe configuration keys that contain "token" or similar
-                        if any(pattern in k.lower() for pattern in safe_config_patterns):
-                            continue
-                        filtered_value[k] = v
-                    if filtered_value:
-                        filtered_data[key] = filtered_value
-                else:
-                    filtered_data[key] = value
-            
+            filtered_data = self._filter_safe_content(data)
             data_str = json.dumps(filtered_data, default=str).lower()
         elif isinstance(data, list | tuple):
             data_str = " ".join(str(item) for item in data).lower()
@@ -465,6 +444,53 @@ class WorkflowSecurityManager:
         return any(
             pattern in data_str for pattern in self.blocked_patterns
         )
+
+    def _filter_safe_content(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Recursively filter out safe content that shouldn't trigger security checks.
+        
+        Args:
+            data: Dictionary to filter
+            
+        Returns:
+            Filtered dictionary with safe content removed
+        """
+        # Keys to completely exclude from security scanning
+        safe_keys = {"metadata", "workflow_metadata"}
+        
+        # Patterns in key names that are safe (e.g., max_tokens, timeout_ms)
+        safe_key_patterns = {"token", "timeout"}
+        
+        filtered = {}
+        for key, value in data.items():
+            # Skip entire metadata sections
+            if key in safe_keys:
+                continue
+                
+            # Skip keys that match safe patterns (e.g., max_tokens, tool_timeout_ms)
+            if any(pattern in key.lower() for pattern in safe_key_patterns):
+                continue
+            
+            # Recursively filter nested structures
+            if isinstance(value, dict):
+                filtered_value = self._filter_safe_content(value)
+                if filtered_value:  # Only include if not empty
+                    filtered[key] = filtered_value
+            elif isinstance(value, list):
+                # Filter list items if they're dicts
+                filtered_list = []
+                for item in value:
+                    if isinstance(item, dict):
+                        filtered_item = self._filter_safe_content(item)
+                        if filtered_item:
+                            filtered_list.append(filtered_item)
+                    else:
+                        filtered_list.append(item)
+                if filtered_list:
+                    filtered[key] = filtered_list
+            else:
+                filtered[key] = value
+        
+        return filtered
 
     def log_event(
         self,

@@ -861,7 +861,7 @@ class MonitoringService:
                 )
                 current_count = await self.cache.get(key) or 0
                 await self.cache.set(
-                    key, current_count + 1, expire_time
+                    key, current_count + 1, int(expire_time.total_seconds())
                 )
 
         except Exception as e:

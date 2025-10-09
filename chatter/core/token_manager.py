@@ -116,7 +116,7 @@ class TokenManager:
             }
 
             await self.cache.set(
-                f"blacklist:{jti}", blacklist_data, expire_time
+                f"blacklist:{jti}", blacklist_data, int(expire_time.total_seconds())
             )
 
             # Remove token metadata
@@ -373,7 +373,7 @@ class TokenManager:
                 days=settings.refresh_token_expire_days
             )
             await self.cache.set(
-                f"token_meta:{jti}", metadata, expire_time
+                f"token_meta:{jti}", metadata, int(expire_time.total_seconds())
             )
 
             # Update user's active tokens list
@@ -407,7 +407,7 @@ class TokenManager:
                 days=settings.refresh_token_expire_days
             )
             await self.cache.set(
-                user_tokens_key, user_tokens, expire_time
+                user_tokens_key, user_tokens, int(expire_time.total_seconds())
             )
 
         except Exception as e:
